@@ -1,9 +1,9 @@
 package repository
 
 type Repository struct {
-	*Order
+	Order
 }
 
-func NewRepository(order *Order) *Repository {
+func NewRepository(order Order) *Repository {
 	return &Repository{Order: order}
 }
