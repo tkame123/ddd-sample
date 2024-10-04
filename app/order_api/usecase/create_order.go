@@ -2,13 +2,18 @@ package usecase
 
 import (
 	"context"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/repository"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
 )
 
-type CreateOrder struct{}
+type CreateOrder struct {
+	rep repository.Repository
+}
 
-func NewCreateOrder() *CreateOrder {
-	return &CreateOrder{}
+func NewCreateOrder(rep repository.Repository) *CreateOrder {
+	return &CreateOrder{
+		rep: rep,
+	}
 }
 
 type CreateOrderInput struct {
@@ -25,7 +30,9 @@ func (c *CreateOrder) Execute(ctx context.Context, input CreateOrderInput) (*Cre
 		return nil, err
 	}
 
-	// TODO: save repository
+	if err := c.rep.Order.Save(ctx, order); err != nil {
+		return nil, err
+	}
 
 	return &CreateOrderOutput{OrderID: order.OrderID}, nil
 }
