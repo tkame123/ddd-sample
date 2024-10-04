@@ -3,7 +3,6 @@ package model
 import "github.com/google/uuid"
 
 type OrderID = string
-type OrderItemID = string
 type ItemID = string
 
 func generateID() string {
