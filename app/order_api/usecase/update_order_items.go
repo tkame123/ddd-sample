@@ -2,12 +2,14 @@ package usecase
 
 import (
 	"context"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/domain_event"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/repository"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
 )
 
 type UpdateOrderItems struct {
 	rep repository.Repository
+	pub domain_event.Publisher
 }
 
 func NewUpdateOrderItems(rep repository.Repository) *UpdateOrderItems {
@@ -40,9 +42,7 @@ func (u *UpdateOrderItems) Execute(ctx context.Context, input UpdateOrderItemsIn
 		return nil, err
 	}
 
-	if events != nil {
-		// TODO: publish event
-	}
+	u.pub.PublishMessages(ctx, events)
 
 	return &UpdateOrderItemsOutput{OrderID: order.OrderID}, nil
 }
