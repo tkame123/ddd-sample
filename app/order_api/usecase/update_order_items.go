@@ -2,9 +2,9 @@ package usecase
 
 import (
 	"context"
-	"github.com/tkame123/ddd-sample/app/order_api/adapter/domain_event"
-	"github.com/tkame123/ddd-sample/app/order_api/adapter/repository"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/port/domain_event"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
 )
 
 type UpdateOrderItems struct {
