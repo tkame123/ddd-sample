@@ -31,12 +31,17 @@ func (u *UpdateOrderItems) Execute(ctx context.Context, input UpdateOrderItemsIn
 		return nil, err
 	}
 
-	if err := order.UpdateOrderItems(input.Items); err != nil {
+	events, err := order.UpdateOrderItems(input.Items)
+	if err != nil {
 		return nil, err
 	}
 
 	if err := u.rep.Order.Save(ctx, order); err != nil {
 		return nil, err
+	}
+
+	if events != nil {
+		// TODO: publish event
 	}
 
 	return &UpdateOrderItemsOutput{OrderID: order.OrderID}, nil

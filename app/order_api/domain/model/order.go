@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/event"
 )
 
 const (
@@ -28,7 +29,7 @@ type OrderItemRequest struct {
 	quantity int64
 }
 
-func NewOrder(items []*OrderItemRequest) (*Order, error) {
+func NewOrder(items []*OrderItemRequest) (*Order, []event.OrderEvent, error) {
 	orderID := generateID()
 
 	orderItems := make([]*OrderItem, 0, len(items))
@@ -49,13 +50,14 @@ func NewOrder(items []*OrderItemRequest) (*Order, error) {
 	}
 
 	if !order.validateApprovalLimit() {
-		return nil, errors.New("approval limit over")
+		return nil, nil, errors.New("approval limit over")
 	}
 
-	return order, nil
+	createdEvent := event.NewOrderCreated(order.OrderID)
+	return order, []event.OrderEvent{createdEvent}, nil
 }
 
-func (o *Order) UpdateOrderItems(items []*OrderItemRequest) error {
+func (o *Order) UpdateOrderItems(items []*OrderItemRequest) ([]event.OrderEvent, error) {
 	orderItems := make([]*OrderItem, 0, len(items))
 	for i, item := range items {
 		orderItems = append(orderItems, &OrderItem{
@@ -70,10 +72,11 @@ func (o *Order) UpdateOrderItems(items []*OrderItemRequest) error {
 	o.orderItems = orderItems
 
 	if !o.validateApprovalLimit() {
-		return errors.New("approval limit over")
+		return nil, errors.New("approval limit over")
 	}
 
-	return nil
+	updatedEvent := event.NewOrderItemsUpdated(o.OrderID)
+	return []event.OrderEvent{updatedEvent}, nil
 }
 
 func (o *Order) validateApprovalLimit() bool {

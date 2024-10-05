@@ -25,13 +25,17 @@ type CreateOrderOutput struct {
 }
 
 func (c *CreateOrder) Execute(ctx context.Context, input CreateOrderInput) (*CreateOrderOutput, error) {
-	order, err := model.NewOrder(input.Items)
+	order, events, err := model.NewOrder(input.Items)
 	if err != nil {
 		return nil, err
 	}
 
 	if err := c.rep.Order.Save(ctx, order); err != nil {
 		return nil, err
+	}
+
+	if events != nil {
+		// TODO: publish event
 	}
 
 	return &CreateOrderOutput{OrderID: order.OrderID}, nil
