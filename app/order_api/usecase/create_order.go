@@ -12,9 +12,10 @@ type CreateOrder struct {
 	pub domain_event.Publisher
 }
 
-func NewCreateOrder(rep repository.Repository) *CreateOrder {
+func NewCreateOrder(rep repository.Repository, pub domain_event.Publisher) *CreateOrder {
 	return &CreateOrder{
 		rep: rep,
+		pub: pub,
 	}
 }
 

@@ -12,9 +12,10 @@ type CreateTicket struct {
 	pub domain_event.Publisher
 }
 
-func NewCreateTicket(rep repository.Repository) *CreateTicket {
+func NewCreateTicket(rep repository.Repository, pub domain_event.Publisher) *CreateTicket {
 	return &CreateTicket{
 		rep: rep,
+		pub: pub,
 	}
 }
 

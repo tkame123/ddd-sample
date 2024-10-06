@@ -4,11 +4,11 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/domain/event"
 )
 
-type OrderStatus int32
+type OrderStatus int
 
 const (
 	OrderCreated OrderStatus = iota
-	VerifyingDelivery
+	CreatingTicket
 	OrderApproved
 	OrderRejected
 )
