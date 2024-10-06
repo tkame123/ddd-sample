@@ -11,7 +11,7 @@ const (
 
 // 集約ルート
 type Order struct {
-	OrderID       OrderID
+	orderID       OrderID
 	approvalLimit int64
 	orderItems    []*OrderItem
 }
@@ -44,7 +44,7 @@ func NewOrder(items []*OrderItemRequest) (*Order, []event.OrderEvent, error) {
 	}
 
 	order := &Order{
-		OrderID:       orderID,
+		orderID:       orderID,
 		approvalLimit: APPROVAL_LIMIT,
 		orderItems:    orderItems,
 	}
@@ -53,15 +53,19 @@ func NewOrder(items []*OrderItemRequest) (*Order, []event.OrderEvent, error) {
 		return nil, nil, errors.New("approval limit over")
 	}
 
-	createdEvent := event.NewOrderCreated(order.OrderID)
+	createdEvent := event.NewOrderCreated(order.OrderID())
 	return order, []event.OrderEvent{createdEvent}, nil
+}
+
+func (o *Order) OrderID() OrderID {
+	return o.orderID
 }
 
 func (o *Order) UpdateOrderItems(items []*OrderItemRequest) ([]event.OrderEvent, error) {
 	orderItems := make([]*OrderItem, 0, len(items))
 	for i, item := range items {
 		orderItems = append(orderItems, &OrderItem{
-			OrderID:  o.OrderID,
+			OrderID:  o.OrderID(),
 			SortNo:   int32(i + 1),
 			ItemID:   item.ItemID,
 			Price:    item.Price,
@@ -75,7 +79,7 @@ func (o *Order) UpdateOrderItems(items []*OrderItemRequest) ([]event.OrderEvent,
 		return nil, errors.New("approval limit over")
 	}
 
-	updatedEvent := event.NewOrderItemsUpdated(o.OrderID)
+	updatedEvent := event.NewOrderItemsUpdated(o.OrderID())
 	return []event.OrderEvent{updatedEvent}, nil
 }
 

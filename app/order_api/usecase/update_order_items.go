@@ -44,5 +44,5 @@ func (u *UpdateOrderItems) Execute(ctx context.Context, input UpdateOrderItemsIn
 
 	u.pub.PublishMessages(ctx, events)
 
-	return &UpdateOrderItemsOutput{OrderID: order.OrderID}, nil
+	return &UpdateOrderItemsOutput{OrderID: order.OrderID()}, nil
 }

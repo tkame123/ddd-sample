@@ -38,5 +38,5 @@ func (c *CreateOrder) Execute(ctx context.Context, input CreateOrderInput) (*Cre
 
 	c.pub.PublishMessages(ctx, events)
 
-	return &CreateOrderOutput{OrderID: order.OrderID}, nil
+	return &CreateOrderOutput{OrderID: order.OrderID()}, nil
 }
