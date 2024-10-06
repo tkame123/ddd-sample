@@ -2,7 +2,7 @@ package model
 
 import "github.com/google/uuid"
 
-type ShipmentID = string
+type TicketID = string
 type OrderID = string
 type ItemID = string
 
