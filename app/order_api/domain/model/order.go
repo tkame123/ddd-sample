@@ -1,18 +1,5 @@
 package model
 
-import (
-	"github.com/tkame123/ddd-sample/app/order_api/domain/event"
-)
-
-type OrderStatus int
-
-const (
-	OrderCreated OrderStatus = iota
-	CreatingTicket
-	OrderApproved
-	OrderRejected
-)
-
 // 集約ルート
 type Order struct {
 	orderID       OrderID
@@ -34,7 +21,7 @@ type OrderItemRequest struct {
 	quantity int64
 }
 
-func NewOrder(items []*OrderItemRequest) (*Order, []event.OrderEvent, error) {
+func NewOrder(items []*OrderItemRequest) (*Order, []OrderEvent, error) {
 	orderID := generateID()
 
 	orderItems := make([]*OrderItem, 0, len(items))
@@ -51,11 +38,11 @@ func NewOrder(items []*OrderItemRequest) (*Order, []event.OrderEvent, error) {
 	order := &Order{
 		orderID:    orderID,
 		orderItems: orderItems,
-		status:     OrderCreated,
+		status:     ApprovalPending,
 	}
 
-	createdEvent := event.NewOrderCreated(order.OrderID())
-	return order, []event.OrderEvent{createdEvent}, nil
+	createdEvent := NewOrderCreated(order.OrderID())
+	return order, []OrderEvent{createdEvent}, nil
 }
 
 func (o *Order) OrderID() OrderID {

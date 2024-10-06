@@ -1,7 +1,5 @@
 package model
 
-import "github.com/tkame123/ddd-sample/app/kitchen_api/domain/event"
-
 // 集約ルート
 type Ticket struct {
 	ticketID    TicketID
@@ -20,7 +18,7 @@ type TicketItemRequest struct {
 	quantity int64
 }
 
-func NewTicket(orderID OrderID, items []*TicketItemRequest) (*Ticket, []event.TicketEvent, error) {
+func NewTicket(orderID OrderID, items []*TicketItemRequest) (*Ticket, []TicketEvent, error) {
 	ticketID := generateID()
 
 	ticketItems := make([]*TicketItem, 0, len(items))
@@ -38,9 +36,9 @@ func NewTicket(orderID OrderID, items []*TicketItemRequest) (*Ticket, []event.Ti
 		ticketItems: ticketItems,
 	}
 
-	createEvent := event.NewTicketCreated(ticket.ticketID)
+	createEvent := NewTicketCreated(ticket.ticketID)
 
-	return ticket, []event.TicketEvent{createEvent}, nil
+	return ticket, []TicketEvent{createEvent}, nil
 }
 
 func (s *Ticket) TicketID() TicketID {
