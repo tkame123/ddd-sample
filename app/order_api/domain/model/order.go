@@ -16,6 +16,14 @@ type OrderItem struct {
 	Quantity int64
 }
 
+type OrderStatus int
+
+const (
+	ApprovalPending OrderStatus = iota
+	OrderApproved
+	OrderRejected
+)
+
 type OrderItemRequest struct {
 	Item
 	quantity int64
