@@ -1,8 +1,8 @@
 package event
 
 import (
-	"github.com/tkame123/ddd-sample/app/lib/event"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
+	"github.com/tkame123/ddd-sample/lib/event"
 )
 
 type OrderEvent interface {
