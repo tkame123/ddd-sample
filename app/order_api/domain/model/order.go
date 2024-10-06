@@ -1,12 +1,16 @@
 package model
 
 import (
-	"errors"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/event"
 )
 
+type OrderStatus int32
+
 const (
-	APPROVAL_LIMIT int64 = 10000 // 10,000円
+	OrderCreated OrderStatus = iota
+	VerifyingDelivery
+	OrderApproved
+	OrderRejected
 )
 
 // 集約ルート
@@ -14,6 +18,7 @@ type Order struct {
 	orderID       OrderID
 	approvalLimit int64
 	orderItems    []*OrderItem
+	status        OrderStatus
 }
 
 type OrderItem struct {
@@ -44,13 +49,9 @@ func NewOrder(items []*OrderItemRequest) (*Order, []event.OrderEvent, error) {
 	}
 
 	order := &Order{
-		orderID:       orderID,
-		approvalLimit: APPROVAL_LIMIT,
-		orderItems:    orderItems,
-	}
-
-	if !order.validateApprovalLimit() {
-		return nil, nil, errors.New("approval limit over")
+		orderID:    orderID,
+		orderItems: orderItems,
+		status:     OrderCreated,
 	}
 
 	createdEvent := event.NewOrderCreated(order.OrderID())
@@ -59,35 +60,4 @@ func NewOrder(items []*OrderItemRequest) (*Order, []event.OrderEvent, error) {
 
 func (o *Order) OrderID() OrderID {
 	return o.orderID
-}
-
-func (o *Order) UpdateOrderItems(items []*OrderItemRequest) ([]event.OrderEvent, error) {
-	orderItems := make([]*OrderItem, 0, len(items))
-	for i, item := range items {
-		orderItems = append(orderItems, &OrderItem{
-			OrderID:  o.OrderID(),
-			SortNo:   int32(i + 1),
-			ItemID:   item.ItemID,
-			Price:    item.Price,
-			Quantity: item.quantity,
-		})
-	}
-
-	o.orderItems = orderItems
-
-	if !o.validateApprovalLimit() {
-		return nil, errors.New("approval limit over")
-	}
-
-	updatedEvent := event.NewOrderItemsUpdated(o.OrderID())
-	return []event.OrderEvent{updatedEvent}, nil
-}
-
-func (o *Order) validateApprovalLimit() bool {
-	sum := 0
-	for _, v := range o.orderItems {
-		sum += int(v.Price * v.Quantity)
-	}
-
-	return sum <= int(o.approvalLimit)
 }

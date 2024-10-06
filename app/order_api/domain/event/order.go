@@ -31,17 +31,3 @@ func (e *OrderCreated) ID() model.OrderID {
 type OrderItemsUpdated struct {
 	orderID model.OrderID
 }
-
-func NewOrderItemsUpdated(orderID model.OrderID) *OrderItemsUpdated {
-	return &OrderItemsUpdated{
-		orderID: orderID,
-	}
-}
-
-func (e *OrderItemsUpdated) Name() string {
-	return "event.order.items_updated"
-}
-
-func (e *OrderItemsUpdated) ID() model.OrderID {
-	return e.orderID
-}
