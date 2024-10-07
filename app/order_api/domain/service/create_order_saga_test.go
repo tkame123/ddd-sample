@@ -41,6 +41,8 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 		&external_service.ExternalAPI{KitchenAPI: mockKitchenAPI, BillingAPI: mockBillingAPI},
 	)
 
+	// 下記で絵になるので、迷ったら出力して比較する
+	// http://www.webgraphviz.com/
 	fmt.Println(saga.GetFSMVisualize())
 
 	mockOrder.EXPECT().FindOne(gomock.Any(), gomock.Any()).AnyTimes().Return(o, nil)
