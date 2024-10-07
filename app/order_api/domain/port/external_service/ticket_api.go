@@ -8,4 +8,5 @@ import (
 type KitchenAPI interface {
 	CreateTicket(ctx context.Context, orderID model.OrderID)
 	ApproveTicket(ctx context.Context, orderID model.OrderID)
+	RejectTicket(ctx context.Context, orderID model.OrderID)
 }

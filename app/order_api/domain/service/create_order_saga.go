@@ -112,6 +112,9 @@ func NewCreateOrderSaga(
 			"enter_ApproveOrder": func(ctx context.Context, e *fsm.Event) {
 				c.approveOrder(ctx)
 			},
+			"enter_AuthorizeCardFailed": func(ctx context.Context, e *fsm.Event) {
+				c.rejectTicket(ctx)
+			},
 			"enter_RejectOrder": func(ctx context.Context, e *fsm.Event) {
 				c.rejectOrder(ctx)
 			},
@@ -150,6 +153,10 @@ func (c *CreateOrderSaga) approveTicket(ctx context.Context) {
 	c.externalAPI.KitchenAPI.ApproveTicket(ctx, c.orderID)
 }
 
+func (c *CreateOrderSaga) rejectTicket(ctx context.Context) {
+	c.externalAPI.KitchenAPI.RejectTicket(ctx, c.orderID)
+}
+
 func (c *CreateOrderSaga) authorizeCard(ctx context.Context) {
 	c.externalAPI.KitchenAPI.ApproveTicket(ctx, c.orderID)
 }
@@ -158,7 +165,7 @@ func (c *CreateOrderSaga) approveOrder(ctx context.Context) {
 	_, err := c.orderSVC.ApproveOrder(ctx, order.ApproveOrderInput{OrderID: c.orderID})
 
 	if err != nil {
-		// TODO: 原則再実行で成功が保証されているはずなのでその点の対処を行う
+		// TODO: 原則再実行で成功が保証されているはずなので、通知だけ行う
 		panic("approve order failed")
 	}
 }
@@ -167,7 +174,7 @@ func (c *CreateOrderSaga) rejectOrder(ctx context.Context) {
 	_, err := c.orderSVC.RejectOrder(ctx, order.RejectOrderInput{OrderID: c.orderID})
 
 	if err != nil {
-		// TODO: 原則再実行で成功が保証されているはずなのでその点の対処を行う
+		// TODO: 原則再実行で成功が保証されているはずなので、通知だけ行う
 		panic("reject order failed")
 	}
 }

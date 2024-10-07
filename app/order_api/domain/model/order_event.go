@@ -19,8 +19,8 @@ func NewOrderCreatedEvent(orderID OrderID) *OrderCreatedEvent {
 	}
 }
 
-func (e *OrderCreatedEvent) Name() string {
-	return "event.order.order_created"
+func (e *OrderCreatedEvent) Name() event.Name {
+	return event.EventName_OrderCreated
 }
 
 func (e *OrderCreatedEvent) ID() OrderID {
@@ -37,8 +37,8 @@ func NewOrderApprovedEvent(orderID OrderID) *OrderApprovedEvent {
 	}
 }
 
-func (e *OrderApprovedEvent) Name() string {
-	return "event.order.order_approved"
+func (e *OrderApprovedEvent) Name() event.Name {
+	return event.EventName_OrderApproved
 }
 
 func (e *OrderApprovedEvent) ID() OrderID {
@@ -55,8 +55,8 @@ func NewOrderRejectedEvent(orderID OrderID) *OrderRejectedEvent {
 	}
 }
 
-func (e *OrderRejectedEvent) Name() string {
-	return "event.order.order_rejected"
+func (e *OrderRejectedEvent) Name() event.Name {
+	return event.EventName_OrderRejected
 }
 
 func (e *OrderRejectedEvent) ID() OrderID {
