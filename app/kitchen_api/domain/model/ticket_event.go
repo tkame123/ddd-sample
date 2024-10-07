@@ -9,38 +9,38 @@ type TicketEvent interface {
 	ID() TicketID
 }
 
-type TicketCreated struct {
+type TicketCreatedEvent struct {
 	ticketID TicketID
 }
 
-func NewTicketCreated(ticketID TicketID) *TicketCreated {
-	return &TicketCreated{
+func NewTicketCreatedEvent(ticketID TicketID) *TicketCreatedEvent {
+	return &TicketCreatedEvent{
 		ticketID: ticketID,
 	}
 }
 
-func (e *TicketCreated) Name() string {
+func (e *TicketCreatedEvent) Name() string {
 	return "event.delivery.ticket_created"
 }
 
-func (e *TicketCreated) ID() TicketID {
+func (e *TicketCreatedEvent) ID() TicketID {
 	return e.ticketID
 }
 
-type TicketRejected struct {
+type TicketRejectedEvent struct {
 	ticketID TicketID
 }
 
-func NewTTicketRejected(ticketID TicketID) *TicketRejected {
-	return &TicketRejected{
+func NewTTicketRejectedEvent(ticketID TicketID) *TicketRejectedEvent {
+	return &TicketRejectedEvent{
 		ticketID: ticketID,
 	}
 }
 
-func (e *TicketRejected) Name() string {
+func (e *TicketRejectedEvent) Name() string {
 	return "event.delivery.ticket_rejected"
 }
 
-func (e *TicketRejected) ID() TicketID {
+func (e *TicketRejectedEvent) ID() TicketID {
 	return e.ticketID
 }

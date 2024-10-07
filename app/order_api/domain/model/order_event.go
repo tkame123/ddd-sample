@@ -9,24 +9,56 @@ type OrderEvent interface {
 	ID() OrderID
 }
 
-type OrderCreated struct {
+type OrderCreatedEvent struct {
 	orderID OrderID
 }
 
-func NewOrderCreated(orderID OrderID) *OrderCreated {
-	return &OrderCreated{
+func NewOrderCreatedEvent(orderID OrderID) *OrderCreatedEvent {
+	return &OrderCreatedEvent{
 		orderID: orderID,
 	}
 }
 
-func (e *OrderCreated) Name() string {
-	return "event.order.created"
+func (e *OrderCreatedEvent) Name() string {
+	return "event.order.order_created"
 }
 
-func (e *OrderCreated) ID() OrderID {
+func (e *OrderCreatedEvent) ID() OrderID {
 	return e.orderID
 }
 
-type OrderItemsUpdated struct {
+type OrderApprovedEvent struct {
 	orderID OrderID
+}
+
+func NewOrderApprovedEvent(orderID OrderID) *OrderApprovedEvent {
+	return &OrderApprovedEvent{
+		orderID: orderID,
+	}
+}
+
+func (e *OrderApprovedEvent) Name() string {
+	return "event.order.order_approved"
+}
+
+func (e *OrderApprovedEvent) ID() OrderID {
+	return e.orderID
+}
+
+type OrderRejectedEvent struct {
+	orderID OrderID
+}
+
+func NewOrderRejectedEvent(orderID OrderID) *OrderRejectedEvent {
+	return &OrderRejectedEvent{
+		orderID: orderID,
+	}
+}
+
+func (e *OrderRejectedEvent) Name() string {
+	return "event.order.order_rejected"
+}
+
+func (e *OrderRejectedEvent) ID() OrderID {
+	return e.orderID
 }

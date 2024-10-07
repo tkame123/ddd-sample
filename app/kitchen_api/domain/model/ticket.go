@@ -36,7 +36,7 @@ func NewTicket(orderID OrderID, items []*TicketItemRequest) (*Ticket, []TicketEv
 		ticketItems: ticketItems,
 	}
 
-	createEvent := NewTicketCreated(ticket.ticketID)
+	createEvent := NewTicketCreatedEvent(ticket.ticketID)
 
 	return ticket, []TicketEvent{createEvent}, nil
 }

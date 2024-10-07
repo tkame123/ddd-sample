@@ -1,5 +1,7 @@
 package model
 
+import "errors"
+
 // 集約ルート
 type Order struct {
 	orderID       OrderID
@@ -19,9 +21,9 @@ type OrderItem struct {
 type OrderStatus int
 
 const (
-	ApprovalPending OrderStatus = iota
-	OrderApproved
-	OrderRejected
+	OrderStatus_ApprovalPending OrderStatus = iota
+	OrderStatus_OrderApproved
+	OrderStatus_OrderRejected
 )
 
 type OrderItemRequest struct {
@@ -46,13 +48,31 @@ func NewOrder(items []*OrderItemRequest) (*Order, []OrderEvent, error) {
 	order := &Order{
 		orderID:    orderID,
 		orderItems: orderItems,
-		status:     ApprovalPending,
+		status:     OrderStatus_ApprovalPending,
 	}
 
-	createdEvent := NewOrderCreated(order.OrderID())
+	createdEvent := NewOrderCreatedEvent(order.OrderID())
 	return order, []OrderEvent{createdEvent}, nil
 }
 
 func (o *Order) OrderID() OrderID {
 	return o.orderID
+}
+
+func (o *Order) ApproveOrder() ([]OrderEvent, error) {
+	if o.status != OrderStatus_ApprovalPending {
+		return nil, errors.New("order is not in approval pending status")
+	}
+
+	o.status = OrderStatus_OrderApproved
+	return []OrderEvent{NewOrderApprovedEvent(o.OrderID())}, nil
+}
+
+func (o *Order) RejectOrder() ([]OrderEvent, error) {
+	if o.status != OrderStatus_ApprovalPending {
+		return nil, errors.New("order is not in approval pending status")
+	}
+
+	o.status = OrderStatus_OrderRejected
+	return []OrderEvent{NewOrderRejectedEvent(o.OrderID())}, nil
 }
