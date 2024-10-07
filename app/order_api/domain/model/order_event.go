@@ -9,6 +9,44 @@ type OrderEvent interface {
 	ID() OrderID
 }
 
+type ApproveOrderCommand struct {
+	orderID OrderID
+}
+
+func NewApproveOrderCommand(orderID OrderID) *ApproveOrderCommand {
+	return &ApproveOrderCommand{
+		orderID: orderID,
+	}
+}
+
+func (e *ApproveOrderCommand) Name() string {
+	return "command.order.approve_order"
+}
+
+func (e *ApproveOrderCommand) ID() OrderID {
+	return e.orderID
+}
+
+type RejectOrderCommand struct {
+	orderID OrderID
+}
+
+func NewRejectOrderCommand(orderID OrderID) *RejectOrderCommand {
+	return &RejectOrderCommand{
+		orderID: orderID,
+	}
+}
+
+func (e *RejectOrderCommand) Name() string {
+	return "command.order.reject_order"
+}
+
+func (e *RejectOrderCommand) ID() OrderID {
+	return e.orderID
+}
+
+// message
+
 type OrderCreatedEvent struct {
 	orderID OrderID
 }

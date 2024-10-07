@@ -30,3 +30,7 @@ func NewCreateOrderSagaState(orderID OrderID, currentStep CreateOrderSagaStep) *
 func (s *CreateOrderSagaState) OrderID() OrderID {
 	return s.orderID
 }
+
+func (s *CreateOrderSagaState) Current() CreateOrderSagaStep {
+	return s.current
+}
