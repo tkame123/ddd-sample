@@ -86,3 +86,121 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 		t.Errorf("CurrentStep() = %v, want %v", got, model.CreateOrderSagaStep_OrderApproved)
 	}
 }
+
+func TestCreateOrderSaga_OrderRejectedDutToTicketCreationFailed(t *testing.T) {
+	ctx := context.Background()
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockOrder := mockRp.NewMockOrder(mockCtrl)
+	mockCOS := mockRp.NewMockCreateOrderSagaState(mockCtrl)
+	mockPub := mockMes.NewMockPublisher(mockCtrl)
+	mockKitchenAPI := mockAPI.NewMockKitchenAPI(mockCtrl)
+	mockBillingAPI := mockAPI.NewMockBillingAPI(mockCtrl)
+
+	o, _, err := model.NewOrder(nil)
+	if err != nil {
+		t.Errorf("err: %v\n", err)
+	}
+	orderSvc := order.NewService(repository.Repository{Order: mockOrder, CreateOrderSagaState: mockCOS}, mockPub)
+	orderID := o.OrderID()
+	initialStep := model.NewCreateOrderSagaState(orderID, model.CreateOrderSagaStep_ApprovalPending)
+	saga := servive.NewCreateOrderSaga(
+		initialStep,
+		&repository.Repository{Order: mockOrder, CreateOrderSagaState: mockCOS},
+		orderSvc,
+		&external_service.ExternalAPI{KitchenAPI: mockKitchenAPI, BillingAPI: mockBillingAPI},
+	)
+
+	// 下記で絵になるので、迷ったら出力して比較する
+	// http://www.webgraphviz.com/
+	fmt.Println(saga.GetFSMVisualize())
+
+	mockCOS.EXPECT().Save(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
+	mockKitchenAPI.EXPECT().CreateTicket(gomock.Any(), gomock.Any()).AnyTimes()
+
+	err = event_handler.NewNextStepSagaWhenOrderCreatedHandler(saga).
+		Handler(ctx, *model.NewOrderCreatedEvent(orderID))
+	if err != nil {
+		t.Errorf("err: %v\n", err)
+	}
+
+	err = event_handler.NewNextStepSagaWhenTicketCreationFailedHandler(saga).
+		Handler(ctx, event.NewGeneralEvent(orderID, event.EventName_TicketCreationFailed))
+	if err != nil {
+		t.Errorf("err: %v\n", err)
+	}
+
+	if got := saga.CurrentStep(); got != model.CreateOrderSagaStep_OrderRejected {
+		t.Errorf("CurrentStep() = %v, want %v", got, model.CreateOrderSagaStep_OrderRejected)
+	}
+}
+
+func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
+	ctx := context.Background()
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockOrder := mockRp.NewMockOrder(mockCtrl)
+	mockCOS := mockRp.NewMockCreateOrderSagaState(mockCtrl)
+	mockPub := mockMes.NewMockPublisher(mockCtrl)
+	mockKitchenAPI := mockAPI.NewMockKitchenAPI(mockCtrl)
+	mockBillingAPI := mockAPI.NewMockBillingAPI(mockCtrl)
+
+	o, _, err := model.NewOrder(nil)
+	if err != nil {
+		t.Errorf("err: %v\n", err)
+	}
+	orderSvc := order.NewService(repository.Repository{Order: mockOrder, CreateOrderSagaState: mockCOS}, mockPub)
+	orderID := o.OrderID()
+	initialStep := model.NewCreateOrderSagaState(orderID, model.CreateOrderSagaStep_ApprovalPending)
+	saga := servive.NewCreateOrderSaga(
+		initialStep,
+		&repository.Repository{Order: mockOrder, CreateOrderSagaState: mockCOS},
+		orderSvc,
+		&external_service.ExternalAPI{KitchenAPI: mockKitchenAPI, BillingAPI: mockBillingAPI},
+	)
+
+	// 下記で絵になるので、迷ったら出力して比較する
+	// http://www.webgraphviz.com/
+	fmt.Println(saga.GetFSMVisualize())
+
+	mockOrder.EXPECT().FindOne(gomock.Any(), gomock.Any()).AnyTimes().Return(o, nil)
+	mockCOS.EXPECT().Save(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
+	mockKitchenAPI.EXPECT().CreateTicket(gomock.Any(), gomock.Any()).AnyTimes()
+	mockKitchenAPI.EXPECT().RejectTicket(gomock.Any(), gomock.Any()).AnyTimes()
+	mockBillingAPI.EXPECT().AuthorizeCard(gomock.Any(), gomock.Any()).AnyTimes()
+	mockPub.EXPECT().PublishMessages(gomock.Any(), gomock.Any()).AnyTimes()
+
+	err = event_handler.NewNextStepSagaWhenOrderCreatedHandler(saga).
+		Handler(ctx, *model.NewOrderCreatedEvent(orderID))
+	if err != nil {
+		t.Errorf("err: %v\n", err)
+	}
+
+	err = event_handler.NewNextStepSagaWhenTicketCreatedHandler(saga).
+		Handler(ctx, event.NewGeneralEvent(orderID, event.EventName_TicketCreated))
+	if err != nil {
+		t.Errorf("err: %v\n", err)
+	}
+
+	err = event_handler.NewNextStepSagaWhenCardAuthorizeFailedHandler(saga).
+		Handler(ctx, event.NewGeneralEvent(orderID, event.EventName_CardAuthorizeFailed))
+	if err != nil {
+		t.Errorf("err: %v\n", err)
+	}
+
+	err = event_handler.NewNextStepSagaWhenTicketRejectedHandler(saga).
+		Handler(ctx, event.NewGeneralEvent(orderID, event.EventName_TicketRejected))
+	if err != nil {
+		t.Errorf("err: %v\n", err)
+	}
+
+	err = event_handler.NewNextStepSagaWhenOrderRejectedHandler(saga).
+		Handler(ctx, *model.NewOrderRejectedEvent(orderID))
+	if err != nil {
+		t.Errorf("err: %v\n", err)
+	}
+
+	if got := saga.CurrentStep(); got != model.CreateOrderSagaStep_OrderRejected {
+		t.Errorf("CurrentStep() = %v, want %v", got, model.CreateOrderSagaStep_OrderRejected)
+	}
+}

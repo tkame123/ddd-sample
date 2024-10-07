@@ -9,9 +9,10 @@ const (
 	EventName_OrderRejected Name = "event.order.order_rejected"
 
 	// kitchenAPI
-	EventName_TicketCreated  Name = "event.kitchen.ticket_created"
-	EventName_TicketApproved Name = "event.kitchen.ticket_approved"
-	EventName_TicketRejected Name = "event.kitchen.ticket_rejected"
+	EventName_TicketCreated        Name = "event.kitchen.ticket_created"
+	EventName_TicketCreationFailed Name = "event.kitchen.ticket_creation_failed"
+	EventName_TicketApproved       Name = "event.kitchen.ticket_approved"
+	EventName_TicketRejected       Name = "event.kitchen.ticket_rejected"
 
 	// BillingAPI
 	EventName_CardAuthorized      Name = "event.billing.card_authorized"
