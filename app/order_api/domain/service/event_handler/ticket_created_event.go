@@ -22,7 +22,7 @@ func (h *NextStepSagaWhenTicketCreatedHandler) Handler(ctx context.Context, even
 		return errors.New("invalid event")
 	}
 
-	if err := h.saga.Event(ctx, servive.CreateOrderSagaEvent_RejectOrder); err != nil {
+	if err := h.saga.Event(ctx, servive.CreateOrderSagaEvent_AuthorizeCard); err != nil {
 		return err
 	}
 

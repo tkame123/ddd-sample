@@ -21,3 +21,23 @@ const (
 type Event interface {
 	Name() Name
 }
+
+type GeneralEvent struct {
+	id   string
+	name string
+}
+
+func NewGeneralEvent(id string, name string) *GeneralEvent {
+	return &GeneralEvent{
+		id:   id,
+		name: name,
+	}
+}
+
+func (e *GeneralEvent) Name() Name {
+	return e.name
+}
+
+func (e *GeneralEvent) ID() Name {
+	return e.id
+}

@@ -2,9 +2,9 @@ package servive
 
 import (
 	"context"
+	"fmt"
 	"github.com/looplab/fsm"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
-	"github.com/tkame123/ddd-sample/app/order_api/domain/port/domain_event"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/service/order"
@@ -14,7 +14,6 @@ type CreateOrderSaga struct {
 	orderID     model.OrderID
 	fsm         *fsm.FSM
 	rep         *repository.Repository
-	pub         domain_event.Publisher
 	orderSVC    *order.Service
 	externalAPI *external_service.ExternalAPI
 }
@@ -36,13 +35,13 @@ const (
 func NewCreateOrderSaga(
 	currentState *model.CreateOrderSagaState,
 	rep *repository.Repository,
-	pub domain_event.Publisher,
+	orderSVC *order.Service,
 	externalAPI *external_service.ExternalAPI,
 ) *CreateOrderSaga {
 	c := &CreateOrderSaga{
 		orderID:     currentState.OrderID(),
 		rep:         rep,
-		pub:         pub,
+		orderSVC:    orderSVC,
 		externalAPI: externalAPI,
 	}
 
@@ -100,22 +99,22 @@ func NewCreateOrderSaga(
 			},
 		},
 		fsm.Callbacks{
-			"enter_CreteTicket": func(ctx context.Context, e *fsm.Event) {
+			"enter_CreatingTicket": func(ctx context.Context, e *fsm.Event) {
 				c.createTicket(ctx)
 			},
-			"enter_ApproveTicket": func(ctx context.Context, e *fsm.Event) {
+			"enter_ApprovingTicket": func(ctx context.Context, e *fsm.Event) {
 				c.approveTicket(ctx)
 			},
-			"enter_AuthorizeCard": func(ctx context.Context, e *fsm.Event) {
+			"enter_AuthorizingCard": func(ctx context.Context, e *fsm.Event) {
 				c.authorizeCard(ctx)
 			},
-			"enter_ApproveOrder": func(ctx context.Context, e *fsm.Event) {
+			"enter_ApprovingOrder": func(ctx context.Context, e *fsm.Event) {
 				c.approveOrder(ctx)
 			},
-			"enter_AuthorizeCardFailed": func(ctx context.Context, e *fsm.Event) {
+			"enter_RejectingTicket": func(ctx context.Context, e *fsm.Event) {
 				c.rejectTicket(ctx)
 			},
-			"enter_RejectOrder": func(ctx context.Context, e *fsm.Event) {
+			"enter_RejectingOrder": func(ctx context.Context, e *fsm.Event) {
 				c.rejectOrder(ctx)
 			},
 		},
@@ -123,6 +122,8 @@ func NewCreateOrderSaga(
 
 	ms.SetState(currentState.Current())
 	c.fsm = ms
+
+	fmt.Println(c.fsm.AvailableTransitions())
 
 	return c
 }
@@ -158,7 +159,7 @@ func (c *CreateOrderSaga) rejectTicket(ctx context.Context) {
 }
 
 func (c *CreateOrderSaga) authorizeCard(ctx context.Context) {
-	c.externalAPI.KitchenAPI.ApproveTicket(ctx, c.orderID)
+	c.externalAPI.BillingAPI.AuthorizeCard(ctx, c.orderID)
 }
 
 func (c *CreateOrderSaga) approveOrder(ctx context.Context) {
