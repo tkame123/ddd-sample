@@ -7,6 +7,7 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/domain_event"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/service/order"
 )
 
 type CreateOrderSaga struct {
@@ -14,6 +15,7 @@ type CreateOrderSaga struct {
 	fsm         *fsm.FSM
 	rep         *repository.Repository
 	pub         domain_event.Publisher
+	orderSVC    *order.Service
 	externalAPI *external_service.ExternalAPI
 }
 
@@ -153,9 +155,19 @@ func (c *CreateOrderSaga) authorizeCard(ctx context.Context) {
 }
 
 func (c *CreateOrderSaga) approveOrder(ctx context.Context) {
-	c.pub.PublishMessages(ctx, []model.OrderEvent{model.NewApproveOrderCommand(c.orderID)})
+	_, err := c.orderSVC.ApproveOrder(ctx, order.ApproveOrderInput{OrderID: c.orderID})
+
+	if err != nil {
+		// TODO: 原則再実行で成功が保証されているはずなのでその点の対処を行う
+		panic("approve order failed")
+	}
 }
 
 func (c *CreateOrderSaga) rejectOrder(ctx context.Context) {
-	c.pub.PublishMessages(ctx, []model.OrderEvent{model.NewRejectOrderCommand(c.orderID)})
+	_, err := c.orderSVC.RejectOrder(ctx, order.RejectOrderInput{OrderID: c.orderID})
+
+	if err != nil {
+		// TODO: 原則再実行で成功が保証されているはずなのでその点の対処を行う
+		panic("reject order failed")
+	}
 }
