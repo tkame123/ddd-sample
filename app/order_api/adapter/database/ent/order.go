@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 )
 
@@ -16,9 +17,13 @@ type Order struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// OrderID holds the value of the "orderID" field.
+	OrderID uuid.UUID `json:"orderID,omitempty"`
 	// ApprovalLimit holds the value of the "approvalLimit" field.
 	ApprovalLimit int64 `json:"approvalLimit,omitempty"`
-	selectValues  sql.SelectValues
+	// Status holds the value of the "status" field.
+	Status       order.Status `json:"status,omitempty"`
+	selectValues sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -28,6 +33,10 @@ func (*Order) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case order.FieldID, order.FieldApprovalLimit:
 			values[i] = new(sql.NullInt64)
+		case order.FieldStatus:
+			values[i] = new(sql.NullString)
+		case order.FieldOrderID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -49,11 +58,23 @@ func (o *Order) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			o.ID = int(value.Int64)
+		case order.FieldOrderID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field orderID", values[i])
+			} else if value != nil {
+				o.OrderID = *value
+			}
 		case order.FieldApprovalLimit:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field approvalLimit", values[i])
 			} else if value.Valid {
 				o.ApprovalLimit = value.Int64
+			}
+		case order.FieldStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field status", values[i])
+			} else if value.Valid {
+				o.Status = order.Status(value.String)
 			}
 		default:
 			o.selectValues.Set(columns[i], values[i])
@@ -91,8 +112,14 @@ func (o *Order) String() string {
 	var builder strings.Builder
 	builder.WriteString("Order(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", o.ID))
+	builder.WriteString("orderID=")
+	builder.WriteString(fmt.Sprintf("%v", o.OrderID))
+	builder.WriteString(", ")
 	builder.WriteString("approvalLimit=")
 	builder.WriteString(fmt.Sprintf("%v", o.ApprovalLimit))
+	builder.WriteString(", ")
+	builder.WriteString("status=")
+	builder.WriteString(fmt.Sprintf("%v", o.Status))
 	builder.WriteByte(')')
 	return builder.String()
 }

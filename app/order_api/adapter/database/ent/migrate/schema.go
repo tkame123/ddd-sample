@@ -10,8 +10,10 @@ import (
 var (
 	// OrdersColumns holds the columns for the "orders" table.
 	OrdersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID},
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "order_id", Type: field.TypeUUID},
 		{Name: "approval_limit", Type: field.TypeInt64},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"OrderStatus_ApprovalPending", "OrderStatus_OrderApproved", "OrderStatus_OrderRejected"}},
 	}
 	// OrdersTable holds the schema information for the "orders" table.
 	OrdersTable = &schema.Table{

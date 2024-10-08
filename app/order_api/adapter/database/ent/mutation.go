@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/predicate"
 )
@@ -32,8 +33,10 @@ type OrderMutation struct {
 	op               Op
 	typ              string
 	id               *int
+	orderID          *uuid.UUID
 	approvalLimit    *int64
 	addapprovalLimit *int64
+	status           *order.Status
 	clearedFields    map[string]struct{}
 	done             bool
 	oldValue         func(context.Context) (*Order, error)
@@ -138,6 +141,42 @@ func (m *OrderMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetOrderID sets the "orderID" field.
+func (m *OrderMutation) SetOrderID(u uuid.UUID) {
+	m.orderID = &u
+}
+
+// OrderID returns the value of the "orderID" field in the mutation.
+func (m *OrderMutation) OrderID() (r uuid.UUID, exists bool) {
+	v := m.orderID
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrderID returns the old "orderID" field's value of the Order entity.
+// If the Order object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderMutation) OldOrderID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrderID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrderID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrderID: %w", err)
+	}
+	return oldValue.OrderID, nil
+}
+
+// ResetOrderID resets all changes to the "orderID" field.
+func (m *OrderMutation) ResetOrderID() {
+	m.orderID = nil
+}
+
 // SetApprovalLimit sets the "approvalLimit" field.
 func (m *OrderMutation) SetApprovalLimit(i int64) {
 	m.approvalLimit = &i
@@ -194,6 +233,42 @@ func (m *OrderMutation) ResetApprovalLimit() {
 	m.addapprovalLimit = nil
 }
 
+// SetStatus sets the "status" field.
+func (m *OrderMutation) SetStatus(o order.Status) {
+	m.status = &o
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *OrderMutation) Status() (r order.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the Order entity.
+// If the Order object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderMutation) OldStatus(ctx context.Context) (v order.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *OrderMutation) ResetStatus() {
+	m.status = nil
+}
+
 // Where appends a list predicates to the OrderMutation builder.
 func (m *OrderMutation) Where(ps ...predicate.Order) {
 	m.predicates = append(m.predicates, ps...)
@@ -228,9 +303,15 @@ func (m *OrderMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *OrderMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 3)
+	if m.orderID != nil {
+		fields = append(fields, order.FieldOrderID)
+	}
 	if m.approvalLimit != nil {
 		fields = append(fields, order.FieldApprovalLimit)
+	}
+	if m.status != nil {
+		fields = append(fields, order.FieldStatus)
 	}
 	return fields
 }
@@ -240,8 +321,12 @@ func (m *OrderMutation) Fields() []string {
 // schema.
 func (m *OrderMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case order.FieldOrderID:
+		return m.OrderID()
 	case order.FieldApprovalLimit:
 		return m.ApprovalLimit()
+	case order.FieldStatus:
+		return m.Status()
 	}
 	return nil, false
 }
@@ -251,8 +336,12 @@ func (m *OrderMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *OrderMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case order.FieldOrderID:
+		return m.OldOrderID(ctx)
 	case order.FieldApprovalLimit:
 		return m.OldApprovalLimit(ctx)
+	case order.FieldStatus:
+		return m.OldStatus(ctx)
 	}
 	return nil, fmt.Errorf("unknown Order field %s", name)
 }
@@ -262,12 +351,26 @@ func (m *OrderMutation) OldField(ctx context.Context, name string) (ent.Value, e
 // type.
 func (m *OrderMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case order.FieldOrderID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrderID(v)
+		return nil
 	case order.FieldApprovalLimit:
 		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetApprovalLimit(v)
+		return nil
+	case order.FieldStatus:
+		v, ok := value.(order.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Order field %s", name)
@@ -333,8 +436,14 @@ func (m *OrderMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *OrderMutation) ResetField(name string) error {
 	switch name {
+	case order.FieldOrderID:
+		m.ResetOrderID()
+		return nil
 	case order.FieldApprovalLimit:
 		m.ResetApprovalLimit()
+		return nil
+	case order.FieldStatus:
+		m.ResetStatus()
 		return nil
 	}
 	return fmt.Errorf("unknown Order field %s", name)

@@ -3,6 +3,8 @@
 package order
 
 import (
+	"fmt"
+
 	"entgo.io/ent/dialect/sql"
 )
 
@@ -11,8 +13,12 @@ const (
 	Label = "order"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldOrderID holds the string denoting the orderid field in the database.
+	FieldOrderID = "order_id"
 	// FieldApprovalLimit holds the string denoting the approvallimit field in the database.
 	FieldApprovalLimit = "approval_limit"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
 	// Table holds the table name of the order in the database.
 	Table = "orders"
 )
@@ -20,7 +26,9 @@ const (
 // Columns holds all SQL columns for order fields.
 var Columns = []string{
 	FieldID,
+	FieldOrderID,
 	FieldApprovalLimit,
+	FieldStatus,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -33,6 +41,30 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+// Status defines the type for the "status" enum field.
+type Status string
+
+// Status values.
+const (
+	StatusOrderStatus_ApprovalPending Status = "OrderStatus_ApprovalPending"
+	StatusOrderStatus_OrderApproved   Status = "OrderStatus_OrderApproved"
+	StatusOrderStatus_OrderRejected   Status = "OrderStatus_OrderRejected"
+)
+
+func (s Status) String() string {
+	return string(s)
+}
+
+// StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
+func StatusValidator(s Status) error {
+	switch s {
+	case StatusOrderStatus_ApprovalPending, StatusOrderStatus_OrderApproved, StatusOrderStatus_OrderRejected:
+		return nil
+	default:
+		return fmt.Errorf("order: invalid enum value for status field: %q", s)
+	}
+}
+
 // OrderOption defines the ordering options for the Order queries.
 type OrderOption func(*sql.Selector)
 
@@ -41,7 +73,17 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
+// ByOrderID orders the results by the orderID field.
+func ByOrderID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOrderID, opts...).ToFunc()
+}
+
 // ByApprovalLimit orders the results by the approvalLimit field.
 func ByApprovalLimit(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldApprovalLimit, opts...).ToFunc()
+}
+
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
 }

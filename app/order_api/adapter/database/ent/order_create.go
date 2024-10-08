@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 )
 
@@ -19,9 +20,21 @@ type OrderCreate struct {
 	hooks    []Hook
 }
 
+// SetOrderID sets the "orderID" field.
+func (oc *OrderCreate) SetOrderID(u uuid.UUID) *OrderCreate {
+	oc.mutation.SetOrderID(u)
+	return oc
+}
+
 // SetApprovalLimit sets the "approvalLimit" field.
 func (oc *OrderCreate) SetApprovalLimit(i int64) *OrderCreate {
 	oc.mutation.SetApprovalLimit(i)
+	return oc
+}
+
+// SetStatus sets the "status" field.
+func (oc *OrderCreate) SetStatus(o order.Status) *OrderCreate {
+	oc.mutation.SetStatus(o)
 	return oc
 }
 
@@ -59,8 +72,19 @@ func (oc *OrderCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (oc *OrderCreate) check() error {
+	if _, ok := oc.mutation.OrderID(); !ok {
+		return &ValidationError{Name: "orderID", err: errors.New(`ent: missing required field "Order.orderID"`)}
+	}
 	if _, ok := oc.mutation.ApprovalLimit(); !ok {
 		return &ValidationError{Name: "approvalLimit", err: errors.New(`ent: missing required field "Order.approvalLimit"`)}
+	}
+	if _, ok := oc.mutation.Status(); !ok {
+		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Order.status"`)}
+	}
+	if v, ok := oc.mutation.Status(); ok {
+		if err := order.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Order.status": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -88,9 +112,17 @@ func (oc *OrderCreate) createSpec() (*Order, *sqlgraph.CreateSpec) {
 		_node = &Order{config: oc.config}
 		_spec = sqlgraph.NewCreateSpec(order.Table, sqlgraph.NewFieldSpec(order.FieldID, field.TypeInt))
 	)
+	if value, ok := oc.mutation.OrderID(); ok {
+		_spec.SetField(order.FieldOrderID, field.TypeUUID, value)
+		_node.OrderID = value
+	}
 	if value, ok := oc.mutation.ApprovalLimit(); ok {
 		_spec.SetField(order.FieldApprovalLimit, field.TypeInt64, value)
 		_node.ApprovalLimit = value
+	}
+	if value, ok := oc.mutation.Status(); ok {
+		_spec.SetField(order.FieldStatus, field.TypeEnum, value)
+		_node.Status = value
 	}
 	return _node, _spec
 }

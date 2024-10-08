@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/predicate"
 )
@@ -24,6 +25,20 @@ type OrderUpdate struct {
 // Where appends a list predicates to the OrderUpdate builder.
 func (ou *OrderUpdate) Where(ps ...predicate.Order) *OrderUpdate {
 	ou.mutation.Where(ps...)
+	return ou
+}
+
+// SetOrderID sets the "orderID" field.
+func (ou *OrderUpdate) SetOrderID(u uuid.UUID) *OrderUpdate {
+	ou.mutation.SetOrderID(u)
+	return ou
+}
+
+// SetNillableOrderID sets the "orderID" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableOrderID(u *uuid.UUID) *OrderUpdate {
+	if u != nil {
+		ou.SetOrderID(*u)
+	}
 	return ou
 }
 
@@ -45,6 +60,20 @@ func (ou *OrderUpdate) SetNillableApprovalLimit(i *int64) *OrderUpdate {
 // AddApprovalLimit adds i to the "approvalLimit" field.
 func (ou *OrderUpdate) AddApprovalLimit(i int64) *OrderUpdate {
 	ou.mutation.AddApprovalLimit(i)
+	return ou
+}
+
+// SetStatus sets the "status" field.
+func (ou *OrderUpdate) SetStatus(o order.Status) *OrderUpdate {
+	ou.mutation.SetStatus(o)
+	return ou
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableStatus(o *order.Status) *OrderUpdate {
+	if o != nil {
+		ou.SetStatus(*o)
+	}
 	return ou
 }
 
@@ -80,7 +109,20 @@ func (ou *OrderUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (ou *OrderUpdate) check() error {
+	if v, ok := ou.mutation.Status(); ok {
+		if err := order.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Order.status": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (ou *OrderUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := ou.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(order.Table, order.Columns, sqlgraph.NewFieldSpec(order.FieldID, field.TypeInt))
 	if ps := ou.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -89,11 +131,17 @@ func (ou *OrderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := ou.mutation.OrderID(); ok {
+		_spec.SetField(order.FieldOrderID, field.TypeUUID, value)
+	}
 	if value, ok := ou.mutation.ApprovalLimit(); ok {
 		_spec.SetField(order.FieldApprovalLimit, field.TypeInt64, value)
 	}
 	if value, ok := ou.mutation.AddedApprovalLimit(); ok {
 		_spec.AddField(order.FieldApprovalLimit, field.TypeInt64, value)
+	}
+	if value, ok := ou.mutation.Status(); ok {
+		_spec.SetField(order.FieldStatus, field.TypeEnum, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, ou.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -115,6 +163,20 @@ type OrderUpdateOne struct {
 	mutation *OrderMutation
 }
 
+// SetOrderID sets the "orderID" field.
+func (ouo *OrderUpdateOne) SetOrderID(u uuid.UUID) *OrderUpdateOne {
+	ouo.mutation.SetOrderID(u)
+	return ouo
+}
+
+// SetNillableOrderID sets the "orderID" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableOrderID(u *uuid.UUID) *OrderUpdateOne {
+	if u != nil {
+		ouo.SetOrderID(*u)
+	}
+	return ouo
+}
+
 // SetApprovalLimit sets the "approvalLimit" field.
 func (ouo *OrderUpdateOne) SetApprovalLimit(i int64) *OrderUpdateOne {
 	ouo.mutation.ResetApprovalLimit()
@@ -133,6 +195,20 @@ func (ouo *OrderUpdateOne) SetNillableApprovalLimit(i *int64) *OrderUpdateOne {
 // AddApprovalLimit adds i to the "approvalLimit" field.
 func (ouo *OrderUpdateOne) AddApprovalLimit(i int64) *OrderUpdateOne {
 	ouo.mutation.AddApprovalLimit(i)
+	return ouo
+}
+
+// SetStatus sets the "status" field.
+func (ouo *OrderUpdateOne) SetStatus(o order.Status) *OrderUpdateOne {
+	ouo.mutation.SetStatus(o)
+	return ouo
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableStatus(o *order.Status) *OrderUpdateOne {
+	if o != nil {
+		ouo.SetStatus(*o)
+	}
 	return ouo
 }
 
@@ -181,7 +257,20 @@ func (ouo *OrderUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (ouo *OrderUpdateOne) check() error {
+	if v, ok := ouo.mutation.Status(); ok {
+		if err := order.StatusValidator(v); err != nil {
+			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Order.status": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (ouo *OrderUpdateOne) sqlSave(ctx context.Context) (_node *Order, err error) {
+	if err := ouo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(order.Table, order.Columns, sqlgraph.NewFieldSpec(order.FieldID, field.TypeInt))
 	id, ok := ouo.mutation.ID()
 	if !ok {
@@ -207,11 +296,17 @@ func (ouo *OrderUpdateOne) sqlSave(ctx context.Context) (_node *Order, err error
 			}
 		}
 	}
+	if value, ok := ouo.mutation.OrderID(); ok {
+		_spec.SetField(order.FieldOrderID, field.TypeUUID, value)
+	}
 	if value, ok := ouo.mutation.ApprovalLimit(); ok {
 		_spec.SetField(order.FieldApprovalLimit, field.TypeInt64, value)
 	}
 	if value, ok := ouo.mutation.AddedApprovalLimit(); ok {
 		_spec.AddField(order.FieldApprovalLimit, field.TypeInt64, value)
+	}
+	if value, ok := ouo.mutation.Status(); ok {
+		_spec.SetField(order.FieldStatus, field.TypeEnum, value)
 	}
 	_node = &Order{config: ouo.config}
 	_spec.Assign = _node.assignValues

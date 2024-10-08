@@ -1,10 +1,10 @@
 package schema
 
 import (
-	"entgo.io/contrib/entproto"
 	"entgo.io/ent"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 type Order struct {
@@ -12,19 +12,14 @@ type Order struct {
 }
 
 func (Order) Annotations() []schema.Annotation {
-	return []schema.Annotation{
-		entproto.Message(),
-		entproto.Service(
-			entproto.Methods(entproto.MethodGet),
-		),
-	}
+	return []schema.Annotation{}
 }
 
 func (Order) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int64("approvalLimit").
-			Annotations(
-				entproto.Field(2),
-			),
+		field.UUID("orderID", uuid.UUID{}),
+		field.Int64("approvalLimit"),
+		field.Enum("status").
+			Values("OrderStatus_ApprovalPending", "OrderStatus_OrderApproved", "OrderStatus_OrderRejected"),
 	}
 }
