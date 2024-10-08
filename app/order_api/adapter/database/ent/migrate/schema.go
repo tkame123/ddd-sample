@@ -10,7 +10,7 @@ import (
 var (
 	// OrdersColumns holds the columns for the "orders" table.
 	OrdersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "id", Type: field.TypeUUID},
 		{Name: "approval_limit", Type: field.TypeInt64},
 	}
 	// OrdersTable holds the schema information for the "orders" table.

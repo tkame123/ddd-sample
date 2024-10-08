@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	model "github.com/tkame123/ddd-sample/app/kitchen_api/domain/model"
+	model "github.com/tkame123/ddd-sample/app/order_api/domain/model"
 )
 
 // MockBillingAPI is a mock of BillingAPI interface.

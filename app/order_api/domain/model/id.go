@@ -4,14 +4,14 @@ import (
 	"github.com/google/uuid"
 )
 
-type OrderID = string
-type ItemID = string
+type OrderID = uuid.UUID
+type ItemID = uuid.UUID
 
-func generateID() string {
-	id, err := uuid.NewRandom()
+func generateID() uuid.UUID {
+	id, err := uuid.NewV7()
 	if err != nil {
 		panic(err)
 	}
 
-	return id.String()
+	return id
 }
