@@ -35,31 +35,31 @@ func (m *MockOrder) EXPECT() *MockOrderMockRecorder {
 	return m.recorder
 }
 
-// FindOne mocks base method.
-func (m *MockOrder) FindOne(ctx context.Context, id model.OrderID) (*model.Order, error) {
+// OrderFindOne mocks base method.
+func (m *MockOrder) OrderFindOne(ctx context.Context, id model.OrderID) (*model.Order, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindOne", ctx, id)
+	ret := m.ctrl.Call(m, "OrderFindOne", ctx, id)
 	ret0, _ := ret[0].(*model.Order)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FindOne indicates an expected call of FindOne.
-func (mr *MockOrderMockRecorder) FindOne(ctx, id interface{}) *gomock.Call {
+// OrderFindOne indicates an expected call of OrderFindOne.
+func (mr *MockOrderMockRecorder) OrderFindOne(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOne", reflect.TypeOf((*MockOrder)(nil).FindOne), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OrderFindOne", reflect.TypeOf((*MockOrder)(nil).OrderFindOne), ctx, id)
 }
 
-// Save mocks base method.
-func (m *MockOrder) Save(ctx context.Context, order *model.Order) error {
+// OrderSave mocks base method.
+func (m *MockOrder) OrderSave(ctx context.Context, order *model.Order) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Save", ctx, order)
+	ret := m.ctrl.Call(m, "OrderSave", ctx, order)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Save indicates an expected call of Save.
-func (mr *MockOrderMockRecorder) Save(ctx, order interface{}) *gomock.Call {
+// OrderSave indicates an expected call of OrderSave.
+func (mr *MockOrderMockRecorder) OrderSave(ctx, order interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockOrder)(nil).Save), ctx, order)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OrderSave", reflect.TypeOf((*MockOrder)(nil).OrderSave), ctx, order)
 }

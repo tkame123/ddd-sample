@@ -6,7 +6,7 @@ import (
 )
 
 func (s *s) RejectOrder(ctx context.Context, orderID model.OrderID) (model.OrderID, error) {
-	order, err := s.rep.Order.FindOne(ctx, orderID)
+	order, err := s.rep.OrderFindOne(ctx, orderID)
 	if err != nil {
 		return "", err
 	}

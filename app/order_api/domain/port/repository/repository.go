@@ -1,6 +1,6 @@
 package repository
 
-type Repository struct {
+type Repository interface {
 	Order
 	CreateOrderSagaState
 }

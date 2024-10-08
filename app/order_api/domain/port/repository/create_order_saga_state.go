@@ -6,6 +6,6 @@ import (
 )
 
 type CreateOrderSagaState interface {
-	FindOne(ctx context.Context, id model.OrderID) (*model.CreateOrderSagaState, error)
-	Save(ctx context.Context, order *model.CreateOrderSagaState) error
+	CreateOrderSagaStateFindOne(ctx context.Context, id model.OrderID) (*model.CreateOrderSagaState, error)
+	CreateOrderSagaStateSave(ctx context.Context, order *model.CreateOrderSagaState) error
 }

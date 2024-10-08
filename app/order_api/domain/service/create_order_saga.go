@@ -11,11 +11,12 @@ import (
 )
 
 type CreateOrderSaga struct {
-	orderID     model.OrderID
-	fsm         *fsm.FSM
-	rep         *repository.Repository
-	orderSVC    service.CreateOrder
-	externalAPI *external_service.ExternalAPI
+	orderID    model.OrderID
+	fsm        *fsm.FSM
+	rep        repository.Repository
+	orderSVC   service.CreateOrder
+	kitchenAPI external_service.KitchenAPI
+	billingAPI external_service.BillingAPI
 }
 
 type CreateOrderSagaEvent = string
@@ -34,15 +35,17 @@ const (
 
 func NewCreateOrderSaga(
 	currentState *model.CreateOrderSagaState,
-	rep *repository.Repository,
+	rep repository.Repository,
 	orderSVC service.CreateOrder,
-	externalAPI *external_service.ExternalAPI,
+	kitchenAPI external_service.KitchenAPI,
+	billingAPI external_service.BillingAPI,
 ) *CreateOrderSaga {
 	c := &CreateOrderSaga{
-		orderID:     currentState.OrderID(),
-		rep:         rep,
-		orderSVC:    orderSVC,
-		externalAPI: externalAPI,
+		orderID:    currentState.OrderID(),
+		rep:        rep,
+		orderSVC:   orderSVC,
+		kitchenAPI: kitchenAPI,
+		billingAPI: billingAPI,
 	}
 
 	ms := fsm.NewFSM(
@@ -140,26 +143,26 @@ func (c *CreateOrderSaga) Event(ctx context.Context, causeEvent CreateOrderSagaE
 	if err := c.fsm.Event(ctx, causeEvent); err != nil {
 		return err
 	}
-	if err := c.rep.CreateOrderSagaState.Save(ctx, model.NewCreateOrderSagaState(c.orderID, c.fsm.Current())); err != nil {
+	if err := c.rep.CreateOrderSagaStateSave(ctx, model.NewCreateOrderSagaState(c.orderID, c.fsm.Current())); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (c *CreateOrderSaga) createTicket(ctx context.Context) {
-	c.externalAPI.KitchenAPI.CreateTicket(ctx, c.orderID)
+	c.kitchenAPI.CreateTicket(ctx, c.orderID)
 }
 
 func (c *CreateOrderSaga) approveTicket(ctx context.Context) {
-	c.externalAPI.KitchenAPI.ApproveTicket(ctx, c.orderID)
+	c.kitchenAPI.ApproveTicket(ctx, c.orderID)
 }
 
 func (c *CreateOrderSaga) rejectTicket(ctx context.Context) {
-	c.externalAPI.KitchenAPI.RejectTicket(ctx, c.orderID)
+	c.kitchenAPI.RejectTicket(ctx, c.orderID)
 }
 
 func (c *CreateOrderSaga) authorizeCard(ctx context.Context) {
-	c.externalAPI.BillingAPI.AuthorizeCard(ctx, c.orderID)
+	c.billingAPI.AuthorizeCard(ctx, c.orderID)
 }
 
 func (c *CreateOrderSaga) approveOrder(ctx context.Context) {

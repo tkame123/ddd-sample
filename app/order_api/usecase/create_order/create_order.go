@@ -11,7 +11,7 @@ func (s *s) CreateOrder(ctx context.Context, items []*model.OrderItemRequest) (m
 		return "", err
 	}
 
-	if err := s.rep.Order.Save(ctx, order); err != nil {
+	if err := s.rep.OrderSave(ctx, order); err != nil {
 		return "", err
 	}
 

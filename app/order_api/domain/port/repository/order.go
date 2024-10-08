@@ -6,6 +6,6 @@ import (
 )
 
 type Order interface {
-	FindOne(ctx context.Context, id model.OrderID) (*model.Order, error)
-	Save(ctx context.Context, order *model.Order) error
+	OrderFindOne(ctx context.Context, id model.OrderID) (*model.Order, error)
+	OrderSave(ctx context.Context, order *model.Order) error
 }

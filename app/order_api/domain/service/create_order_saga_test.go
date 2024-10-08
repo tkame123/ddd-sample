@@ -5,11 +5,9 @@ import (
 	"fmt"
 	"github.com/golang/mock/gomock"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
-	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
 	mockAPI "github.com/tkame123/ddd-sample/app/order_api/domain/port/mock/external_service"
 	mockRp "github.com/tkame123/ddd-sample/app/order_api/domain/port/mock/repository"
 	mockOSVS "github.com/tkame123/ddd-sample/app/order_api/domain/port/mock/service"
-	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
 	servive "github.com/tkame123/ddd-sample/app/order_api/domain/service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/service/event_handler"
 	"github.com/tkame123/ddd-sample/lib/event"
@@ -20,8 +18,7 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 	ctx := context.Background()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockOrder := mockRp.NewMockOrder(mockCtrl)
-	mockCOS := mockRp.NewMockCreateOrderSagaState(mockCtrl)
+	mockRepo := mockRp.NewMockRepository(mockCtrl)
 	mockKitchenAPI := mockAPI.NewMockKitchenAPI(mockCtrl)
 	mockBillingAPI := mockAPI.NewMockBillingAPI(mockCtrl)
 	mockOrderSVC := mockOSVS.NewMockCreateOrder(mockCtrl)
@@ -34,16 +31,17 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 	initialStep := model.NewCreateOrderSagaState(orderID, model.CreateOrderSagaStep_ApprovalPending)
 	saga := servive.NewCreateOrderSaga(
 		initialStep,
-		&repository.Repository{Order: mockOrder, CreateOrderSagaState: mockCOS},
+		mockRepo,
 		mockOrderSVC,
-		&external_service.ExternalAPI{KitchenAPI: mockKitchenAPI, BillingAPI: mockBillingAPI},
+		mockKitchenAPI,
+		mockBillingAPI,
 	)
 
 	// 下記で絵になるので、迷ったら出力して比較する
 	// http://www.webgraphviz.com/
 	fmt.Println(saga.GetFSMVisualize())
 
-	mockCOS.EXPECT().Save(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
+	mockRepo.EXPECT().CreateOrderSagaStateSave(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
 	mockKitchenAPI.EXPECT().CreateTicket(gomock.Any(), gomock.Any()).AnyTimes()
 	mockKitchenAPI.EXPECT().ApproveTicket(gomock.Any(), gomock.Any()).AnyTimes()
 	mockBillingAPI.EXPECT().AuthorizeCard(gomock.Any(), gomock.Any()).AnyTimes()
@@ -88,8 +86,7 @@ func TestCreateOrderSaga_OrderRejectedDutToTicketCreationFailed(t *testing.T) {
 	ctx := context.Background()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockOrder := mockRp.NewMockOrder(mockCtrl)
-	mockCOS := mockRp.NewMockCreateOrderSagaState(mockCtrl)
+	mockRepo := mockRp.NewMockRepository(mockCtrl)
 	mockKitchenAPI := mockAPI.NewMockKitchenAPI(mockCtrl)
 	mockBillingAPI := mockAPI.NewMockBillingAPI(mockCtrl)
 	mockOrderSVC := mockOSVS.NewMockCreateOrder(mockCtrl)
@@ -102,16 +99,17 @@ func TestCreateOrderSaga_OrderRejectedDutToTicketCreationFailed(t *testing.T) {
 	initialStep := model.NewCreateOrderSagaState(orderID, model.CreateOrderSagaStep_ApprovalPending)
 	saga := servive.NewCreateOrderSaga(
 		initialStep,
-		&repository.Repository{Order: mockOrder, CreateOrderSagaState: mockCOS},
+		mockRepo,
 		mockOrderSVC,
-		&external_service.ExternalAPI{KitchenAPI: mockKitchenAPI, BillingAPI: mockBillingAPI},
+		mockKitchenAPI,
+		mockBillingAPI,
 	)
 
 	// 下記で絵になるので、迷ったら出力して比較する
 	// http://www.webgraphviz.com/
 	fmt.Println(saga.GetFSMVisualize())
 
-	mockCOS.EXPECT().Save(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
+	mockRepo.EXPECT().CreateOrderSagaStateSave(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
 	mockKitchenAPI.EXPECT().CreateTicket(gomock.Any(), gomock.Any()).AnyTimes()
 
 	err = event_handler.NewNextStepSagaWhenOrderCreatedHandler(saga).
@@ -135,8 +133,7 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 	ctx := context.Background()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockOrder := mockRp.NewMockOrder(mockCtrl)
-	mockCOS := mockRp.NewMockCreateOrderSagaState(mockCtrl)
+	mockRepo := mockRp.NewMockRepository(mockCtrl)
 	mockKitchenAPI := mockAPI.NewMockKitchenAPI(mockCtrl)
 	mockBillingAPI := mockAPI.NewMockBillingAPI(mockCtrl)
 	mockOrderSVC := mockOSVS.NewMockCreateOrder(mockCtrl)
@@ -149,16 +146,17 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 	initialStep := model.NewCreateOrderSagaState(orderID, model.CreateOrderSagaStep_ApprovalPending)
 	saga := servive.NewCreateOrderSaga(
 		initialStep,
-		&repository.Repository{Order: mockOrder, CreateOrderSagaState: mockCOS},
+		mockRepo,
 		mockOrderSVC,
-		&external_service.ExternalAPI{KitchenAPI: mockKitchenAPI, BillingAPI: mockBillingAPI},
+		mockKitchenAPI,
+		mockBillingAPI,
 	)
 
 	// 下記で絵になるので、迷ったら出力して比較する
 	// http://www.webgraphviz.com/
 	fmt.Println(saga.GetFSMVisualize())
 
-	mockCOS.EXPECT().Save(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
+	mockRepo.EXPECT().CreateOrderSagaStateSave(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
 	mockKitchenAPI.EXPECT().CreateTicket(gomock.Any(), gomock.Any()).AnyTimes()
 	mockKitchenAPI.EXPECT().RejectTicket(gomock.Any(), gomock.Any()).AnyTimes()
 	mockBillingAPI.EXPECT().AuthorizeCard(gomock.Any(), gomock.Any()).AnyTimes()
