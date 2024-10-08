@@ -1,5 +1,8 @@
 install:
 	go install github.com/golang/mock/mockgen
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+	go install entgo.io/contrib/entproto/cmd/protoc-gen-entgrpc@master
 
 test.mock:
 	mockgen -source=app/order_api/domain/port/domain_event/publisher.go -destination=app/order_api/domain/port/mock/domain_event/publisher.go -package=mock
