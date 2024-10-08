@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	service "github.com/tkame123/ddd-sample/app/order_api/domain/port/service"
+	model "github.com/tkame123/ddd-sample/app/order_api/domain/model"
 )
 
 // MockCreateOrder is a mock of CreateOrder interface.
@@ -36,46 +36,46 @@ func (m *MockCreateOrder) EXPECT() *MockCreateOrderMockRecorder {
 }
 
 // ApproveOrder mocks base method.
-func (m *MockCreateOrder) ApproveOrder(ctx context.Context, input service.ApproveOrderInput) (*service.ApproveOrderOutput, error) {
+func (m *MockCreateOrder) ApproveOrder(ctx context.Context, orderID model.OrderID) (model.OrderID, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ApproveOrder", ctx, input)
-	ret0, _ := ret[0].(*service.ApproveOrderOutput)
+	ret := m.ctrl.Call(m, "ApproveOrder", ctx, orderID)
+	ret0, _ := ret[0].(model.OrderID)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ApproveOrder indicates an expected call of ApproveOrder.
-func (mr *MockCreateOrderMockRecorder) ApproveOrder(ctx, input interface{}) *gomock.Call {
+func (mr *MockCreateOrderMockRecorder) ApproveOrder(ctx, orderID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ApproveOrder", reflect.TypeOf((*MockCreateOrder)(nil).ApproveOrder), ctx, input)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ApproveOrder", reflect.TypeOf((*MockCreateOrder)(nil).ApproveOrder), ctx, orderID)
 }
 
 // CreateOrder mocks base method.
-func (m *MockCreateOrder) CreateOrder(ctx context.Context, input service.CreateOrderInput) (*service.CreateOrderOutput, error) {
+func (m *MockCreateOrder) CreateOrder(ctx context.Context, items []*model.OrderItemRequest) (model.OrderID, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateOrder", ctx, input)
-	ret0, _ := ret[0].(*service.CreateOrderOutput)
+	ret := m.ctrl.Call(m, "CreateOrder", ctx, items)
+	ret0, _ := ret[0].(model.OrderID)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateOrder indicates an expected call of CreateOrder.
-func (mr *MockCreateOrderMockRecorder) CreateOrder(ctx, input interface{}) *gomock.Call {
+func (mr *MockCreateOrderMockRecorder) CreateOrder(ctx, items interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrder", reflect.TypeOf((*MockCreateOrder)(nil).CreateOrder), ctx, input)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrder", reflect.TypeOf((*MockCreateOrder)(nil).CreateOrder), ctx, items)
 }
 
 // RejectOrder mocks base method.
-func (m *MockCreateOrder) RejectOrder(ctx context.Context, input service.RejectOrderInput) (*service.RejectOrderOutput, error) {
+func (m *MockCreateOrder) RejectOrder(ctx context.Context, orderID model.OrderID) (model.OrderID, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RejectOrder", ctx, input)
-	ret0, _ := ret[0].(*service.RejectOrderOutput)
+	ret := m.ctrl.Call(m, "RejectOrder", ctx, orderID)
+	ret0, _ := ret[0].(model.OrderID)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // RejectOrder indicates an expected call of RejectOrder.
-func (mr *MockCreateOrderMockRecorder) RejectOrder(ctx, input interface{}) *gomock.Call {
+func (mr *MockCreateOrderMockRecorder) RejectOrder(ctx, orderID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RejectOrder", reflect.TypeOf((*MockCreateOrder)(nil).RejectOrder), ctx, input)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RejectOrder", reflect.TypeOf((*MockCreateOrder)(nil).RejectOrder), ctx, orderID)
 }

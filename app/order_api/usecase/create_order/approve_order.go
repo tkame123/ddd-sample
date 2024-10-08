@@ -2,21 +2,21 @@ package create_order
 
 import (
 	"context"
-	servive "github.com/tkame123/ddd-sample/app/order_api/domain/port/service"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
 )
 
-func (s *s) ApproveOrder(ctx context.Context, input servive.ApproveOrderInput) (*servive.ApproveOrderOutput, error) {
-	order, err := s.rep.Order.FindOne(ctx, input.OrderID)
+func (s *s) ApproveOrder(ctx context.Context, orderID model.OrderID) (model.OrderID, error) {
+	order, err := s.rep.Order.FindOne(ctx, orderID)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	events, err := order.ApproveOrder()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	s.pub.PublishMessages(ctx, events)
 
-	return &servive.ApproveOrderOutput{OrderID: order.OrderID()}, nil
+	return order.OrderID(), nil
 }

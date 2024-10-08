@@ -163,7 +163,7 @@ func (c *CreateOrderSaga) authorizeCard(ctx context.Context) {
 }
 
 func (c *CreateOrderSaga) approveOrder(ctx context.Context) {
-	_, err := c.orderSVC.ApproveOrder(ctx, service.ApproveOrderInput{OrderID: c.orderID})
+	_, err := c.orderSVC.ApproveOrder(ctx, c.orderID)
 
 	if err != nil {
 		// TODO: 原則再実行で成功が保証されているはずなので、通知だけ行う
@@ -172,7 +172,7 @@ func (c *CreateOrderSaga) approveOrder(ctx context.Context) {
 }
 
 func (c *CreateOrderSaga) rejectOrder(ctx context.Context) {
-	_, err := c.orderSVC.RejectOrder(ctx, service.RejectOrderInput{OrderID: c.orderID})
+	_, err := c.orderSVC.RejectOrder(ctx, c.orderID)
 
 	if err != nil {
 		// TODO: 原則再実行で成功が保証されているはずなので、通知だけ行う
