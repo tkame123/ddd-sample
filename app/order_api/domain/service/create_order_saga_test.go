@@ -6,13 +6,12 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
-	mockMes "github.com/tkame123/ddd-sample/app/order_api/domain/port/mock/domain_event"
 	mockAPI "github.com/tkame123/ddd-sample/app/order_api/domain/port/mock/external_service"
 	mockRp "github.com/tkame123/ddd-sample/app/order_api/domain/port/mock/repository"
+	mockOSVS "github.com/tkame123/ddd-sample/app/order_api/domain/port/mock/service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
 	servive "github.com/tkame123/ddd-sample/app/order_api/domain/service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/service/event_handler"
-	"github.com/tkame123/ddd-sample/app/order_api/usecase/create_order"
 	"github.com/tkame123/ddd-sample/lib/event"
 	"testing"
 )
@@ -23,21 +22,20 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockOrder := mockRp.NewMockOrder(mockCtrl)
 	mockCOS := mockRp.NewMockCreateOrderSagaState(mockCtrl)
-	mockPub := mockMes.NewMockPublisher(mockCtrl)
 	mockKitchenAPI := mockAPI.NewMockKitchenAPI(mockCtrl)
 	mockBillingAPI := mockAPI.NewMockBillingAPI(mockCtrl)
+	mockOrderSVC := mockOSVS.NewMockCreateOrder(mockCtrl)
 
 	o, _, err := model.NewOrder(nil)
 	if err != nil {
 		t.Errorf("err: %v\n", err)
 	}
-	orderSvc := create_order.NewService(repository.Repository{Order: mockOrder, CreateOrderSagaState: mockCOS}, mockPub)
 	orderID := o.OrderID()
 	initialStep := model.NewCreateOrderSagaState(orderID, model.CreateOrderSagaStep_ApprovalPending)
 	saga := servive.NewCreateOrderSaga(
 		initialStep,
 		&repository.Repository{Order: mockOrder, CreateOrderSagaState: mockCOS},
-		orderSvc,
+		mockOrderSVC,
 		&external_service.ExternalAPI{KitchenAPI: mockKitchenAPI, BillingAPI: mockBillingAPI},
 	)
 
@@ -45,12 +43,11 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 	// http://www.webgraphviz.com/
 	fmt.Println(saga.GetFSMVisualize())
 
-	mockOrder.EXPECT().FindOne(gomock.Any(), gomock.Any()).AnyTimes().Return(o, nil)
 	mockCOS.EXPECT().Save(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
 	mockKitchenAPI.EXPECT().CreateTicket(gomock.Any(), gomock.Any()).AnyTimes()
 	mockKitchenAPI.EXPECT().ApproveTicket(gomock.Any(), gomock.Any()).AnyTimes()
 	mockBillingAPI.EXPECT().AuthorizeCard(gomock.Any(), gomock.Any()).AnyTimes()
-	mockPub.EXPECT().PublishMessages(gomock.Any(), gomock.Any()).AnyTimes()
+	mockOrderSVC.EXPECT().ApproveOrder(gomock.Any(), gomock.Any()).AnyTimes()
 
 	err = event_handler.NewNextStepSagaWhenOrderCreatedHandler(saga).
 		Handler(ctx, *model.NewOrderCreatedEvent(orderID))
@@ -93,21 +90,20 @@ func TestCreateOrderSaga_OrderRejectedDutToTicketCreationFailed(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockOrder := mockRp.NewMockOrder(mockCtrl)
 	mockCOS := mockRp.NewMockCreateOrderSagaState(mockCtrl)
-	mockPub := mockMes.NewMockPublisher(mockCtrl)
 	mockKitchenAPI := mockAPI.NewMockKitchenAPI(mockCtrl)
 	mockBillingAPI := mockAPI.NewMockBillingAPI(mockCtrl)
+	mockOrderSVC := mockOSVS.NewMockCreateOrder(mockCtrl)
 
 	o, _, err := model.NewOrder(nil)
 	if err != nil {
 		t.Errorf("err: %v\n", err)
 	}
-	orderSvc := create_order.NewService(repository.Repository{Order: mockOrder, CreateOrderSagaState: mockCOS}, mockPub)
 	orderID := o.OrderID()
 	initialStep := model.NewCreateOrderSagaState(orderID, model.CreateOrderSagaStep_ApprovalPending)
 	saga := servive.NewCreateOrderSaga(
 		initialStep,
 		&repository.Repository{Order: mockOrder, CreateOrderSagaState: mockCOS},
-		orderSvc,
+		mockOrderSVC,
 		&external_service.ExternalAPI{KitchenAPI: mockKitchenAPI, BillingAPI: mockBillingAPI},
 	)
 
@@ -141,21 +137,20 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 	defer mockCtrl.Finish()
 	mockOrder := mockRp.NewMockOrder(mockCtrl)
 	mockCOS := mockRp.NewMockCreateOrderSagaState(mockCtrl)
-	mockPub := mockMes.NewMockPublisher(mockCtrl)
 	mockKitchenAPI := mockAPI.NewMockKitchenAPI(mockCtrl)
 	mockBillingAPI := mockAPI.NewMockBillingAPI(mockCtrl)
+	mockOrderSVC := mockOSVS.NewMockCreateOrder(mockCtrl)
 
 	o, _, err := model.NewOrder(nil)
 	if err != nil {
 		t.Errorf("err: %v\n", err)
 	}
-	orderSvc := create_order.NewService(repository.Repository{Order: mockOrder, CreateOrderSagaState: mockCOS}, mockPub)
 	orderID := o.OrderID()
 	initialStep := model.NewCreateOrderSagaState(orderID, model.CreateOrderSagaStep_ApprovalPending)
 	saga := servive.NewCreateOrderSaga(
 		initialStep,
 		&repository.Repository{Order: mockOrder, CreateOrderSagaState: mockCOS},
-		orderSvc,
+		mockOrderSVC,
 		&external_service.ExternalAPI{KitchenAPI: mockKitchenAPI, BillingAPI: mockBillingAPI},
 	)
 
@@ -163,12 +158,11 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 	// http://www.webgraphviz.com/
 	fmt.Println(saga.GetFSMVisualize())
 
-	mockOrder.EXPECT().FindOne(gomock.Any(), gomock.Any()).AnyTimes().Return(o, nil)
 	mockCOS.EXPECT().Save(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
 	mockKitchenAPI.EXPECT().CreateTicket(gomock.Any(), gomock.Any()).AnyTimes()
 	mockKitchenAPI.EXPECT().RejectTicket(gomock.Any(), gomock.Any()).AnyTimes()
 	mockBillingAPI.EXPECT().AuthorizeCard(gomock.Any(), gomock.Any()).AnyTimes()
-	mockPub.EXPECT().PublishMessages(gomock.Any(), gomock.Any()).AnyTimes()
+	mockOrderSVC.EXPECT().RejectOrder(gomock.Any(), gomock.Any()).AnyTimes()
 
 	err = event_handler.NewNextStepSagaWhenOrderCreatedHandler(saga).
 		Handler(ctx, *model.NewOrderCreatedEvent(orderID))
