@@ -46,9 +46,9 @@ type Status string
 
 // Status values.
 const (
-	StatusOrderStatus_ApprovalPending Status = "OrderStatus_ApprovalPending"
-	StatusOrderStatus_OrderApproved   Status = "OrderStatus_OrderApproved"
-	StatusOrderStatus_OrderRejected   Status = "OrderStatus_OrderRejected"
+	StatusApprovalPending Status = "ApprovalPending"
+	StatusOrderApproved   Status = "OrderApproved"
+	StatusOrderRejected   Status = "OrderRejected"
 )
 
 func (s Status) String() string {
@@ -58,7 +58,7 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusOrderStatus_ApprovalPending, StatusOrderStatus_OrderApproved, StatusOrderStatus_OrderRejected:
+	case StatusApprovalPending, StatusOrderApproved, StatusOrderRejected:
 		return nil
 	default:
 		return fmt.Errorf("order: invalid enum value for status field: %q", s)

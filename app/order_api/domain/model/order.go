@@ -18,12 +18,12 @@ type OrderItem struct {
 	Quantity int64
 }
 
-type OrderStatus int
+type OrderStatus = string
 
 const (
-	OrderStatus_ApprovalPending OrderStatus = iota
-	OrderStatus_OrderApproved
-	OrderStatus_OrderRejected
+	OrderStatus_ApprovalPending OrderStatus = "ApprovalPending"
+	OrderStatus_OrderApproved   OrderStatus = "OrderApproved"
+	OrderStatus_OrderRejected   OrderStatus = "OrderRejected"
 )
 
 type OrderItemRequest struct {
