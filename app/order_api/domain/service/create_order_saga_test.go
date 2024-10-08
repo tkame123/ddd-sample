@@ -12,7 +12,7 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
 	servive "github.com/tkame123/ddd-sample/app/order_api/domain/service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/service/event_handler"
-	"github.com/tkame123/ddd-sample/app/order_api/domain/service/order"
+	"github.com/tkame123/ddd-sample/app/order_api/usecase/create_order"
 	"github.com/tkame123/ddd-sample/lib/event"
 	"testing"
 )
@@ -31,7 +31,7 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 	if err != nil {
 		t.Errorf("err: %v\n", err)
 	}
-	orderSvc := order.NewService(repository.Repository{Order: mockOrder, CreateOrderSagaState: mockCOS}, mockPub)
+	orderSvc := create_order.NewService(repository.Repository{Order: mockOrder, CreateOrderSagaState: mockCOS}, mockPub)
 	orderID := o.OrderID()
 	initialStep := model.NewCreateOrderSagaState(orderID, model.CreateOrderSagaStep_ApprovalPending)
 	saga := servive.NewCreateOrderSaga(
@@ -101,7 +101,7 @@ func TestCreateOrderSaga_OrderRejectedDutToTicketCreationFailed(t *testing.T) {
 	if err != nil {
 		t.Errorf("err: %v\n", err)
 	}
-	orderSvc := order.NewService(repository.Repository{Order: mockOrder, CreateOrderSagaState: mockCOS}, mockPub)
+	orderSvc := create_order.NewService(repository.Repository{Order: mockOrder, CreateOrderSagaState: mockCOS}, mockPub)
 	orderID := o.OrderID()
 	initialStep := model.NewCreateOrderSagaState(orderID, model.CreateOrderSagaStep_ApprovalPending)
 	saga := servive.NewCreateOrderSaga(
@@ -149,7 +149,7 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 	if err != nil {
 		t.Errorf("err: %v\n", err)
 	}
-	orderSvc := order.NewService(repository.Repository{Order: mockOrder, CreateOrderSagaState: mockCOS}, mockPub)
+	orderSvc := create_order.NewService(repository.Repository{Order: mockOrder, CreateOrderSagaState: mockCOS}, mockPub)
 	orderID := o.OrderID()
 	initialStep := model.NewCreateOrderSagaState(orderID, model.CreateOrderSagaStep_ApprovalPending)
 	saga := servive.NewCreateOrderSaga(

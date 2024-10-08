@@ -7,14 +7,14 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
-	"github.com/tkame123/ddd-sample/app/order_api/domain/service/order"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/port/service"
 )
 
 type CreateOrderSaga struct {
 	orderID     model.OrderID
 	fsm         *fsm.FSM
 	rep         *repository.Repository
-	orderSVC    *order.Service
+	orderSVC    service.CreateOrder
 	externalAPI *external_service.ExternalAPI
 }
 
@@ -35,7 +35,7 @@ const (
 func NewCreateOrderSaga(
 	currentState *model.CreateOrderSagaState,
 	rep *repository.Repository,
-	orderSVC *order.Service,
+	orderSVC service.CreateOrder,
 	externalAPI *external_service.ExternalAPI,
 ) *CreateOrderSaga {
 	c := &CreateOrderSaga{
@@ -163,7 +163,7 @@ func (c *CreateOrderSaga) authorizeCard(ctx context.Context) {
 }
 
 func (c *CreateOrderSaga) approveOrder(ctx context.Context) {
-	_, err := c.orderSVC.ApproveOrder(ctx, order.ApproveOrderInput{OrderID: c.orderID})
+	_, err := c.orderSVC.ApproveOrder(ctx, service.ApproveOrderInput{OrderID: c.orderID})
 
 	if err != nil {
 		// TODO: 原則再実行で成功が保証されているはずなので、通知だけ行う
@@ -172,7 +172,7 @@ func (c *CreateOrderSaga) approveOrder(ctx context.Context) {
 }
 
 func (c *CreateOrderSaga) rejectOrder(ctx context.Context) {
-	_, err := c.orderSVC.RejectOrder(ctx, order.RejectOrderInput{OrderID: c.orderID})
+	_, err := c.orderSVC.RejectOrder(ctx, service.RejectOrderInput{OrderID: c.orderID})
 
 	if err != nil {
 		// TODO: 原則再実行で成功が保証されているはずなので、通知だけ行う
