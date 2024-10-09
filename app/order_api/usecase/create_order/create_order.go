@@ -18,5 +18,5 @@ func (s *s) CreateOrder(ctx context.Context, items []*model.OrderItemRequest) (m
 
 	s.pub.PublishMessages(ctx, events)
 
-	return order.OrderID(), nil
+	return order.OrderID, nil
 }

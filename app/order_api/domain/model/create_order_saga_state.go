@@ -1,8 +1,8 @@
 package model
 
 type CreateOrderSagaState struct {
-	orderID OrderID
-	current CreateOrderSagaStep
+	OrderID OrderID
+	Current CreateOrderSagaStep
 }
 
 type CreateOrderSagaStep = string
@@ -22,15 +22,7 @@ const (
 
 func NewCreateOrderSagaState(orderID OrderID, currentStep CreateOrderSagaStep) *CreateOrderSagaState {
 	return &CreateOrderSagaState{
-		orderID: orderID,
-		current: currentStep,
+		OrderID: orderID,
+		Current: currentStep,
 	}
-}
-
-func (s *CreateOrderSagaState) OrderID() OrderID {
-	return s.orderID
-}
-
-func (s *CreateOrderSagaState) Current() CreateOrderSagaStep {
-	return s.current
 }

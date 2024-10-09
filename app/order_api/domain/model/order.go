@@ -8,10 +8,10 @@ const APPOVAL_LIMIT = 10000
 
 // 集約ルート
 type Order struct {
-	orderID       OrderID
-	approvalLimit int
-	orderItems    []*OrderItem
-	status        OrderStatus
+	OrderID       OrderID
+	ApprovalLimit int
+	OrderItems    []*OrderItem
+	Status        OrderStatus
 }
 
 type OrderItem struct {
@@ -52,46 +52,30 @@ func NewOrder(items []*OrderItemRequest) (*Order, []OrderEvent, error) {
 	}
 
 	order := &Order{
-		orderID:       orderID,
-		orderItems:    orderItems,
-		approvalLimit: APPOVAL_LIMIT,
-		status:        OrderStatus_ApprovalPending,
+		OrderID:       orderID,
+		OrderItems:    orderItems,
+		ApprovalLimit: APPOVAL_LIMIT,
+		Status:        OrderStatus_ApprovalPending,
 	}
 
-	createdEvent := NewOrderCreatedEvent(order.OrderID())
+	createdEvent := NewOrderCreatedEvent(order.OrderID)
 	return order, []OrderEvent{createdEvent}, nil
 }
 
-func (o *Order) OrderID() OrderID {
-	return o.orderID
-}
-
-func (o *Order) ApprovalLimit() int {
-	return o.approvalLimit
-}
-
-func (o *Order) OrderItems() []*OrderItem {
-	return o.orderItems
-}
-
-func (o *Order) Status() OrderStatus {
-	return o.status
-}
-
 func (o *Order) ApproveOrder() ([]OrderEvent, error) {
-	if o.status != OrderStatus_ApprovalPending {
+	if o.Status != OrderStatus_ApprovalPending {
 		return nil, errors.New("order is not in approval pending status")
 	}
 
-	o.status = OrderStatus_OrderApproved
-	return []OrderEvent{NewOrderApprovedEvent(o.OrderID())}, nil
+	o.Status = OrderStatus_OrderApproved
+	return []OrderEvent{NewOrderApprovedEvent(o.OrderID)}, nil
 }
 
 func (o *Order) RejectOrder() ([]OrderEvent, error) {
-	if o.status != OrderStatus_ApprovalPending {
+	if o.Status != OrderStatus_ApprovalPending {
 		return nil, errors.New("order is not in approval pending status")
 	}
 
-	o.status = OrderStatus_OrderRejected
-	return []OrderEvent{NewOrderRejectedEvent(o.OrderID())}, nil
+	o.Status = OrderStatus_OrderRejected
+	return []OrderEvent{NewOrderRejectedEvent(o.OrderID)}, nil
 }

@@ -27,7 +27,7 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 	if err != nil {
 		t.Errorf("err: %v\n", err)
 	}
-	orderID := o.OrderID()
+	orderID := o.OrderID
 	initialStep := model.NewCreateOrderSagaState(orderID, model.CreateOrderSagaStep_ApprovalPending)
 	saga := servive.NewCreateOrderSaga(
 		initialStep,
@@ -95,7 +95,7 @@ func TestCreateOrderSaga_OrderRejectedDutToTicketCreationFailed(t *testing.T) {
 	if err != nil {
 		t.Errorf("err: %v\n", err)
 	}
-	orderID := o.OrderID()
+	orderID := o.OrderID
 	initialStep := model.NewCreateOrderSagaState(orderID, model.CreateOrderSagaStep_ApprovalPending)
 	saga := servive.NewCreateOrderSaga(
 		initialStep,
@@ -142,7 +142,7 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 	if err != nil {
 		t.Errorf("err: %v\n", err)
 	}
-	orderID := o.OrderID()
+	orderID := o.OrderID
 	initialStep := model.NewCreateOrderSagaState(orderID, model.CreateOrderSagaStep_ApprovalPending)
 	saga := servive.NewCreateOrderSaga(
 		initialStep,

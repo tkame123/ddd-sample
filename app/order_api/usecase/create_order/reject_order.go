@@ -19,5 +19,5 @@ func (s *s) RejectOrder(ctx context.Context, orderID model.OrderID) (model.Order
 
 	s.pub.PublishMessages(ctx, events)
 
-	return order.OrderID(), nil
+	return order.OrderID, nil
 }

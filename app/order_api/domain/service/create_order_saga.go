@@ -41,7 +41,7 @@ func NewCreateOrderSaga(
 	billingAPI external_service.BillingAPI,
 ) *CreateOrderSaga {
 	c := &CreateOrderSaga{
-		orderID:    currentState.OrderID(),
+		orderID:    currentState.OrderID,
 		rep:        rep,
 		orderSVC:   orderSVC,
 		kitchenAPI: kitchenAPI,
@@ -123,7 +123,7 @@ func NewCreateOrderSaga(
 		},
 	)
 
-	ms.SetState(currentState.Current())
+	ms.SetState(currentState.Current)
 	c.fsm = ms
 
 	fmt.Println(c.fsm.AvailableTransitions())

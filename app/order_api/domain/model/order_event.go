@@ -10,12 +10,12 @@ type OrderEvent interface {
 }
 
 type OrderCreatedEvent struct {
-	orderID OrderID
+	OrderID OrderID
 }
 
 func NewOrderCreatedEvent(orderID OrderID) *OrderCreatedEvent {
 	return &OrderCreatedEvent{
-		orderID: orderID,
+		OrderID: orderID,
 	}
 }
 
@@ -24,16 +24,16 @@ func (e *OrderCreatedEvent) Name() event.Name {
 }
 
 func (e *OrderCreatedEvent) ID() OrderID {
-	return e.orderID
+	return e.OrderID
 }
 
 type OrderApprovedEvent struct {
-	orderID OrderID
+	OrderID OrderID
 }
 
 func NewOrderApprovedEvent(orderID OrderID) *OrderApprovedEvent {
 	return &OrderApprovedEvent{
-		orderID: orderID,
+		OrderID: orderID,
 	}
 }
 
@@ -42,16 +42,16 @@ func (e *OrderApprovedEvent) Name() event.Name {
 }
 
 func (e *OrderApprovedEvent) ID() OrderID {
-	return e.orderID
+	return e.OrderID
 }
 
 type OrderRejectedEvent struct {
-	orderID OrderID
+	OrderID OrderID
 }
 
 func NewOrderRejectedEvent(orderID OrderID) *OrderRejectedEvent {
 	return &OrderRejectedEvent{
-		orderID: orderID,
+		OrderID: orderID,
 	}
 }
 
@@ -60,5 +60,5 @@ func (e *OrderRejectedEvent) Name() event.Name {
 }
 
 func (e *OrderRejectedEvent) ID() OrderID {
-	return e.orderID
+	return e.OrderID
 }
