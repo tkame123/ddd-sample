@@ -32,7 +32,7 @@ const (
 
 type OrderItemRequest struct {
 	Item
-	quantity int
+	Quantity int
 }
 
 func NewOrder(items []*OrderItemRequest) (*Order, []OrderEvent, error) {
@@ -45,7 +45,7 @@ func NewOrder(items []*OrderItemRequest) (*Order, []OrderEvent, error) {
 			SortNo:   i + 1,
 			ItemID:   item.ItemID,
 			Price:    item.Price,
-			Quantity: item.quantity,
+			Quantity: item.Quantity,
 		})
 	}
 
