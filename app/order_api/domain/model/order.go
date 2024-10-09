@@ -1,21 +1,23 @@
 package model
 
-import "errors"
+import (
+	"errors"
+)
 
 // 集約ルート
 type Order struct {
 	orderID       OrderID
-	approvalLimit int64
+	approvalLimit int
 	orderItems    []*OrderItem
 	status        OrderStatus
 }
 
 type OrderItem struct {
 	OrderID  OrderID
-	SortNo   int32
+	SortNo   int
 	ItemID   ItemID
-	Price    int64
-	Quantity int64
+	Price    int
+	Quantity int
 }
 
 type OrderStatus = string
@@ -28,7 +30,7 @@ const (
 
 type OrderItemRequest struct {
 	Item
-	quantity int64
+	quantity int
 }
 
 func NewOrder(items []*OrderItemRequest) (*Order, []OrderEvent, error) {
@@ -38,7 +40,7 @@ func NewOrder(items []*OrderItemRequest) (*Order, []OrderEvent, error) {
 	for i, item := range items {
 		orderItems = append(orderItems, &OrderItem{
 			OrderID:  orderID,
-			SortNo:   int32(i + 1),
+			SortNo:   i + 1,
 			ItemID:   item.ItemID,
 			Price:    item.Price,
 			Quantity: item.quantity,
@@ -57,6 +59,18 @@ func NewOrder(items []*OrderItemRequest) (*Order, []OrderEvent, error) {
 
 func (o *Order) OrderID() OrderID {
 	return o.orderID
+}
+
+func (o *Order) ApprovalLimit() int {
+	return o.approvalLimit
+}
+
+func (o *Order) OrderItems() []*OrderItem {
+	return o.orderItems
+}
+
+func (o *Order) Status() OrderStatus {
+	return o.status
 }
 
 func (o *Order) ApproveOrder() ([]OrderEvent, error) {
