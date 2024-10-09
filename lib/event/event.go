@@ -1,7 +1,5 @@
 package event
 
-import "github.com/google/uuid"
-
 type Name = string
 
 const (
@@ -26,11 +24,11 @@ type Event interface {
 }
 
 type GeneralEvent struct {
-	id   uuid.UUID
+	id   int
 	name string
 }
 
-func NewGeneralEvent(id uuid.UUID, name string) *GeneralEvent {
+func NewGeneralEvent(id int, name string) *GeneralEvent {
 	return &GeneralEvent{
 		id:   id,
 		name: name,
@@ -41,6 +39,6 @@ func (e *GeneralEvent) Name() Name {
 	return e.name
 }
 
-func (e *GeneralEvent) ID() uuid.UUID {
+func (e *GeneralEvent) ID() int {
 	return e.id
 }

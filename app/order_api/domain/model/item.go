@@ -1,6 +1,6 @@
 package model
 
 type Item struct {
-	ItemID ItemID
-	Price  int64
+	ItemID int
+	Price  int
 }

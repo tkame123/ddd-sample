@@ -1,21 +1,23 @@
 package model
 
-import "errors"
+import (
+	"errors"
+)
 
 // 集約ルート
 type Order struct {
 	orderID       OrderID
-	approvalLimit int64
+	approvalLimit int
 	orderItems    []*OrderItem
 	status        OrderStatus
 }
 
 type OrderItem struct {
 	OrderID  OrderID
-	SortNo   int32
+	SortNo   int
 	ItemID   ItemID
-	Price    int64
-	Quantity int64
+	Price    int
+	Quantity int
 }
 
 type OrderStatus = string
@@ -28,28 +30,27 @@ const (
 
 type OrderItemRequest struct {
 	Item
-	quantity int64
+	quantity int
 }
 
 func NewOrder(items []*OrderItemRequest) (*Order, []OrderEvent, error) {
-	orderID := generateID()
+	// NOTE: IDの発行はInfra層で行う
+
+	order := &Order{
+		status: OrderStatus_ApprovalPending,
+	}
 
 	orderItems := make([]*OrderItem, 0, len(items))
 	for i, item := range items {
 		orderItems = append(orderItems, &OrderItem{
-			OrderID:  orderID,
-			SortNo:   int32(i + 1),
+			OrderID:  order.orderID,
+			SortNo:   i + 1,
 			ItemID:   item.ItemID,
 			Price:    item.Price,
 			Quantity: item.quantity,
 		})
 	}
-
-	order := &Order{
-		orderID:    orderID,
-		orderItems: orderItems,
-		status:     OrderStatus_ApprovalPending,
-	}
+	order.orderItems = orderItems
 
 	createdEvent := NewOrderCreatedEvent(order.OrderID())
 	return order, []OrderEvent{createdEvent}, nil
