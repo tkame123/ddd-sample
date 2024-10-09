@@ -9,15 +9,23 @@ import (
 )
 
 func (r *repo) OrderFindOne(ctx context.Context, id model.OrderID) (*model.Order, error) {
-	panic("implement me")
+	orders, err := r.db.Order.Query().
+		Where(e_order.ID(id)).
+		WithOrderItems().
+		First(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return toModelOrder(orders), nil
 }
 
 func (r *repo) OrderSave(ctx context.Context, order *model.Order) error {
 	if err := r.WithTx(ctx, func(tx *ent.Tx) error {
 		err := tx.Order.Create().
-			SetID(order.OrderID()).
-			SetApprovalLimit(int64(order.ApprovalLimit())).
-			SetStatus(fromModelStatus(order.Status())).
+			SetID(order.OrderID).
+			SetApprovalLimit(int64(order.ApprovalLimit)).
+			SetStatus(fromModelOrderStatus(order.Status)).
 			OnConflictColumns("id").
 			UpdateNewValues().
 			Exec(ctx)
@@ -26,13 +34,13 @@ func (r *repo) OrderSave(ctx context.Context, order *model.Order) error {
 		}
 
 		_, err = tx.OrderItem.Delete().
-			Where(e_orderItem.OrderID(order.OrderID())).
+			Where(e_orderItem.OrderID(order.OrderID)).
 			Exec(ctx)
 		if err != nil {
 			return err
 		}
 
-		orderItems := order.OrderItems()
+		orderItems := order.OrderItems
 		err = tx.OrderItem.MapCreateBulk(
 			orderItems,
 			func(
@@ -57,7 +65,33 @@ func (r *repo) OrderSave(ctx context.Context, order *model.Order) error {
 	return nil
 }
 
-func fromModelStatus(status model.OrderStatus) e_order.Status {
+func toModelOrder(order *ent.Order) *model.Order {
+	items := make([]*model.OrderItem, 0, len(order.Edges.OrderItems))
+
+	for _, item := range order.Edges.OrderItems {
+		items = append(items, toModelOrderItem(item))
+	}
+
+	return &model.Order{
+		OrderID:       order.ID,
+		ApprovalLimit: int(order.ApprovalLimit),
+		Status:        toModelOrderStatus(order.Status),
+		OrderItems:    items,
+	}
+}
+
+func toModelOrderItem(orderItem *ent.OrderItem) *model.OrderItem {
+	return &model.OrderItem{
+		OrderItemID: orderItem.ID,
+		OrderID:     orderItem.OrderID,
+		SortNo:      int(orderItem.SortNo),
+		ItemID:      orderItem.ItemID,
+		Price:       int(orderItem.Price),
+		Quantity:    int(orderItem.Quantity),
+	}
+}
+
+func fromModelOrderStatus(status model.OrderStatus) e_order.Status {
 	switch status {
 	case model.OrderStatus_ApprovalPending:
 		return e_order.StatusApprovalPending
@@ -65,6 +99,19 @@ func fromModelStatus(status model.OrderStatus) e_order.Status {
 		return e_order.StatusOrderApproved
 	case model.OrderStatus_OrderRejected:
 		return e_order.StatusOrderRejected
+	default:
+		panic("invalid status")
+	}
+}
+
+func toModelOrderStatus(status e_order.Status) model.OrderStatus {
+	switch status {
+	case e_order.StatusApprovalPending:
+		return model.OrderStatus_ApprovalPending
+	case e_order.StatusOrderApproved:
+		return model.OrderStatus_OrderApproved
+	case e_order.StatusOrderRejected:
+		return model.OrderStatus_OrderRejected
 	default:
 		panic("invalid status")
 	}
