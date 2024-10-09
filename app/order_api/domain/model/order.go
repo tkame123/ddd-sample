@@ -4,6 +4,8 @@ import (
 	"errors"
 )
 
+const APPOVAL_LIMIT = 10000
+
 // 集約ルート
 type Order struct {
 	orderID       OrderID
@@ -48,9 +50,10 @@ func NewOrder(items []*OrderItemRequest) (*Order, []OrderEvent, error) {
 	}
 
 	order := &Order{
-		orderID:    orderID,
-		orderItems: orderItems,
-		status:     OrderStatus_ApprovalPending,
+		orderID:       orderID,
+		orderItems:    orderItems,
+		approvalLimit: APPOVAL_LIMIT,
+		status:        OrderStatus_ApprovalPending,
 	}
 
 	createdEvent := NewOrderCreatedEvent(order.OrderID())
