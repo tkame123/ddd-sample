@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/orderitem"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/predicate"
@@ -64,14 +65,14 @@ func (ou *OrderUpdate) SetNillableStatus(o *order.Status) *OrderUpdate {
 }
 
 // AddOrderItemIDs adds the "orderItems" edge to the OrderItem entity by IDs.
-func (ou *OrderUpdate) AddOrderItemIDs(ids ...int) *OrderUpdate {
+func (ou *OrderUpdate) AddOrderItemIDs(ids ...uuid.UUID) *OrderUpdate {
 	ou.mutation.AddOrderItemIDs(ids...)
 	return ou
 }
 
 // AddOrderItems adds the "orderItems" edges to the OrderItem entity.
 func (ou *OrderUpdate) AddOrderItems(o ...*OrderItem) *OrderUpdate {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -90,14 +91,14 @@ func (ou *OrderUpdate) ClearOrderItems() *OrderUpdate {
 }
 
 // RemoveOrderItemIDs removes the "orderItems" edge to OrderItem entities by IDs.
-func (ou *OrderUpdate) RemoveOrderItemIDs(ids ...int) *OrderUpdate {
+func (ou *OrderUpdate) RemoveOrderItemIDs(ids ...uuid.UUID) *OrderUpdate {
 	ou.mutation.RemoveOrderItemIDs(ids...)
 	return ou
 }
 
 // RemoveOrderItems removes "orderItems" edges to OrderItem entities.
 func (ou *OrderUpdate) RemoveOrderItems(o ...*OrderItem) *OrderUpdate {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -145,7 +146,7 @@ func (ou *OrderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := ou.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(order.Table, order.Columns, sqlgraph.NewFieldSpec(order.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(order.Table, order.Columns, sqlgraph.NewFieldSpec(order.FieldID, field.TypeUUID))
 	if ps := ou.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -170,7 +171,7 @@ func (ou *OrderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{order.OrderItemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -183,7 +184,7 @@ func (ou *OrderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{order.OrderItemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -199,7 +200,7 @@ func (ou *OrderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{order.OrderItemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -263,14 +264,14 @@ func (ouo *OrderUpdateOne) SetNillableStatus(o *order.Status) *OrderUpdateOne {
 }
 
 // AddOrderItemIDs adds the "orderItems" edge to the OrderItem entity by IDs.
-func (ouo *OrderUpdateOne) AddOrderItemIDs(ids ...int) *OrderUpdateOne {
+func (ouo *OrderUpdateOne) AddOrderItemIDs(ids ...uuid.UUID) *OrderUpdateOne {
 	ouo.mutation.AddOrderItemIDs(ids...)
 	return ouo
 }
 
 // AddOrderItems adds the "orderItems" edges to the OrderItem entity.
 func (ouo *OrderUpdateOne) AddOrderItems(o ...*OrderItem) *OrderUpdateOne {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -289,14 +290,14 @@ func (ouo *OrderUpdateOne) ClearOrderItems() *OrderUpdateOne {
 }
 
 // RemoveOrderItemIDs removes the "orderItems" edge to OrderItem entities by IDs.
-func (ouo *OrderUpdateOne) RemoveOrderItemIDs(ids ...int) *OrderUpdateOne {
+func (ouo *OrderUpdateOne) RemoveOrderItemIDs(ids ...uuid.UUID) *OrderUpdateOne {
 	ouo.mutation.RemoveOrderItemIDs(ids...)
 	return ouo
 }
 
 // RemoveOrderItems removes "orderItems" edges to OrderItem entities.
 func (ouo *OrderUpdateOne) RemoveOrderItems(o ...*OrderItem) *OrderUpdateOne {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -357,7 +358,7 @@ func (ouo *OrderUpdateOne) sqlSave(ctx context.Context) (_node *Order, err error
 	if err := ouo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(order.Table, order.Columns, sqlgraph.NewFieldSpec(order.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(order.Table, order.Columns, sqlgraph.NewFieldSpec(order.FieldID, field.TypeUUID))
 	id, ok := ouo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Order.id" for update`)}
@@ -399,7 +400,7 @@ func (ouo *OrderUpdateOne) sqlSave(ctx context.Context) (_node *Order, err error
 			Columns: []string{order.OrderItemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -412,7 +413,7 @@ func (ouo *OrderUpdateOne) sqlSave(ctx context.Context) (_node *Order, err error
 			Columns: []string{order.OrderItemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -428,7 +429,7 @@ func (ouo *OrderUpdateOne) sqlSave(ctx context.Context) (_node *Order, err error
 			Columns: []string{order.OrderItemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

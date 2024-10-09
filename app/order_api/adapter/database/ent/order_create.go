@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/orderitem"
 )
@@ -32,15 +33,21 @@ func (oc *OrderCreate) SetStatus(o order.Status) *OrderCreate {
 	return oc
 }
 
+// SetID sets the "id" field.
+func (oc *OrderCreate) SetID(u uuid.UUID) *OrderCreate {
+	oc.mutation.SetID(u)
+	return oc
+}
+
 // AddOrderItemIDs adds the "orderItems" edge to the OrderItem entity by IDs.
-func (oc *OrderCreate) AddOrderItemIDs(ids ...int) *OrderCreate {
+func (oc *OrderCreate) AddOrderItemIDs(ids ...uuid.UUID) *OrderCreate {
 	oc.mutation.AddOrderItemIDs(ids...)
 	return oc
 }
 
 // AddOrderItems adds the "orderItems" edges to the OrderItem entity.
 func (oc *OrderCreate) AddOrderItems(o ...*OrderItem) *OrderCreate {
-	ids := make([]int, len(o))
+	ids := make([]uuid.UUID, len(o))
 	for i := range o {
 		ids[i] = o[i].ID
 	}
@@ -106,8 +113,13 @@ func (oc *OrderCreate) sqlSave(ctx context.Context) (*Order, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	oc.mutation.id = &_node.ID
 	oc.mutation.done = true
 	return _node, nil
@@ -116,8 +128,12 @@ func (oc *OrderCreate) sqlSave(ctx context.Context) (*Order, error) {
 func (oc *OrderCreate) createSpec() (*Order, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Order{config: oc.config}
-		_spec = sqlgraph.NewCreateSpec(order.Table, sqlgraph.NewFieldSpec(order.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(order.Table, sqlgraph.NewFieldSpec(order.FieldID, field.TypeUUID))
 	)
+	if id, ok := oc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := oc.mutation.ApprovalLimit(); ok {
 		_spec.SetField(order.FieldApprovalLimit, field.TypeInt64, value)
 		_node.ApprovalLimit = value
@@ -134,7 +150,7 @@ func (oc *OrderCreate) createSpec() (*Order, *sqlgraph.CreateSpec) {
 			Columns: []string{order.OrderItemsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -189,10 +205,6 @@ func (ocb *OrderCreateBulk) Save(ctx context.Context) ([]*Order, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

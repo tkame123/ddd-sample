@@ -9,6 +9,7 @@ import (
 	"log"
 	"reflect"
 
+	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/migrate"
 
 	"entgo.io/ent"
@@ -268,7 +269,7 @@ func (c *OrderClient) UpdateOne(o *Order) *OrderUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *OrderClient) UpdateOneID(id int) *OrderUpdateOne {
+func (c *OrderClient) UpdateOneID(id uuid.UUID) *OrderUpdateOne {
 	mutation := newOrderMutation(c.config, OpUpdateOne, withOrderID(id))
 	return &OrderUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -285,7 +286,7 @@ func (c *OrderClient) DeleteOne(o *Order) *OrderDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *OrderClient) DeleteOneID(id int) *OrderDeleteOne {
+func (c *OrderClient) DeleteOneID(id uuid.UUID) *OrderDeleteOne {
 	builder := c.Delete().Where(order.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -302,12 +303,12 @@ func (c *OrderClient) Query() *OrderQuery {
 }
 
 // Get returns a Order entity by its id.
-func (c *OrderClient) Get(ctx context.Context, id int) (*Order, error) {
+func (c *OrderClient) Get(ctx context.Context, id uuid.UUID) (*Order, error) {
 	return c.Query().Where(order.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *OrderClient) GetX(ctx context.Context, id int) *Order {
+func (c *OrderClient) GetX(ctx context.Context, id uuid.UUID) *Order {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -417,7 +418,7 @@ func (c *OrderItemClient) UpdateOne(oi *OrderItem) *OrderItemUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *OrderItemClient) UpdateOneID(id int) *OrderItemUpdateOne {
+func (c *OrderItemClient) UpdateOneID(id uuid.UUID) *OrderItemUpdateOne {
 	mutation := newOrderItemMutation(c.config, OpUpdateOne, withOrderItemID(id))
 	return &OrderItemUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -434,7 +435,7 @@ func (c *OrderItemClient) DeleteOne(oi *OrderItem) *OrderItemDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *OrderItemClient) DeleteOneID(id int) *OrderItemDeleteOne {
+func (c *OrderItemClient) DeleteOneID(id uuid.UUID) *OrderItemDeleteOne {
 	builder := c.Delete().Where(orderitem.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -451,12 +452,12 @@ func (c *OrderItemClient) Query() *OrderItemQuery {
 }
 
 // Get returns a OrderItem entity by its id.
-func (c *OrderItemClient) Get(ctx context.Context, id int) (*OrderItem, error) {
+func (c *OrderItemClient) Get(ctx context.Context, id uuid.UUID) (*OrderItem, error) {
 	return c.Query().Where(orderitem.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *OrderItemClient) GetX(ctx context.Context, id int) *OrderItem {
+func (c *OrderItemClient) GetX(ctx context.Context, id uuid.UUID) *OrderItem {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)

@@ -14,11 +14,11 @@ func init() {
 	orderitemFields := schema.OrderItem{}.Fields()
 	_ = orderitemFields
 	// orderitemDescPrice is the schema descriptor for price field.
-	orderitemDescPrice := orderitemFields[1].Descriptor()
+	orderitemDescPrice := orderitemFields[2].Descriptor()
 	// orderitem.DefaultPrice holds the default value on creation for the price field.
 	orderitem.DefaultPrice = orderitemDescPrice.Default.(int64)
 	// orderitemDescQuantity is the schema descriptor for quantity field.
-	orderitemDescQuantity := orderitemFields[2].Descriptor()
+	orderitemDescQuantity := orderitemFields[3].Descriptor()
 	// orderitem.DefaultQuantity holds the default value on creation for the quantity field.
 	orderitem.DefaultQuantity = orderitemDescQuantity.Default.(int32)
 }

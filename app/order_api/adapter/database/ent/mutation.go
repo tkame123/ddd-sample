@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/orderitem"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/predicate"
@@ -33,13 +34,13 @@ type OrderMutation struct {
 	config
 	op                Op
 	typ               string
-	id                *int
+	id                *uuid.UUID
 	approvalLimit     *int64
 	addapprovalLimit  *int64
 	status            *order.Status
 	clearedFields     map[string]struct{}
-	orderItems        map[int]struct{}
-	removedorderItems map[int]struct{}
+	orderItems        map[uuid.UUID]struct{}
+	removedorderItems map[uuid.UUID]struct{}
 	clearedorderItems bool
 	done              bool
 	oldValue          func(context.Context) (*Order, error)
@@ -66,7 +67,7 @@ func newOrderMutation(c config, op Op, opts ...orderOption) *OrderMutation {
 }
 
 // withOrderID sets the ID field of the mutation.
-func withOrderID(id int) orderOption {
+func withOrderID(id uuid.UUID) orderOption {
 	return func(m *OrderMutation) {
 		var (
 			err   error
@@ -116,9 +117,15 @@ func (m OrderMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Order entities.
+func (m *OrderMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *OrderMutation) ID() (id int, exists bool) {
+func (m *OrderMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -129,12 +136,12 @@ func (m *OrderMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *OrderMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *OrderMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -237,9 +244,9 @@ func (m *OrderMutation) ResetStatus() {
 }
 
 // AddOrderItemIDs adds the "orderItems" edge to the OrderItem entity by ids.
-func (m *OrderMutation) AddOrderItemIDs(ids ...int) {
+func (m *OrderMutation) AddOrderItemIDs(ids ...uuid.UUID) {
 	if m.orderItems == nil {
-		m.orderItems = make(map[int]struct{})
+		m.orderItems = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.orderItems[ids[i]] = struct{}{}
@@ -257,9 +264,9 @@ func (m *OrderMutation) OrderItemsCleared() bool {
 }
 
 // RemoveOrderItemIDs removes the "orderItems" edge to the OrderItem entity by IDs.
-func (m *OrderMutation) RemoveOrderItemIDs(ids ...int) {
+func (m *OrderMutation) RemoveOrderItemIDs(ids ...uuid.UUID) {
 	if m.removedorderItems == nil {
-		m.removedorderItems = make(map[int]struct{})
+		m.removedorderItems = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.orderItems, ids[i])
@@ -268,7 +275,7 @@ func (m *OrderMutation) RemoveOrderItemIDs(ids ...int) {
 }
 
 // RemovedOrderItems returns the removed IDs of the "orderItems" edge to the OrderItem entity.
-func (m *OrderMutation) RemovedOrderItemsIDs() (ids []int) {
+func (m *OrderMutation) RemovedOrderItemsIDs() (ids []uuid.UUID) {
 	for id := range m.removedorderItems {
 		ids = append(ids, id)
 	}
@@ -276,7 +283,7 @@ func (m *OrderMutation) RemovedOrderItemsIDs() (ids []int) {
 }
 
 // OrderItemsIDs returns the "orderItems" edge IDs in the mutation.
-func (m *OrderMutation) OrderItemsIDs() (ids []int) {
+func (m *OrderMutation) OrderItemsIDs() (ids []uuid.UUID) {
 	for id := range m.orderItems {
 		ids = append(ids, id)
 	}
@@ -542,7 +549,7 @@ type OrderItemMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *int
+	id            *uuid.UUID
 	sortNo        *int32
 	addsortNo     *int32
 	price         *int64
@@ -550,7 +557,7 @@ type OrderItemMutation struct {
 	quantity      *int32
 	addquantity   *int32
 	clearedFields map[string]struct{}
-	owner         *int
+	owner         *uuid.UUID
 	clearedowner  bool
 	done          bool
 	oldValue      func(context.Context) (*OrderItem, error)
@@ -577,7 +584,7 @@ func newOrderItemMutation(c config, op Op, opts ...orderitemOption) *OrderItemMu
 }
 
 // withOrderItemID sets the ID field of the mutation.
-func withOrderItemID(id int) orderitemOption {
+func withOrderItemID(id uuid.UUID) orderitemOption {
 	return func(m *OrderItemMutation) {
 		var (
 			err   error
@@ -627,9 +634,15 @@ func (m OrderItemMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of OrderItem entities.
+func (m *OrderItemMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *OrderItemMutation) ID() (id int, exists bool) {
+func (m *OrderItemMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -640,12 +653,12 @@ func (m *OrderItemMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *OrderItemMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *OrderItemMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -824,7 +837,7 @@ func (m *OrderItemMutation) ResetQuantity() {
 }
 
 // SetOwnerID sets the "owner" edge to the Order entity by id.
-func (m *OrderItemMutation) SetOwnerID(id int) {
+func (m *OrderItemMutation) SetOwnerID(id uuid.UUID) {
 	m.owner = &id
 }
 
@@ -839,7 +852,7 @@ func (m *OrderItemMutation) OwnerCleared() bool {
 }
 
 // OwnerID returns the "owner" edge ID in the mutation.
-func (m *OrderItemMutation) OwnerID() (id int, exists bool) {
+func (m *OrderItemMutation) OwnerID() (id uuid.UUID, exists bool) {
 	if m.owner != nil {
 		return *m.owner, true
 	}
@@ -849,7 +862,7 @@ func (m *OrderItemMutation) OwnerID() (id int, exists bool) {
 // OwnerIDs returns the "owner" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // OwnerID instead. It exists only for internal usage by the builders.
-func (m *OrderItemMutation) OwnerIDs() (ids []int) {
+func (m *OrderItemMutation) OwnerIDs() (ids []uuid.UUID) {
 	if id := m.owner; id != nil {
 		ids = append(ids, *id)
 	}

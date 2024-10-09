@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/orderitem"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/predicate"
@@ -92,7 +93,7 @@ func (oiu *OrderItemUpdate) AddQuantity(i int32) *OrderItemUpdate {
 }
 
 // SetOwnerID sets the "owner" edge to the Order entity by ID.
-func (oiu *OrderItemUpdate) SetOwnerID(id int) *OrderItemUpdate {
+func (oiu *OrderItemUpdate) SetOwnerID(id uuid.UUID) *OrderItemUpdate {
 	oiu.mutation.SetOwnerID(id)
 	return oiu
 }
@@ -152,7 +153,7 @@ func (oiu *OrderItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := oiu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(orderitem.Table, orderitem.Columns, sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(orderitem.Table, orderitem.Columns, sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeUUID))
 	if ps := oiu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -186,7 +187,7 @@ func (oiu *OrderItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{orderitem.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -199,7 +200,7 @@ func (oiu *OrderItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{orderitem.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -291,7 +292,7 @@ func (oiuo *OrderItemUpdateOne) AddQuantity(i int32) *OrderItemUpdateOne {
 }
 
 // SetOwnerID sets the "owner" edge to the Order entity by ID.
-func (oiuo *OrderItemUpdateOne) SetOwnerID(id int) *OrderItemUpdateOne {
+func (oiuo *OrderItemUpdateOne) SetOwnerID(id uuid.UUID) *OrderItemUpdateOne {
 	oiuo.mutation.SetOwnerID(id)
 	return oiuo
 }
@@ -364,7 +365,7 @@ func (oiuo *OrderItemUpdateOne) sqlSave(ctx context.Context) (_node *OrderItem, 
 	if err := oiuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(orderitem.Table, orderitem.Columns, sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(orderitem.Table, orderitem.Columns, sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeUUID))
 	id, ok := oiuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "OrderItem.id" for update`)}
@@ -415,7 +416,7 @@ func (oiuo *OrderItemUpdateOne) sqlSave(ctx context.Context) (_node *OrderItem, 
 			Columns: []string{orderitem.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -428,7 +429,7 @@ func (oiuo *OrderItemUpdateOne) sqlSave(ctx context.Context) (_node *OrderItem, 
 			Columns: []string{orderitem.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

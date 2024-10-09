@@ -5,6 +5,7 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 type OrderItem struct {
@@ -17,6 +18,8 @@ func (OrderItem) Annotations() []schema.Annotation {
 
 func (OrderItem) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Unique(),
 		field.Int32("sortNo"),
 		field.Int64("price").
 			Default(0),

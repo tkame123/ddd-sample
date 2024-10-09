@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 )
 
@@ -15,7 +16,7 @@ import (
 type Order struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// ApprovalLimit holds the value of the "approvalLimit" field.
 	ApprovalLimit int64 `json:"approvalLimit,omitempty"`
 	// Status holds the value of the "status" field.
@@ -49,10 +50,12 @@ func (*Order) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case order.FieldID, order.FieldApprovalLimit:
+		case order.FieldApprovalLimit:
 			values[i] = new(sql.NullInt64)
 		case order.FieldStatus:
 			values[i] = new(sql.NullString)
+		case order.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -69,11 +72,11 @@ func (o *Order) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case order.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				o.ID = *value
 			}
-			o.ID = int(value.Int64)
 		case order.FieldApprovalLimit:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field approvalLimit", values[i])

@@ -13,3 +13,18 @@ test.mock:
 	mockgen -source=app/order_api/domain/port/repository/order.go -destination=app/order_api/domain/port/mock/repository/order.go -package=mock
 	mockgen -source=app/order_api/domain/port/service/create_order.go -destination=app/order_api/domain/port/mock/service/create_order.go -package=mock
 
+ent.generate:
+	go generate ./...
+
+ent.schema:
+	go run -mod=mod entgo.io/ent/cmd/ent describe ./app/order_api/adapter/database/ent/schema
+
+TARGET=hoge
+ent.add:
+	go run -mod=mod entgo.io/ent/cmd/ent new --target app/order_api/adapter/database/ent/schema $(TARGET)
+
+ent.atlas:
+	 atlas schema inspect \
+      -u "ent://app/order_api/adapter/database/ent/schema" \
+      --dev-url "sqlite://file?mode=memory&_fk=1" \
+      -w

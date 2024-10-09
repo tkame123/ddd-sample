@@ -8,6 +8,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/orderitem"
 )
@@ -16,7 +17,7 @@ import (
 type OrderItem struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// SortNo holds the value of the "sortNo" field.
 	SortNo int32 `json:"sortNo,omitempty"`
 	// Price holds the value of the "price" field.
@@ -26,7 +27,7 @@ type OrderItem struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the OrderItemQuery when eager-loading is set.
 	Edges        OrderItemEdges `json:"edges"`
-	order_id     *int
+	order_id     *uuid.UUID
 	selectValues sql.SelectValues
 }
 
@@ -55,10 +56,12 @@ func (*OrderItem) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case orderitem.FieldID, orderitem.FieldSortNo, orderitem.FieldPrice, orderitem.FieldQuantity:
+		case orderitem.FieldSortNo, orderitem.FieldPrice, orderitem.FieldQuantity:
 			values[i] = new(sql.NullInt64)
+		case orderitem.FieldID:
+			values[i] = new(uuid.UUID)
 		case orderitem.ForeignKeys[0]: // order_id
-			values[i] = new(sql.NullInt64)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -75,11 +78,11 @@ func (oi *OrderItem) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case orderitem.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				oi.ID = *value
 			}
-			oi.ID = int(value.Int64)
 		case orderitem.FieldSortNo:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field sortNo", values[i])
@@ -99,11 +102,11 @@ func (oi *OrderItem) assignValues(columns []string, values []any) error {
 				oi.Quantity = int32(value.Int64)
 			}
 		case orderitem.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field order_id", value)
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field order_id", values[i])
 			} else if value.Valid {
-				oi.order_id = new(int)
-				*oi.order_id = int(value.Int64)
+				oi.order_id = new(uuid.UUID)
+				*oi.order_id = *value.S.(*uuid.UUID)
 			}
 		default:
 			oi.selectValues.Set(columns[i], values[i])

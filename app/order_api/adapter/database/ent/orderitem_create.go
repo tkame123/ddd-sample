@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/orderitem"
 )
@@ -54,8 +55,14 @@ func (oic *OrderItemCreate) SetNillableQuantity(i *int32) *OrderItemCreate {
 	return oic
 }
 
+// SetID sets the "id" field.
+func (oic *OrderItemCreate) SetID(u uuid.UUID) *OrderItemCreate {
+	oic.mutation.SetID(u)
+	return oic
+}
+
 // SetOwnerID sets the "owner" edge to the Order entity by ID.
-func (oic *OrderItemCreate) SetOwnerID(id int) *OrderItemCreate {
+func (oic *OrderItemCreate) SetOwnerID(id uuid.UUID) *OrderItemCreate {
 	oic.mutation.SetOwnerID(id)
 	return oic
 }
@@ -138,8 +145,13 @@ func (oic *OrderItemCreate) sqlSave(ctx context.Context) (*OrderItem, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	oic.mutation.id = &_node.ID
 	oic.mutation.done = true
 	return _node, nil
@@ -148,8 +160,12 @@ func (oic *OrderItemCreate) sqlSave(ctx context.Context) (*OrderItem, error) {
 func (oic *OrderItemCreate) createSpec() (*OrderItem, *sqlgraph.CreateSpec) {
 	var (
 		_node = &OrderItem{config: oic.config}
-		_spec = sqlgraph.NewCreateSpec(orderitem.Table, sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(orderitem.Table, sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeUUID))
 	)
+	if id, ok := oic.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := oic.mutation.SortNo(); ok {
 		_spec.SetField(orderitem.FieldSortNo, field.TypeInt32, value)
 		_node.SortNo = value
@@ -170,7 +186,7 @@ func (oic *OrderItemCreate) createSpec() (*OrderItem, *sqlgraph.CreateSpec) {
 			Columns: []string{orderitem.OwnerColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -227,10 +243,6 @@ func (oicb *OrderItemCreateBulk) Save(ctx context.Context) ([]*OrderItem, error)
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

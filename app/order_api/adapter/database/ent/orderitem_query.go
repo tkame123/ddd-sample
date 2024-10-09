@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/orderitem"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/predicate"
@@ -107,8 +108,8 @@ func (oiq *OrderItemQuery) FirstX(ctx context.Context) *OrderItem {
 
 // FirstID returns the first OrderItem ID from the query.
 // Returns a *NotFoundError when no OrderItem ID was found.
-func (oiq *OrderItemQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (oiq *OrderItemQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = oiq.Limit(1).IDs(setContextOp(ctx, oiq.ctx, ent.OpQueryFirstID)); err != nil {
 		return
 	}
@@ -120,7 +121,7 @@ func (oiq *OrderItemQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (oiq *OrderItemQuery) FirstIDX(ctx context.Context) int {
+func (oiq *OrderItemQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := oiq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -158,8 +159,8 @@ func (oiq *OrderItemQuery) OnlyX(ctx context.Context) *OrderItem {
 // OnlyID is like Only, but returns the only OrderItem ID in the query.
 // Returns a *NotSingularError when more than one OrderItem ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (oiq *OrderItemQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (oiq *OrderItemQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = oiq.Limit(2).IDs(setContextOp(ctx, oiq.ctx, ent.OpQueryOnlyID)); err != nil {
 		return
 	}
@@ -175,7 +176,7 @@ func (oiq *OrderItemQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (oiq *OrderItemQuery) OnlyIDX(ctx context.Context) int {
+func (oiq *OrderItemQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := oiq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -203,7 +204,7 @@ func (oiq *OrderItemQuery) AllX(ctx context.Context) []*OrderItem {
 }
 
 // IDs executes the query and returns a list of OrderItem IDs.
-func (oiq *OrderItemQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (oiq *OrderItemQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if oiq.ctx.Unique == nil && oiq.path != nil {
 		oiq.Unique(true)
 	}
@@ -215,7 +216,7 @@ func (oiq *OrderItemQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (oiq *OrderItemQuery) IDsX(ctx context.Context) []int {
+func (oiq *OrderItemQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := oiq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -410,8 +411,8 @@ func (oiq *OrderItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*O
 }
 
 func (oiq *OrderItemQuery) loadOwner(ctx context.Context, query *OrderQuery, nodes []*OrderItem, init func(*OrderItem), assign func(*OrderItem, *Order)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*OrderItem)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*OrderItem)
 	for i := range nodes {
 		if nodes[i].order_id == nil {
 			continue
@@ -452,7 +453,7 @@ func (oiq *OrderItemQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (oiq *OrderItemQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(orderitem.Table, orderitem.Columns, sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(orderitem.Table, orderitem.Columns, sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeUUID))
 	_spec.From = oiq.sql
 	if unique := oiq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

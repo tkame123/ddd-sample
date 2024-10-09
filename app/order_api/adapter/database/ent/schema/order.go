@@ -5,6 +5,7 @@ import (
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
 )
 
@@ -18,6 +19,8 @@ func (Order) Annotations() []schema.Annotation {
 
 func (Order) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).
+			Unique(),
 		field.Int64("approvalLimit"),
 		field.Enum("status").
 			Values(
