@@ -15,11 +15,12 @@ type Order struct {
 }
 
 type OrderItem struct {
-	OrderID  OrderID
-	SortNo   int
-	ItemID   ItemID
-	Price    int
-	Quantity int
+	OrderItemID OrderItemID
+	OrderID     OrderID
+	SortNo      int
+	ItemID      ItemID
+	Price       int
+	Quantity    int
 }
 
 type OrderStatus = string
@@ -41,11 +42,12 @@ func NewOrder(items []*OrderItemRequest) (*Order, []OrderEvent, error) {
 	orderItems := make([]*OrderItem, 0, len(items))
 	for i, item := range items {
 		orderItems = append(orderItems, &OrderItem{
-			OrderID:  orderID,
-			SortNo:   i + 1,
-			ItemID:   item.ItemID,
-			Price:    item.Price,
-			Quantity: item.Quantity,
+			OrderItemID: generateID(),
+			OrderID:     orderID,
+			SortNo:      i + 1,
+			ItemID:      item.ItemID,
+			Price:       item.Price,
+			Quantity:    item.Quantity,
 		})
 	}
 

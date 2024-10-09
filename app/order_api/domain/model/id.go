@@ -5,6 +5,7 @@ import (
 )
 
 type OrderID = uuid.UUID
+type OrderItemID = uuid.UUID
 type ItemID = uuid.UUID
 
 func generateID() uuid.UUID {
