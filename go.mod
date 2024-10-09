@@ -6,6 +6,7 @@ toolchain go1.23.2
 
 require (
 	entgo.io/ent v0.14.1
+	github.com/go-sql-driver/mysql v1.8.1
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/looplab/fsm v1.0.2
@@ -14,6 +15,7 @@ require (
 require (
 	ariga.io/atlas v0.28.0 // indirect
 	entgo.io/contrib v0.6.0 // indirect
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/bmatcuk/doublestar v1.3.4 // indirect

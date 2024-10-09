@@ -11,7 +11,6 @@ var (
 	// OrdersColumns holds the columns for the "orders" table.
 	OrdersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "order_id", Type: field.TypeUUID},
 		{Name: "approval_limit", Type: field.TypeInt64},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"ApprovalPending", "OrderApproved", "OrderRejected"}},
 	}
@@ -21,11 +20,35 @@ var (
 		Columns:    OrdersColumns,
 		PrimaryKey: []*schema.Column{OrdersColumns[0]},
 	}
+	// OrderItemsColumns holds the columns for the "order_items" table.
+	OrderItemsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "sort_no", Type: field.TypeInt32},
+		{Name: "price", Type: field.TypeInt64, Default: 0},
+		{Name: "quantity", Type: field.TypeInt32, Default: 0},
+		{Name: "order_id", Type: field.TypeInt},
+	}
+	// OrderItemsTable holds the schema information for the "order_items" table.
+	OrderItemsTable = &schema.Table{
+		Name:       "order_items",
+		Columns:    OrderItemsColumns,
+		PrimaryKey: []*schema.Column{OrderItemsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "order_items_orders_orderItems",
+				Columns:    []*schema.Column{OrderItemsColumns[4]},
+				RefColumns: []*schema.Column{OrdersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		OrdersTable,
+		OrderItemsTable,
 	}
 )
 
 func init() {
+	OrderItemsTable.ForeignKeys[0].RefTable = OrdersTable
 }

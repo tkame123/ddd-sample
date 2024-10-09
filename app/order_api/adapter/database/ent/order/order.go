@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 const (
@@ -13,20 +14,26 @@ const (
 	Label = "order"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldOrderID holds the string denoting the orderid field in the database.
-	FieldOrderID = "order_id"
 	// FieldApprovalLimit holds the string denoting the approvallimit field in the database.
 	FieldApprovalLimit = "approval_limit"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
+	// EdgeOrderItems holds the string denoting the orderitems edge name in mutations.
+	EdgeOrderItems = "orderItems"
 	// Table holds the table name of the order in the database.
 	Table = "orders"
+	// OrderItemsTable is the table that holds the orderItems relation/edge.
+	OrderItemsTable = "order_items"
+	// OrderItemsInverseTable is the table name for the OrderItem entity.
+	// It exists in this package in order to avoid circular dependency with the "orderitem" package.
+	OrderItemsInverseTable = "order_items"
+	// OrderItemsColumn is the table column denoting the orderItems relation/edge.
+	OrderItemsColumn = "order_id"
 )
 
 // Columns holds all SQL columns for order fields.
 var Columns = []string{
 	FieldID,
-	FieldOrderID,
 	FieldApprovalLimit,
 	FieldStatus,
 }
@@ -73,11 +80,6 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByOrderID orders the results by the orderID field.
-func ByOrderID(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldOrderID, opts...).ToFunc()
-}
-
 // ByApprovalLimit orders the results by the approvalLimit field.
 func ByApprovalLimit(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldApprovalLimit, opts...).ToFunc()
@@ -86,4 +88,25 @@ func ByApprovalLimit(opts ...sql.OrderTermOption) OrderOption {
 // ByStatus orders the results by the status field.
 func ByStatus(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
+// ByOrderItemsCount orders the results by orderItems count.
+func ByOrderItemsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newOrderItemsStep(), opts...)
+	}
+}
+
+// ByOrderItems orders the results by orderItems terms.
+func ByOrderItems(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newOrderItemsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newOrderItemsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(OrderItemsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, OrderItemsTable, OrderItemsColumn),
+	)
 }

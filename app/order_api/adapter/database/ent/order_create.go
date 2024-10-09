@@ -9,8 +9,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/orderitem"
 )
 
 // OrderCreate is the builder for creating a Order entity.
@@ -18,12 +18,6 @@ type OrderCreate struct {
 	config
 	mutation *OrderMutation
 	hooks    []Hook
-}
-
-// SetOrderID sets the "orderID" field.
-func (oc *OrderCreate) SetOrderID(u uuid.UUID) *OrderCreate {
-	oc.mutation.SetOrderID(u)
-	return oc
 }
 
 // SetApprovalLimit sets the "approvalLimit" field.
@@ -36,6 +30,21 @@ func (oc *OrderCreate) SetApprovalLimit(i int64) *OrderCreate {
 func (oc *OrderCreate) SetStatus(o order.Status) *OrderCreate {
 	oc.mutation.SetStatus(o)
 	return oc
+}
+
+// AddOrderItemIDs adds the "orderItems" edge to the OrderItem entity by IDs.
+func (oc *OrderCreate) AddOrderItemIDs(ids ...int) *OrderCreate {
+	oc.mutation.AddOrderItemIDs(ids...)
+	return oc
+}
+
+// AddOrderItems adds the "orderItems" edges to the OrderItem entity.
+func (oc *OrderCreate) AddOrderItems(o ...*OrderItem) *OrderCreate {
+	ids := make([]int, len(o))
+	for i := range o {
+		ids[i] = o[i].ID
+	}
+	return oc.AddOrderItemIDs(ids...)
 }
 
 // Mutation returns the OrderMutation object of the builder.
@@ -72,9 +81,6 @@ func (oc *OrderCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (oc *OrderCreate) check() error {
-	if _, ok := oc.mutation.OrderID(); !ok {
-		return &ValidationError{Name: "orderID", err: errors.New(`ent: missing required field "Order.orderID"`)}
-	}
 	if _, ok := oc.mutation.ApprovalLimit(); !ok {
 		return &ValidationError{Name: "approvalLimit", err: errors.New(`ent: missing required field "Order.approvalLimit"`)}
 	}
@@ -112,10 +118,6 @@ func (oc *OrderCreate) createSpec() (*Order, *sqlgraph.CreateSpec) {
 		_node = &Order{config: oc.config}
 		_spec = sqlgraph.NewCreateSpec(order.Table, sqlgraph.NewFieldSpec(order.FieldID, field.TypeInt))
 	)
-	if value, ok := oc.mutation.OrderID(); ok {
-		_spec.SetField(order.FieldOrderID, field.TypeUUID, value)
-		_node.OrderID = value
-	}
 	if value, ok := oc.mutation.ApprovalLimit(); ok {
 		_spec.SetField(order.FieldApprovalLimit, field.TypeInt64, value)
 		_node.ApprovalLimit = value
@@ -123,6 +125,22 @@ func (oc *OrderCreate) createSpec() (*Order, *sqlgraph.CreateSpec) {
 	if value, ok := oc.mutation.Status(); ok {
 		_spec.SetField(order.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
+	}
+	if nodes := oc.mutation.OrderItemsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   order.OrderItemsTable,
+			Columns: []string{order.OrderItemsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

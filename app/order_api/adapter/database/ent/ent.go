@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/orderitem"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -73,7 +74,8 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			order.Table: order.ValidColumn,
+			order.Table:     order.ValidColumn,
+			orderitem.Table: orderitem.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

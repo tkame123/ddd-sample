@@ -8,7 +8,6 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 )
 
@@ -17,13 +16,32 @@ type Order struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// OrderID holds the value of the "orderID" field.
-	OrderID uuid.UUID `json:"orderID,omitempty"`
 	// ApprovalLimit holds the value of the "approvalLimit" field.
 	ApprovalLimit int64 `json:"approvalLimit,omitempty"`
 	// Status holds the value of the "status" field.
-	Status       order.Status `json:"status,omitempty"`
+	Status order.Status `json:"status,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the OrderQuery when eager-loading is set.
+	Edges        OrderEdges `json:"edges"`
 	selectValues sql.SelectValues
+}
+
+// OrderEdges holds the relations/edges for other nodes in the graph.
+type OrderEdges struct {
+	// OrderItems holds the value of the orderItems edge.
+	OrderItems []*OrderItem `json:"orderItems,omitempty" orderID`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// OrderItemsOrErr returns the OrderItems value or an error if the edge
+// was not loaded in eager-loading.
+func (e OrderEdges) OrderItemsOrErr() ([]*OrderItem, error) {
+	if e.loadedTypes[0] {
+		return e.OrderItems, nil
+	}
+	return nil, &NotLoadedError{edge: "orderItems"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -35,8 +53,6 @@ func (*Order) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case order.FieldStatus:
 			values[i] = new(sql.NullString)
-		case order.FieldOrderID:
-			values[i] = new(uuid.UUID)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -58,12 +74,6 @@ func (o *Order) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			o.ID = int(value.Int64)
-		case order.FieldOrderID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field orderID", values[i])
-			} else if value != nil {
-				o.OrderID = *value
-			}
 		case order.FieldApprovalLimit:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field approvalLimit", values[i])
@@ -89,6 +99,11 @@ func (o *Order) Value(name string) (ent.Value, error) {
 	return o.selectValues.Get(name)
 }
 
+// QueryOrderItems queries the "orderItems" edge of the Order entity.
+func (o *Order) QueryOrderItems() *OrderItemQuery {
+	return NewOrderClient(o.config).QueryOrderItems(o)
+}
+
 // Update returns a builder for updating this Order.
 // Note that you need to call Order.Unwrap() before calling this method if this Order
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -112,9 +127,6 @@ func (o *Order) String() string {
 	var builder strings.Builder
 	builder.WriteString("Order(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", o.ID))
-	builder.WriteString("orderID=")
-	builder.WriteString(fmt.Sprintf("%v", o.OrderID))
-	builder.WriteString(", ")
 	builder.WriteString("approvalLimit=")
 	builder.WriteString(fmt.Sprintf("%v", o.ApprovalLimit))
 	builder.WriteString(", ")

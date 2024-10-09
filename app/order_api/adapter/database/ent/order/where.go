@@ -4,7 +4,7 @@ package order
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/predicate"
 )
 
@@ -53,54 +53,9 @@ func IDLTE(id int) predicate.Order {
 	return predicate.Order(sql.FieldLTE(FieldID, id))
 }
 
-// OrderID applies equality check predicate on the "orderID" field. It's identical to OrderIDEQ.
-func OrderID(v uuid.UUID) predicate.Order {
-	return predicate.Order(sql.FieldEQ(FieldOrderID, v))
-}
-
 // ApprovalLimit applies equality check predicate on the "approvalLimit" field. It's identical to ApprovalLimitEQ.
 func ApprovalLimit(v int64) predicate.Order {
 	return predicate.Order(sql.FieldEQ(FieldApprovalLimit, v))
-}
-
-// OrderIDEQ applies the EQ predicate on the "orderID" field.
-func OrderIDEQ(v uuid.UUID) predicate.Order {
-	return predicate.Order(sql.FieldEQ(FieldOrderID, v))
-}
-
-// OrderIDNEQ applies the NEQ predicate on the "orderID" field.
-func OrderIDNEQ(v uuid.UUID) predicate.Order {
-	return predicate.Order(sql.FieldNEQ(FieldOrderID, v))
-}
-
-// OrderIDIn applies the In predicate on the "orderID" field.
-func OrderIDIn(vs ...uuid.UUID) predicate.Order {
-	return predicate.Order(sql.FieldIn(FieldOrderID, vs...))
-}
-
-// OrderIDNotIn applies the NotIn predicate on the "orderID" field.
-func OrderIDNotIn(vs ...uuid.UUID) predicate.Order {
-	return predicate.Order(sql.FieldNotIn(FieldOrderID, vs...))
-}
-
-// OrderIDGT applies the GT predicate on the "orderID" field.
-func OrderIDGT(v uuid.UUID) predicate.Order {
-	return predicate.Order(sql.FieldGT(FieldOrderID, v))
-}
-
-// OrderIDGTE applies the GTE predicate on the "orderID" field.
-func OrderIDGTE(v uuid.UUID) predicate.Order {
-	return predicate.Order(sql.FieldGTE(FieldOrderID, v))
-}
-
-// OrderIDLT applies the LT predicate on the "orderID" field.
-func OrderIDLT(v uuid.UUID) predicate.Order {
-	return predicate.Order(sql.FieldLT(FieldOrderID, v))
-}
-
-// OrderIDLTE applies the LTE predicate on the "orderID" field.
-func OrderIDLTE(v uuid.UUID) predicate.Order {
-	return predicate.Order(sql.FieldLTE(FieldOrderID, v))
 }
 
 // ApprovalLimitEQ applies the EQ predicate on the "approvalLimit" field.
@@ -161,6 +116,29 @@ func StatusIn(vs ...Status) predicate.Order {
 // StatusNotIn applies the NotIn predicate on the "status" field.
 func StatusNotIn(vs ...Status) predicate.Order {
 	return predicate.Order(sql.FieldNotIn(FieldStatus, vs...))
+}
+
+// HasOrderItems applies the HasEdge predicate on the "orderItems" edge.
+func HasOrderItems() predicate.Order {
+	return predicate.Order(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, OrderItemsTable, OrderItemsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasOrderItemsWith applies the HasEdge predicate on the "orderItems" edge with a given conditions (other predicates).
+func HasOrderItemsWith(preds ...predicate.OrderItem) predicate.Order {
+	return predicate.Order(func(s *sql.Selector) {
+		step := newOrderItemsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // And groups predicates with the AND operator between them.

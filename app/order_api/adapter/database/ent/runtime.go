@@ -2,8 +2,23 @@
 
 package ent
 
+import (
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/orderitem"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/schema"
+)
+
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	orderitemFields := schema.OrderItem{}.Fields()
+	_ = orderitemFields
+	// orderitemDescPrice is the schema descriptor for price field.
+	orderitemDescPrice := orderitemFields[1].Descriptor()
+	// orderitem.DefaultPrice holds the default value on creation for the price field.
+	orderitem.DefaultPrice = orderitemDescPrice.Default.(int64)
+	// orderitemDescQuantity is the schema descriptor for quantity field.
+	orderitemDescQuantity := orderitemFields[2].Descriptor()
+	// orderitem.DefaultQuantity holds the default value on creation for the quantity field.
+	orderitem.DefaultQuantity = orderitemDescQuantity.Default.(int32)
 }

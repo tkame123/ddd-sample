@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -12,16 +13,18 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/orderitem"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/predicate"
 )
 
 // OrderQuery is the builder for querying Order entities.
 type OrderQuery struct {
 	config
-	ctx        *QueryContext
-	order      []order.OrderOption
-	inters     []Interceptor
-	predicates []predicate.Order
+	ctx            *QueryContext
+	order          []order.OrderOption
+	inters         []Interceptor
+	predicates     []predicate.Order
+	withOrderItems *OrderItemQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -56,6 +59,28 @@ func (oq *OrderQuery) Unique(unique bool) *OrderQuery {
 func (oq *OrderQuery) Order(o ...order.OrderOption) *OrderQuery {
 	oq.order = append(oq.order, o...)
 	return oq
+}
+
+// QueryOrderItems chains the current query on the "orderItems" edge.
+func (oq *OrderQuery) QueryOrderItems() *OrderItemQuery {
+	query := (&OrderItemClient{config: oq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := oq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := oq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(order.Table, order.FieldID, selector),
+			sqlgraph.To(orderitem.Table, orderitem.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, order.OrderItemsTable, order.OrderItemsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(oq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Order entity from the query.
@@ -245,15 +270,27 @@ func (oq *OrderQuery) Clone() *OrderQuery {
 		return nil
 	}
 	return &OrderQuery{
-		config:     oq.config,
-		ctx:        oq.ctx.Clone(),
-		order:      append([]order.OrderOption{}, oq.order...),
-		inters:     append([]Interceptor{}, oq.inters...),
-		predicates: append([]predicate.Order{}, oq.predicates...),
+		config:         oq.config,
+		ctx:            oq.ctx.Clone(),
+		order:          append([]order.OrderOption{}, oq.order...),
+		inters:         append([]Interceptor{}, oq.inters...),
+		predicates:     append([]predicate.Order{}, oq.predicates...),
+		withOrderItems: oq.withOrderItems.Clone(),
 		// clone intermediate query.
 		sql:  oq.sql.Clone(),
 		path: oq.path,
 	}
+}
+
+// WithOrderItems tells the query-builder to eager-load the nodes that are connected to
+// the "orderItems" edge. The optional arguments are used to configure the query builder of the edge.
+func (oq *OrderQuery) WithOrderItems(opts ...func(*OrderItemQuery)) *OrderQuery {
+	query := (&OrderItemClient{config: oq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	oq.withOrderItems = query
+	return oq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -262,12 +299,12 @@ func (oq *OrderQuery) Clone() *OrderQuery {
 // Example:
 //
 //	var v []struct {
-//		OrderID uuid.UUID `json:"orderID,omitempty"`
+//		ApprovalLimit int64 `json:"approvalLimit,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Order.Query().
-//		GroupBy(order.FieldOrderID).
+//		GroupBy(order.FieldApprovalLimit).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (oq *OrderQuery) GroupBy(field string, fields ...string) *OrderGroupBy {
@@ -285,11 +322,11 @@ func (oq *OrderQuery) GroupBy(field string, fields ...string) *OrderGroupBy {
 // Example:
 //
 //	var v []struct {
-//		OrderID uuid.UUID `json:"orderID,omitempty"`
+//		ApprovalLimit int64 `json:"approvalLimit,omitempty"`
 //	}
 //
 //	client.Order.Query().
-//		Select(order.FieldOrderID).
+//		Select(order.FieldApprovalLimit).
 //		Scan(ctx, &v)
 func (oq *OrderQuery) Select(fields ...string) *OrderSelect {
 	oq.ctx.Fields = append(oq.ctx.Fields, fields...)
@@ -332,8 +369,11 @@ func (oq *OrderQuery) prepareQuery(ctx context.Context) error {
 
 func (oq *OrderQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Order, error) {
 	var (
-		nodes = []*Order{}
-		_spec = oq.querySpec()
+		nodes       = []*Order{}
+		_spec       = oq.querySpec()
+		loadedTypes = [1]bool{
+			oq.withOrderItems != nil,
+		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Order).scanValues(nil, columns)
@@ -341,6 +381,7 @@ func (oq *OrderQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Order,
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Order{config: oq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -352,7 +393,46 @@ func (oq *OrderQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Order,
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := oq.withOrderItems; query != nil {
+		if err := oq.loadOrderItems(ctx, query, nodes,
+			func(n *Order) { n.Edges.OrderItems = []*OrderItem{} },
+			func(n *Order, e *OrderItem) { n.Edges.OrderItems = append(n.Edges.OrderItems, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (oq *OrderQuery) loadOrderItems(ctx context.Context, query *OrderItemQuery, nodes []*Order, init func(*Order), assign func(*Order, *OrderItem)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Order)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.OrderItem(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(order.OrderItemsColumn), fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.order_id
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "order_id" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected referenced foreign-key "order_id" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (oq *OrderQuery) sqlCount(ctx context.Context) (int, error) {
