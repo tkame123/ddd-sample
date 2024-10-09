@@ -23,17 +23,19 @@ func (OrderItem) Fields() []ent.Field {
 		field.UUID("id", uuid.UUID{}).
 			Unique(),
 		field.Int32("sortNo"),
+		field.UUID("item_id", uuid.UUID{}),
+		field.UUID("order_id", uuid.UUID{}),
 		field.Int64("price").
 			Default(0),
 		field.Int32("quantity").
 			Default(0),
 		field.Time("created_at").
-			Default(time.Now()).
+			Default(time.Now).
 			SchemaType(map[string]string{
 				dialect.MySQL: "datetime",
 			}),
 		field.Time("updated_at").
-			Default(time.Now()).
+			Default(time.Now).
 			UpdateDefault(time.Now).
 			SchemaType(map[string]string{
 				dialect.MySQL: "datetime",
@@ -43,8 +45,9 @@ func (OrderItem) Fields() []ent.Field {
 
 func (OrderItem) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("owner", Order.Type).
+		edge.From("order", Order.Type).
 			Ref("orderItems").
+			Field("order_id").
 			Unique().Required(),
 	}
 }

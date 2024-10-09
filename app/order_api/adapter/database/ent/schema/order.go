@@ -31,12 +31,12 @@ func (Order) Fields() []ent.Field {
 				model.OrderStatus_OrderRejected,
 			),
 		field.Time("created_at").
-			Default(time.Now()).
+			Default(time.Now).
 			SchemaType(map[string]string{
 				dialect.MySQL: "datetime",
 			}),
 		field.Time("updated_at").
-			Default(time.Now()).
+			Default(time.Now).
 			UpdateDefault(time.Now).
 			SchemaType(map[string]string{
 				dialect.MySQL: "datetime",
@@ -46,14 +46,6 @@ func (Order) Fields() []ent.Field {
 
 func (Order) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("orderItems", OrderItem.Type).
-			StorageKey(edge.Column("order_id")).
-			StructTag("orderID"),
+		edge.To("orderItems", OrderItem.Type),
 	}
 }
-
-// field.Time("birth_date").
-//    Optional().
-//    SchemaType(map[string]string{
-//        dialect.MySQL: "datetime",
-//    }),

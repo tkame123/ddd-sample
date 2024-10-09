@@ -19,31 +19,31 @@ func init() {
 	// orderDescCreatedAt is the schema descriptor for created_at field.
 	orderDescCreatedAt := orderFields[3].Descriptor()
 	// order.DefaultCreatedAt holds the default value on creation for the created_at field.
-	order.DefaultCreatedAt = orderDescCreatedAt.Default.(time.Time)
+	order.DefaultCreatedAt = orderDescCreatedAt.Default.(func() time.Time)
 	// orderDescUpdatedAt is the schema descriptor for updated_at field.
 	orderDescUpdatedAt := orderFields[4].Descriptor()
 	// order.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	order.DefaultUpdatedAt = orderDescUpdatedAt.Default.(time.Time)
+	order.DefaultUpdatedAt = orderDescUpdatedAt.Default.(func() time.Time)
 	// order.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	order.UpdateDefaultUpdatedAt = orderDescUpdatedAt.UpdateDefault.(func() time.Time)
 	orderitemFields := schema.OrderItem{}.Fields()
 	_ = orderitemFields
 	// orderitemDescPrice is the schema descriptor for price field.
-	orderitemDescPrice := orderitemFields[2].Descriptor()
+	orderitemDescPrice := orderitemFields[4].Descriptor()
 	// orderitem.DefaultPrice holds the default value on creation for the price field.
 	orderitem.DefaultPrice = orderitemDescPrice.Default.(int64)
 	// orderitemDescQuantity is the schema descriptor for quantity field.
-	orderitemDescQuantity := orderitemFields[3].Descriptor()
+	orderitemDescQuantity := orderitemFields[5].Descriptor()
 	// orderitem.DefaultQuantity holds the default value on creation for the quantity field.
 	orderitem.DefaultQuantity = orderitemDescQuantity.Default.(int32)
 	// orderitemDescCreatedAt is the schema descriptor for created_at field.
-	orderitemDescCreatedAt := orderitemFields[4].Descriptor()
+	orderitemDescCreatedAt := orderitemFields[6].Descriptor()
 	// orderitem.DefaultCreatedAt holds the default value on creation for the created_at field.
-	orderitem.DefaultCreatedAt = orderitemDescCreatedAt.Default.(time.Time)
+	orderitem.DefaultCreatedAt = orderitemDescCreatedAt.Default.(func() time.Time)
 	// orderitemDescUpdatedAt is the schema descriptor for updated_at field.
-	orderitemDescUpdatedAt := orderitemFields[5].Descriptor()
+	orderitemDescUpdatedAt := orderitemFields[7].Descriptor()
 	// orderitem.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	orderitem.DefaultUpdatedAt = orderitemDescUpdatedAt.Default.(time.Time)
+	orderitem.DefaultUpdatedAt = orderitemDescUpdatedAt.Default.(func() time.Time)
 	// orderitem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	orderitem.UpdateDefaultUpdatedAt = orderitemDescUpdatedAt.UpdateDefault.(func() time.Time)
 }

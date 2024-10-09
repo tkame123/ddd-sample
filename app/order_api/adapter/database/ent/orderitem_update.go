@@ -51,6 +51,34 @@ func (oiu *OrderItemUpdate) AddSortNo(i int32) *OrderItemUpdate {
 	return oiu
 }
 
+// SetItemID sets the "item_id" field.
+func (oiu *OrderItemUpdate) SetItemID(u uuid.UUID) *OrderItemUpdate {
+	oiu.mutation.SetItemID(u)
+	return oiu
+}
+
+// SetNillableItemID sets the "item_id" field if the given value is not nil.
+func (oiu *OrderItemUpdate) SetNillableItemID(u *uuid.UUID) *OrderItemUpdate {
+	if u != nil {
+		oiu.SetItemID(*u)
+	}
+	return oiu
+}
+
+// SetOrderID sets the "order_id" field.
+func (oiu *OrderItemUpdate) SetOrderID(u uuid.UUID) *OrderItemUpdate {
+	oiu.mutation.SetOrderID(u)
+	return oiu
+}
+
+// SetNillableOrderID sets the "order_id" field if the given value is not nil.
+func (oiu *OrderItemUpdate) SetNillableOrderID(u *uuid.UUID) *OrderItemUpdate {
+	if u != nil {
+		oiu.SetOrderID(*u)
+	}
+	return oiu
+}
+
 // SetPrice sets the "price" field.
 func (oiu *OrderItemUpdate) SetPrice(i int64) *OrderItemUpdate {
 	oiu.mutation.ResetPrice()
@@ -113,15 +141,9 @@ func (oiu *OrderItemUpdate) SetUpdatedAt(t time.Time) *OrderItemUpdate {
 	return oiu
 }
 
-// SetOwnerID sets the "owner" edge to the Order entity by ID.
-func (oiu *OrderItemUpdate) SetOwnerID(id uuid.UUID) *OrderItemUpdate {
-	oiu.mutation.SetOwnerID(id)
-	return oiu
-}
-
-// SetOwner sets the "owner" edge to the Order entity.
-func (oiu *OrderItemUpdate) SetOwner(o *Order) *OrderItemUpdate {
-	return oiu.SetOwnerID(o.ID)
+// SetOrder sets the "order" edge to the Order entity.
+func (oiu *OrderItemUpdate) SetOrder(o *Order) *OrderItemUpdate {
+	return oiu.SetOrderID(o.ID)
 }
 
 // Mutation returns the OrderItemMutation object of the builder.
@@ -129,9 +151,9 @@ func (oiu *OrderItemUpdate) Mutation() *OrderItemMutation {
 	return oiu.mutation
 }
 
-// ClearOwner clears the "owner" edge to the Order entity.
-func (oiu *OrderItemUpdate) ClearOwner() *OrderItemUpdate {
-	oiu.mutation.ClearOwner()
+// ClearOrder clears the "order" edge to the Order entity.
+func (oiu *OrderItemUpdate) ClearOrder() *OrderItemUpdate {
+	oiu.mutation.ClearOrder()
 	return oiu
 }
 
@@ -173,8 +195,8 @@ func (oiu *OrderItemUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (oiu *OrderItemUpdate) check() error {
-	if oiu.mutation.OwnerCleared() && len(oiu.mutation.OwnerIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "OrderItem.owner"`)
+	if oiu.mutation.OrderCleared() && len(oiu.mutation.OrderIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "OrderItem.order"`)
 	}
 	return nil
 }
@@ -197,6 +219,9 @@ func (oiu *OrderItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := oiu.mutation.AddedSortNo(); ok {
 		_spec.AddField(orderitem.FieldSortNo, field.TypeInt32, value)
 	}
+	if value, ok := oiu.mutation.ItemID(); ok {
+		_spec.SetField(orderitem.FieldItemID, field.TypeUUID, value)
+	}
 	if value, ok := oiu.mutation.Price(); ok {
 		_spec.SetField(orderitem.FieldPrice, field.TypeInt64, value)
 	}
@@ -215,12 +240,12 @@ func (oiu *OrderItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := oiu.mutation.UpdatedAt(); ok {
 		_spec.SetField(orderitem.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if oiu.mutation.OwnerCleared() {
+	if oiu.mutation.OrderCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   orderitem.OwnerTable,
-			Columns: []string{orderitem.OwnerColumn},
+			Table:   orderitem.OrderTable,
+			Columns: []string{orderitem.OrderColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeUUID),
@@ -228,12 +253,12 @@ func (oiu *OrderItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := oiu.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := oiu.mutation.OrderIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   orderitem.OwnerTable,
-			Columns: []string{orderitem.OwnerColumn},
+			Table:   orderitem.OrderTable,
+			Columns: []string{orderitem.OrderColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeUUID),
@@ -282,6 +307,34 @@ func (oiuo *OrderItemUpdateOne) SetNillableSortNo(i *int32) *OrderItemUpdateOne 
 // AddSortNo adds i to the "sortNo" field.
 func (oiuo *OrderItemUpdateOne) AddSortNo(i int32) *OrderItemUpdateOne {
 	oiuo.mutation.AddSortNo(i)
+	return oiuo
+}
+
+// SetItemID sets the "item_id" field.
+func (oiuo *OrderItemUpdateOne) SetItemID(u uuid.UUID) *OrderItemUpdateOne {
+	oiuo.mutation.SetItemID(u)
+	return oiuo
+}
+
+// SetNillableItemID sets the "item_id" field if the given value is not nil.
+func (oiuo *OrderItemUpdateOne) SetNillableItemID(u *uuid.UUID) *OrderItemUpdateOne {
+	if u != nil {
+		oiuo.SetItemID(*u)
+	}
+	return oiuo
+}
+
+// SetOrderID sets the "order_id" field.
+func (oiuo *OrderItemUpdateOne) SetOrderID(u uuid.UUID) *OrderItemUpdateOne {
+	oiuo.mutation.SetOrderID(u)
+	return oiuo
+}
+
+// SetNillableOrderID sets the "order_id" field if the given value is not nil.
+func (oiuo *OrderItemUpdateOne) SetNillableOrderID(u *uuid.UUID) *OrderItemUpdateOne {
+	if u != nil {
+		oiuo.SetOrderID(*u)
+	}
 	return oiuo
 }
 
@@ -347,15 +400,9 @@ func (oiuo *OrderItemUpdateOne) SetUpdatedAt(t time.Time) *OrderItemUpdateOne {
 	return oiuo
 }
 
-// SetOwnerID sets the "owner" edge to the Order entity by ID.
-func (oiuo *OrderItemUpdateOne) SetOwnerID(id uuid.UUID) *OrderItemUpdateOne {
-	oiuo.mutation.SetOwnerID(id)
-	return oiuo
-}
-
-// SetOwner sets the "owner" edge to the Order entity.
-func (oiuo *OrderItemUpdateOne) SetOwner(o *Order) *OrderItemUpdateOne {
-	return oiuo.SetOwnerID(o.ID)
+// SetOrder sets the "order" edge to the Order entity.
+func (oiuo *OrderItemUpdateOne) SetOrder(o *Order) *OrderItemUpdateOne {
+	return oiuo.SetOrderID(o.ID)
 }
 
 // Mutation returns the OrderItemMutation object of the builder.
@@ -363,9 +410,9 @@ func (oiuo *OrderItemUpdateOne) Mutation() *OrderItemMutation {
 	return oiuo.mutation
 }
 
-// ClearOwner clears the "owner" edge to the Order entity.
-func (oiuo *OrderItemUpdateOne) ClearOwner() *OrderItemUpdateOne {
-	oiuo.mutation.ClearOwner()
+// ClearOrder clears the "order" edge to the Order entity.
+func (oiuo *OrderItemUpdateOne) ClearOrder() *OrderItemUpdateOne {
+	oiuo.mutation.ClearOrder()
 	return oiuo
 }
 
@@ -420,8 +467,8 @@ func (oiuo *OrderItemUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (oiuo *OrderItemUpdateOne) check() error {
-	if oiuo.mutation.OwnerCleared() && len(oiuo.mutation.OwnerIDs()) > 0 {
-		return errors.New(`ent: clearing a required unique edge "OrderItem.owner"`)
+	if oiuo.mutation.OrderCleared() && len(oiuo.mutation.OrderIDs()) > 0 {
+		return errors.New(`ent: clearing a required unique edge "OrderItem.order"`)
 	}
 	return nil
 }
@@ -461,6 +508,9 @@ func (oiuo *OrderItemUpdateOne) sqlSave(ctx context.Context) (_node *OrderItem, 
 	if value, ok := oiuo.mutation.AddedSortNo(); ok {
 		_spec.AddField(orderitem.FieldSortNo, field.TypeInt32, value)
 	}
+	if value, ok := oiuo.mutation.ItemID(); ok {
+		_spec.SetField(orderitem.FieldItemID, field.TypeUUID, value)
+	}
 	if value, ok := oiuo.mutation.Price(); ok {
 		_spec.SetField(orderitem.FieldPrice, field.TypeInt64, value)
 	}
@@ -479,12 +529,12 @@ func (oiuo *OrderItemUpdateOne) sqlSave(ctx context.Context) (_node *OrderItem, 
 	if value, ok := oiuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(orderitem.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if oiuo.mutation.OwnerCleared() {
+	if oiuo.mutation.OrderCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   orderitem.OwnerTable,
-			Columns: []string{orderitem.OwnerColumn},
+			Table:   orderitem.OrderTable,
+			Columns: []string{orderitem.OrderColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeUUID),
@@ -492,12 +542,12 @@ func (oiuo *OrderItemUpdateOne) sqlSave(ctx context.Context) (_node *OrderItem, 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := oiuo.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := oiuo.mutation.OrderIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   orderitem.OwnerTable,
-			Columns: []string{orderitem.OwnerColumn},
+			Table:   orderitem.OrderTable,
+			Columns: []string{orderitem.OrderColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeUUID),

@@ -465,15 +465,15 @@ func (c *OrderItemClient) GetX(ctx context.Context, id uuid.UUID) *OrderItem {
 	return obj
 }
 
-// QueryOwner queries the owner edge of a OrderItem.
-func (c *OrderItemClient) QueryOwner(oi *OrderItem) *OrderQuery {
+// QueryOrder queries the order edge of a OrderItem.
+func (c *OrderItemClient) QueryOrder(oi *OrderItem) *OrderQuery {
 	query := (&OrderClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := oi.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(orderitem.Table, orderitem.FieldID, id),
 			sqlgraph.To(order.Table, order.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, orderitem.OwnerTable, orderitem.OwnerColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, orderitem.OrderTable, orderitem.OrderColumn),
 		)
 		fromV = sqlgraph.Neighbors(oi.driver.Dialect(), step)
 		return fromV, nil

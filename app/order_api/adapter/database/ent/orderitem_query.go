@@ -24,8 +24,7 @@ type OrderItemQuery struct {
 	order      []orderitem.OrderOption
 	inters     []Interceptor
 	predicates []predicate.OrderItem
-	withOwner  *OrderQuery
-	withFKs    bool
+	withOrder  *OrderQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -62,8 +61,8 @@ func (oiq *OrderItemQuery) Order(o ...orderitem.OrderOption) *OrderItemQuery {
 	return oiq
 }
 
-// QueryOwner chains the current query on the "owner" edge.
-func (oiq *OrderItemQuery) QueryOwner() *OrderQuery {
+// QueryOrder chains the current query on the "order" edge.
+func (oiq *OrderItemQuery) QueryOrder() *OrderQuery {
 	query := (&OrderClient{config: oiq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := oiq.prepareQuery(ctx); err != nil {
@@ -76,7 +75,7 @@ func (oiq *OrderItemQuery) QueryOwner() *OrderQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(orderitem.Table, orderitem.FieldID, selector),
 			sqlgraph.To(order.Table, order.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, orderitem.OwnerTable, orderitem.OwnerColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, orderitem.OrderTable, orderitem.OrderColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(oiq.driver.Dialect(), step)
 		return fromU, nil
@@ -276,21 +275,21 @@ func (oiq *OrderItemQuery) Clone() *OrderItemQuery {
 		order:      append([]orderitem.OrderOption{}, oiq.order...),
 		inters:     append([]Interceptor{}, oiq.inters...),
 		predicates: append([]predicate.OrderItem{}, oiq.predicates...),
-		withOwner:  oiq.withOwner.Clone(),
+		withOrder:  oiq.withOrder.Clone(),
 		// clone intermediate query.
 		sql:  oiq.sql.Clone(),
 		path: oiq.path,
 	}
 }
 
-// WithOwner tells the query-builder to eager-load the nodes that are connected to
-// the "owner" edge. The optional arguments are used to configure the query builder of the edge.
-func (oiq *OrderItemQuery) WithOwner(opts ...func(*OrderQuery)) *OrderItemQuery {
+// WithOrder tells the query-builder to eager-load the nodes that are connected to
+// the "order" edge. The optional arguments are used to configure the query builder of the edge.
+func (oiq *OrderItemQuery) WithOrder(opts ...func(*OrderQuery)) *OrderItemQuery {
 	query := (&OrderClient{config: oiq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	oiq.withOwner = query
+	oiq.withOrder = query
 	return oiq
 }
 
@@ -371,18 +370,11 @@ func (oiq *OrderItemQuery) prepareQuery(ctx context.Context) error {
 func (oiq *OrderItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*OrderItem, error) {
 	var (
 		nodes       = []*OrderItem{}
-		withFKs     = oiq.withFKs
 		_spec       = oiq.querySpec()
 		loadedTypes = [1]bool{
-			oiq.withOwner != nil,
+			oiq.withOrder != nil,
 		}
 	)
-	if oiq.withOwner != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, orderitem.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*OrderItem).scanValues(nil, columns)
 	}
@@ -401,23 +393,20 @@ func (oiq *OrderItemQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*O
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := oiq.withOwner; query != nil {
-		if err := oiq.loadOwner(ctx, query, nodes, nil,
-			func(n *OrderItem, e *Order) { n.Edges.Owner = e }); err != nil {
+	if query := oiq.withOrder; query != nil {
+		if err := oiq.loadOrder(ctx, query, nodes, nil,
+			func(n *OrderItem, e *Order) { n.Edges.Order = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (oiq *OrderItemQuery) loadOwner(ctx context.Context, query *OrderQuery, nodes []*OrderItem, init func(*OrderItem), assign func(*OrderItem, *Order)) error {
+func (oiq *OrderItemQuery) loadOrder(ctx context.Context, query *OrderQuery, nodes []*OrderItem, init func(*OrderItem), assign func(*OrderItem, *Order)) error {
 	ids := make([]uuid.UUID, 0, len(nodes))
 	nodeids := make(map[uuid.UUID][]*OrderItem)
 	for i := range nodes {
-		if nodes[i].order_id == nil {
-			continue
-		}
-		fk := *nodes[i].order_id
+		fk := nodes[i].OrderID
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -467,6 +456,9 @@ func (oiq *OrderItemQuery) querySpec() *sqlgraph.QuerySpec {
 			if fields[i] != orderitem.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
+		}
+		if oiq.withOrder != nil {
+			_spec.Node.AddColumnOnce(orderitem.FieldOrderID)
 		}
 	}
 	if ps := oiq.predicates; len(ps) > 0 {

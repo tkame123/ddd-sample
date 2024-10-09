@@ -31,6 +31,18 @@ func (oic *OrderItemCreate) SetSortNo(i int32) *OrderItemCreate {
 	return oic
 }
 
+// SetItemID sets the "item_id" field.
+func (oic *OrderItemCreate) SetItemID(u uuid.UUID) *OrderItemCreate {
+	oic.mutation.SetItemID(u)
+	return oic
+}
+
+// SetOrderID sets the "order_id" field.
+func (oic *OrderItemCreate) SetOrderID(u uuid.UUID) *OrderItemCreate {
+	oic.mutation.SetOrderID(u)
+	return oic
+}
+
 // SetPrice sets the "price" field.
 func (oic *OrderItemCreate) SetPrice(i int64) *OrderItemCreate {
 	oic.mutation.SetPrice(i)
@@ -93,15 +105,9 @@ func (oic *OrderItemCreate) SetID(u uuid.UUID) *OrderItemCreate {
 	return oic
 }
 
-// SetOwnerID sets the "owner" edge to the Order entity by ID.
-func (oic *OrderItemCreate) SetOwnerID(id uuid.UUID) *OrderItemCreate {
-	oic.mutation.SetOwnerID(id)
-	return oic
-}
-
-// SetOwner sets the "owner" edge to the Order entity.
-func (oic *OrderItemCreate) SetOwner(o *Order) *OrderItemCreate {
-	return oic.SetOwnerID(o.ID)
+// SetOrder sets the "order" edge to the Order entity.
+func (oic *OrderItemCreate) SetOrder(o *Order) *OrderItemCreate {
+	return oic.SetOrderID(o.ID)
 }
 
 // Mutation returns the OrderItemMutation object of the builder.
@@ -148,11 +154,11 @@ func (oic *OrderItemCreate) defaults() {
 		oic.mutation.SetQuantity(v)
 	}
 	if _, ok := oic.mutation.CreatedAt(); !ok {
-		v := orderitem.DefaultCreatedAt
+		v := orderitem.DefaultCreatedAt()
 		oic.mutation.SetCreatedAt(v)
 	}
 	if _, ok := oic.mutation.UpdatedAt(); !ok {
-		v := orderitem.DefaultUpdatedAt
+		v := orderitem.DefaultUpdatedAt()
 		oic.mutation.SetUpdatedAt(v)
 	}
 }
@@ -161,6 +167,12 @@ func (oic *OrderItemCreate) defaults() {
 func (oic *OrderItemCreate) check() error {
 	if _, ok := oic.mutation.SortNo(); !ok {
 		return &ValidationError{Name: "sortNo", err: errors.New(`ent: missing required field "OrderItem.sortNo"`)}
+	}
+	if _, ok := oic.mutation.ItemID(); !ok {
+		return &ValidationError{Name: "item_id", err: errors.New(`ent: missing required field "OrderItem.item_id"`)}
+	}
+	if _, ok := oic.mutation.OrderID(); !ok {
+		return &ValidationError{Name: "order_id", err: errors.New(`ent: missing required field "OrderItem.order_id"`)}
 	}
 	if _, ok := oic.mutation.Price(); !ok {
 		return &ValidationError{Name: "price", err: errors.New(`ent: missing required field "OrderItem.price"`)}
@@ -174,8 +186,8 @@ func (oic *OrderItemCreate) check() error {
 	if _, ok := oic.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "OrderItem.updated_at"`)}
 	}
-	if len(oic.mutation.OwnerIDs()) == 0 {
-		return &ValidationError{Name: "owner", err: errors.New(`ent: missing required edge "OrderItem.owner"`)}
+	if len(oic.mutation.OrderIDs()) == 0 {
+		return &ValidationError{Name: "order", err: errors.New(`ent: missing required edge "OrderItem.order"`)}
 	}
 	return nil
 }
@@ -217,6 +229,10 @@ func (oic *OrderItemCreate) createSpec() (*OrderItem, *sqlgraph.CreateSpec) {
 		_spec.SetField(orderitem.FieldSortNo, field.TypeInt32, value)
 		_node.SortNo = value
 	}
+	if value, ok := oic.mutation.ItemID(); ok {
+		_spec.SetField(orderitem.FieldItemID, field.TypeUUID, value)
+		_node.ItemID = value
+	}
 	if value, ok := oic.mutation.Price(); ok {
 		_spec.SetField(orderitem.FieldPrice, field.TypeInt64, value)
 		_node.Price = value
@@ -233,12 +249,12 @@ func (oic *OrderItemCreate) createSpec() (*OrderItem, *sqlgraph.CreateSpec) {
 		_spec.SetField(orderitem.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if nodes := oic.mutation.OwnerIDs(); len(nodes) > 0 {
+	if nodes := oic.mutation.OrderIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   orderitem.OwnerTable,
-			Columns: []string{orderitem.OwnerColumn},
+			Table:   orderitem.OrderTable,
+			Columns: []string{orderitem.OrderColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(order.FieldID, field.TypeUUID),
@@ -247,7 +263,7 @@ func (oic *OrderItemCreate) createSpec() (*OrderItem, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.order_id = &nodes[0]
+		_node.OrderID = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -317,6 +333,30 @@ func (u *OrderItemUpsert) UpdateSortNo() *OrderItemUpsert {
 // AddSortNo adds v to the "sortNo" field.
 func (u *OrderItemUpsert) AddSortNo(v int32) *OrderItemUpsert {
 	u.Add(orderitem.FieldSortNo, v)
+	return u
+}
+
+// SetItemID sets the "item_id" field.
+func (u *OrderItemUpsert) SetItemID(v uuid.UUID) *OrderItemUpsert {
+	u.Set(orderitem.FieldItemID, v)
+	return u
+}
+
+// UpdateItemID sets the "item_id" field to the value that was provided on create.
+func (u *OrderItemUpsert) UpdateItemID() *OrderItemUpsert {
+	u.SetExcluded(orderitem.FieldItemID)
+	return u
+}
+
+// SetOrderID sets the "order_id" field.
+func (u *OrderItemUpsert) SetOrderID(v uuid.UUID) *OrderItemUpsert {
+	u.Set(orderitem.FieldOrderID, v)
+	return u
+}
+
+// UpdateOrderID sets the "order_id" field to the value that was provided on create.
+func (u *OrderItemUpsert) UpdateOrderID() *OrderItemUpsert {
+	u.SetExcluded(orderitem.FieldOrderID)
 	return u
 }
 
@@ -446,6 +486,34 @@ func (u *OrderItemUpsertOne) AddSortNo(v int32) *OrderItemUpsertOne {
 func (u *OrderItemUpsertOne) UpdateSortNo() *OrderItemUpsertOne {
 	return u.Update(func(s *OrderItemUpsert) {
 		s.UpdateSortNo()
+	})
+}
+
+// SetItemID sets the "item_id" field.
+func (u *OrderItemUpsertOne) SetItemID(v uuid.UUID) *OrderItemUpsertOne {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.SetItemID(v)
+	})
+}
+
+// UpdateItemID sets the "item_id" field to the value that was provided on create.
+func (u *OrderItemUpsertOne) UpdateItemID() *OrderItemUpsertOne {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.UpdateItemID()
+	})
+}
+
+// SetOrderID sets the "order_id" field.
+func (u *OrderItemUpsertOne) SetOrderID(v uuid.UUID) *OrderItemUpsertOne {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.SetOrderID(v)
+	})
+}
+
+// UpdateOrderID sets the "order_id" field to the value that was provided on create.
+func (u *OrderItemUpsertOne) UpdateOrderID() *OrderItemUpsertOne {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.UpdateOrderID()
 	})
 }
 
@@ -752,6 +820,34 @@ func (u *OrderItemUpsertBulk) AddSortNo(v int32) *OrderItemUpsertBulk {
 func (u *OrderItemUpsertBulk) UpdateSortNo() *OrderItemUpsertBulk {
 	return u.Update(func(s *OrderItemUpsert) {
 		s.UpdateSortNo()
+	})
+}
+
+// SetItemID sets the "item_id" field.
+func (u *OrderItemUpsertBulk) SetItemID(v uuid.UUID) *OrderItemUpsertBulk {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.SetItemID(v)
+	})
+}
+
+// UpdateItemID sets the "item_id" field to the value that was provided on create.
+func (u *OrderItemUpsertBulk) UpdateItemID() *OrderItemUpsertBulk {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.UpdateItemID()
+	})
+}
+
+// SetOrderID sets the "order_id" field.
+func (u *OrderItemUpsertBulk) SetOrderID(v uuid.UUID) *OrderItemUpsertBulk {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.SetOrderID(v)
+	})
+}
+
+// UpdateOrderID sets the "order_id" field to the value that was provided on create.
+func (u *OrderItemUpsertBulk) UpdateOrderID() *OrderItemUpsertBulk {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.UpdateOrderID()
 	})
 }
 

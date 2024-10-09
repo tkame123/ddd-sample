@@ -122,11 +122,11 @@ func (oc *OrderCreate) ExecX(ctx context.Context) {
 // defaults sets the default values of the builder before save.
 func (oc *OrderCreate) defaults() {
 	if _, ok := oc.mutation.CreatedAt(); !ok {
-		v := order.DefaultCreatedAt
+		v := order.DefaultCreatedAt()
 		oc.mutation.SetCreatedAt(v)
 	}
 	if _, ok := oc.mutation.UpdatedAt(); !ok {
-		v := order.DefaultUpdatedAt
+		v := order.DefaultUpdatedAt()
 		oc.mutation.SetUpdatedAt(v)
 	}
 }

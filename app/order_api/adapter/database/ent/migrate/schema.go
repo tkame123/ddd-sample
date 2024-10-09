@@ -26,6 +26,7 @@ var (
 	OrderItemsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "sort_no", Type: field.TypeInt32},
+		{Name: "item_id", Type: field.TypeUUID},
 		{Name: "price", Type: field.TypeInt64, Default: 0},
 		{Name: "quantity", Type: field.TypeInt32, Default: 0},
 		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "datetime"}},
@@ -40,7 +41,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "order_items_orders_orderItems",
-				Columns:    []*schema.Column{OrderItemsColumns[6]},
+				Columns:    []*schema.Column{OrderItemsColumns[7]},
 				RefColumns: []*schema.Column{OrdersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},

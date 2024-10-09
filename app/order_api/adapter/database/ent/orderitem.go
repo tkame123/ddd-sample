@@ -21,6 +21,10 @@ type OrderItem struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// SortNo holds the value of the "sortNo" field.
 	SortNo int32 `json:"sortNo,omitempty"`
+	// ItemID holds the value of the "item_id" field.
+	ItemID uuid.UUID `json:"item_id,omitempty"`
+	// OrderID holds the value of the "order_id" field.
+	OrderID uuid.UUID `json:"order_id,omitempty"`
 	// Price holds the value of the "price" field.
 	Price int64 `json:"price,omitempty"`
 	// Quantity holds the value of the "quantity" field.
@@ -32,28 +36,27 @@ type OrderItem struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the OrderItemQuery when eager-loading is set.
 	Edges        OrderItemEdges `json:"edges"`
-	order_id     *uuid.UUID
 	selectValues sql.SelectValues
 }
 
 // OrderItemEdges holds the relations/edges for other nodes in the graph.
 type OrderItemEdges struct {
-	// Owner holds the value of the owner edge.
-	Owner *Order `json:"owner,omitempty"`
+	// Order holds the value of the order edge.
+	Order *Order `json:"order,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// OwnerOrErr returns the Owner value or an error if the edge
+// OrderOrErr returns the Order value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e OrderItemEdges) OwnerOrErr() (*Order, error) {
-	if e.Owner != nil {
-		return e.Owner, nil
+func (e OrderItemEdges) OrderOrErr() (*Order, error) {
+	if e.Order != nil {
+		return e.Order, nil
 	} else if e.loadedTypes[0] {
 		return nil, &NotFoundError{label: order.Label}
 	}
-	return nil, &NotLoadedError{edge: "owner"}
+	return nil, &NotLoadedError{edge: "order"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -65,10 +68,8 @@ func (*OrderItem) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case orderitem.FieldCreatedAt, orderitem.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
-		case orderitem.FieldID:
+		case orderitem.FieldID, orderitem.FieldItemID, orderitem.FieldOrderID:
 			values[i] = new(uuid.UUID)
-		case orderitem.ForeignKeys[0]: // order_id
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -96,6 +97,18 @@ func (oi *OrderItem) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				oi.SortNo = int32(value.Int64)
 			}
+		case orderitem.FieldItemID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field item_id", values[i])
+			} else if value != nil {
+				oi.ItemID = *value
+			}
+		case orderitem.FieldOrderID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field order_id", values[i])
+			} else if value != nil {
+				oi.OrderID = *value
+			}
 		case orderitem.FieldPrice:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field price", values[i])
@@ -120,13 +133,6 @@ func (oi *OrderItem) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				oi.UpdatedAt = value.Time
 			}
-		case orderitem.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field order_id", values[i])
-			} else if value.Valid {
-				oi.order_id = new(uuid.UUID)
-				*oi.order_id = *value.S.(*uuid.UUID)
-			}
 		default:
 			oi.selectValues.Set(columns[i], values[i])
 		}
@@ -140,9 +146,9 @@ func (oi *OrderItem) Value(name string) (ent.Value, error) {
 	return oi.selectValues.Get(name)
 }
 
-// QueryOwner queries the "owner" edge of the OrderItem entity.
-func (oi *OrderItem) QueryOwner() *OrderQuery {
-	return NewOrderItemClient(oi.config).QueryOwner(oi)
+// QueryOrder queries the "order" edge of the OrderItem entity.
+func (oi *OrderItem) QueryOrder() *OrderQuery {
+	return NewOrderItemClient(oi.config).QueryOrder(oi)
 }
 
 // Update returns a builder for updating this OrderItem.
@@ -170,6 +176,12 @@ func (oi *OrderItem) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", oi.ID))
 	builder.WriteString("sortNo=")
 	builder.WriteString(fmt.Sprintf("%v", oi.SortNo))
+	builder.WriteString(", ")
+	builder.WriteString("item_id=")
+	builder.WriteString(fmt.Sprintf("%v", oi.ItemID))
+	builder.WriteString(", ")
+	builder.WriteString("order_id=")
+	builder.WriteString(fmt.Sprintf("%v", oi.OrderID))
 	builder.WriteString(", ")
 	builder.WriteString("price=")
 	builder.WriteString(fmt.Sprintf("%v", oi.Price))

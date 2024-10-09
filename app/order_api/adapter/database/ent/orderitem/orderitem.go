@@ -16,6 +16,10 @@ const (
 	FieldID = "id"
 	// FieldSortNo holds the string denoting the sortno field in the database.
 	FieldSortNo = "sort_no"
+	// FieldItemID holds the string denoting the item_id field in the database.
+	FieldItemID = "item_id"
+	// FieldOrderID holds the string denoting the order_id field in the database.
+	FieldOrderID = "order_id"
 	// FieldPrice holds the string denoting the price field in the database.
 	FieldPrice = "price"
 	// FieldQuantity holds the string denoting the quantity field in the database.
@@ -24,44 +28,35 @@ const (
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
 	FieldUpdatedAt = "updated_at"
-	// EdgeOwner holds the string denoting the owner edge name in mutations.
-	EdgeOwner = "owner"
+	// EdgeOrder holds the string denoting the order edge name in mutations.
+	EdgeOrder = "order"
 	// Table holds the table name of the orderitem in the database.
 	Table = "order_items"
-	// OwnerTable is the table that holds the owner relation/edge.
-	OwnerTable = "order_items"
-	// OwnerInverseTable is the table name for the Order entity.
+	// OrderTable is the table that holds the order relation/edge.
+	OrderTable = "order_items"
+	// OrderInverseTable is the table name for the Order entity.
 	// It exists in this package in order to avoid circular dependency with the "order" package.
-	OwnerInverseTable = "orders"
-	// OwnerColumn is the table column denoting the owner relation/edge.
-	OwnerColumn = "order_id"
+	OrderInverseTable = "orders"
+	// OrderColumn is the table column denoting the order relation/edge.
+	OrderColumn = "order_id"
 )
 
 // Columns holds all SQL columns for orderitem fields.
 var Columns = []string{
 	FieldID,
 	FieldSortNo,
+	FieldItemID,
+	FieldOrderID,
 	FieldPrice,
 	FieldQuantity,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "order_items"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"order_id",
-}
-
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -74,9 +69,9 @@ var (
 	// DefaultQuantity holds the default value on creation for the "quantity" field.
 	DefaultQuantity int32
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
-	DefaultCreatedAt time.Time
+	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
-	DefaultUpdatedAt time.Time
+	DefaultUpdatedAt func() time.Time
 	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
 	UpdateDefaultUpdatedAt func() time.Time
 )
@@ -92,6 +87,16 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // BySortNo orders the results by the sortNo field.
 func BySortNo(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSortNo, opts...).ToFunc()
+}
+
+// ByItemID orders the results by the item_id field.
+func ByItemID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldItemID, opts...).ToFunc()
+}
+
+// ByOrderID orders the results by the order_id field.
+func ByOrderID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldOrderID, opts...).ToFunc()
 }
 
 // ByPrice orders the results by the price field.
@@ -114,16 +119,16 @@ func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
-// ByOwnerField orders the results by owner field.
-func ByOwnerField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByOrderField orders the results by order field.
+func ByOrderField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newOwnerStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newOrderStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newOwnerStep() *sqlgraph.Step {
+func newOrderStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(OwnerInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, OwnerTable, OwnerColumn),
+		sqlgraph.To(OrderInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, OrderTable, OrderColumn),
 	)
 }
