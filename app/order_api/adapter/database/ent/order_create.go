@@ -6,7 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -19,6 +22,7 @@ type OrderCreate struct {
 	config
 	mutation *OrderMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetApprovalLimit sets the "approvalLimit" field.
@@ -30,6 +34,34 @@ func (oc *OrderCreate) SetApprovalLimit(i int64) *OrderCreate {
 // SetStatus sets the "status" field.
 func (oc *OrderCreate) SetStatus(o order.Status) *OrderCreate {
 	oc.mutation.SetStatus(o)
+	return oc
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (oc *OrderCreate) SetCreatedAt(t time.Time) *OrderCreate {
+	oc.mutation.SetCreatedAt(t)
+	return oc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableCreatedAt(t *time.Time) *OrderCreate {
+	if t != nil {
+		oc.SetCreatedAt(*t)
+	}
+	return oc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (oc *OrderCreate) SetUpdatedAt(t time.Time) *OrderCreate {
+	oc.mutation.SetUpdatedAt(t)
+	return oc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableUpdatedAt(t *time.Time) *OrderCreate {
+	if t != nil {
+		oc.SetUpdatedAt(*t)
+	}
 	return oc
 }
 
@@ -61,6 +93,7 @@ func (oc *OrderCreate) Mutation() *OrderMutation {
 
 // Save creates the Order in the database.
 func (oc *OrderCreate) Save(ctx context.Context) (*Order, error) {
+	oc.defaults()
 	return withHooks(ctx, oc.sqlSave, oc.mutation, oc.hooks)
 }
 
@@ -86,6 +119,18 @@ func (oc *OrderCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (oc *OrderCreate) defaults() {
+	if _, ok := oc.mutation.CreatedAt(); !ok {
+		v := order.DefaultCreatedAt
+		oc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := oc.mutation.UpdatedAt(); !ok {
+		v := order.DefaultUpdatedAt
+		oc.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (oc *OrderCreate) check() error {
 	if _, ok := oc.mutation.ApprovalLimit(); !ok {
@@ -98,6 +143,12 @@ func (oc *OrderCreate) check() error {
 		if err := order.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Order.status": %w`, err)}
 		}
+	}
+	if _, ok := oc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Order.created_at"`)}
+	}
+	if _, ok := oc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Order.updated_at"`)}
 	}
 	return nil
 }
@@ -130,6 +181,7 @@ func (oc *OrderCreate) createSpec() (*Order, *sqlgraph.CreateSpec) {
 		_node = &Order{config: oc.config}
 		_spec = sqlgraph.NewCreateSpec(order.Table, sqlgraph.NewFieldSpec(order.FieldID, field.TypeUUID))
 	)
+	_spec.OnConflict = oc.conflict
 	if id, ok := oc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
@@ -141,6 +193,14 @@ func (oc *OrderCreate) createSpec() (*Order, *sqlgraph.CreateSpec) {
 	if value, ok := oc.mutation.Status(); ok {
 		_spec.SetField(order.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
+	}
+	if value, ok := oc.mutation.CreatedAt(); ok {
+		_spec.SetField(order.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := oc.mutation.UpdatedAt(); ok {
+		_spec.SetField(order.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
 	}
 	if nodes := oc.mutation.OrderItemsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -161,11 +221,264 @@ func (oc *OrderCreate) createSpec() (*Order, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Order.Create().
+//		SetApprovalLimit(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.OrderUpsert) {
+//			SetApprovalLimit(v+v).
+//		}).
+//		Exec(ctx)
+func (oc *OrderCreate) OnConflict(opts ...sql.ConflictOption) *OrderUpsertOne {
+	oc.conflict = opts
+	return &OrderUpsertOne{
+		create: oc,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Order.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (oc *OrderCreate) OnConflictColumns(columns ...string) *OrderUpsertOne {
+	oc.conflict = append(oc.conflict, sql.ConflictColumns(columns...))
+	return &OrderUpsertOne{
+		create: oc,
+	}
+}
+
+type (
+	// OrderUpsertOne is the builder for "upsert"-ing
+	//  one Order node.
+	OrderUpsertOne struct {
+		create *OrderCreate
+	}
+
+	// OrderUpsert is the "OnConflict" setter.
+	OrderUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetApprovalLimit sets the "approvalLimit" field.
+func (u *OrderUpsert) SetApprovalLimit(v int64) *OrderUpsert {
+	u.Set(order.FieldApprovalLimit, v)
+	return u
+}
+
+// UpdateApprovalLimit sets the "approvalLimit" field to the value that was provided on create.
+func (u *OrderUpsert) UpdateApprovalLimit() *OrderUpsert {
+	u.SetExcluded(order.FieldApprovalLimit)
+	return u
+}
+
+// AddApprovalLimit adds v to the "approvalLimit" field.
+func (u *OrderUpsert) AddApprovalLimit(v int64) *OrderUpsert {
+	u.Add(order.FieldApprovalLimit, v)
+	return u
+}
+
+// SetStatus sets the "status" field.
+func (u *OrderUpsert) SetStatus(v order.Status) *OrderUpsert {
+	u.Set(order.FieldStatus, v)
+	return u
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *OrderUpsert) UpdateStatus() *OrderUpsert {
+	u.SetExcluded(order.FieldStatus)
+	return u
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (u *OrderUpsert) SetCreatedAt(v time.Time) *OrderUpsert {
+	u.Set(order.FieldCreatedAt, v)
+	return u
+}
+
+// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
+func (u *OrderUpsert) UpdateCreatedAt() *OrderUpsert {
+	u.SetExcluded(order.FieldCreatedAt)
+	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *OrderUpsert) SetUpdatedAt(v time.Time) *OrderUpsert {
+	u.Set(order.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *OrderUpsert) UpdateUpdatedAt() *OrderUpsert {
+	u.SetExcluded(order.FieldUpdatedAt)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
+// Using this option is equivalent to using:
+//
+//	client.Order.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(order.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *OrderUpsertOne) UpdateNewValues() *OrderUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(order.FieldID)
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Order.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *OrderUpsertOne) Ignore() *OrderUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *OrderUpsertOne) DoNothing() *OrderUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the OrderCreate.OnConflict
+// documentation for more info.
+func (u *OrderUpsertOne) Update(set func(*OrderUpsert)) *OrderUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&OrderUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetApprovalLimit sets the "approvalLimit" field.
+func (u *OrderUpsertOne) SetApprovalLimit(v int64) *OrderUpsertOne {
+	return u.Update(func(s *OrderUpsert) {
+		s.SetApprovalLimit(v)
+	})
+}
+
+// AddApprovalLimit adds v to the "approvalLimit" field.
+func (u *OrderUpsertOne) AddApprovalLimit(v int64) *OrderUpsertOne {
+	return u.Update(func(s *OrderUpsert) {
+		s.AddApprovalLimit(v)
+	})
+}
+
+// UpdateApprovalLimit sets the "approvalLimit" field to the value that was provided on create.
+func (u *OrderUpsertOne) UpdateApprovalLimit() *OrderUpsertOne {
+	return u.Update(func(s *OrderUpsert) {
+		s.UpdateApprovalLimit()
+	})
+}
+
+// SetStatus sets the "status" field.
+func (u *OrderUpsertOne) SetStatus(v order.Status) *OrderUpsertOne {
+	return u.Update(func(s *OrderUpsert) {
+		s.SetStatus(v)
+	})
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *OrderUpsertOne) UpdateStatus() *OrderUpsertOne {
+	return u.Update(func(s *OrderUpsert) {
+		s.UpdateStatus()
+	})
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (u *OrderUpsertOne) SetCreatedAt(v time.Time) *OrderUpsertOne {
+	return u.Update(func(s *OrderUpsert) {
+		s.SetCreatedAt(v)
+	})
+}
+
+// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
+func (u *OrderUpsertOne) UpdateCreatedAt() *OrderUpsertOne {
+	return u.Update(func(s *OrderUpsert) {
+		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *OrderUpsertOne) SetUpdatedAt(v time.Time) *OrderUpsertOne {
+	return u.Update(func(s *OrderUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *OrderUpsertOne) UpdateUpdatedAt() *OrderUpsertOne {
+	return u.Update(func(s *OrderUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// Exec executes the query.
+func (u *OrderUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for OrderCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *OrderUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *OrderUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: OrderUpsertOne.ID is not supported by MySQL driver. Use OrderUpsertOne.Exec instead")
+	}
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *OrderUpsertOne) IDX(ctx context.Context) uuid.UUID {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // OrderCreateBulk is the builder for creating many Order entities in bulk.
 type OrderCreateBulk struct {
 	config
 	err      error
 	builders []*OrderCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the Order entities in the database.
@@ -179,6 +492,7 @@ func (ocb *OrderCreateBulk) Save(ctx context.Context) ([]*Order, error) {
 	for i := range ocb.builders {
 		func(i int, root context.Context) {
 			builder := ocb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*OrderMutation)
 				if !ok {
@@ -194,6 +508,7 @@ func (ocb *OrderCreateBulk) Save(ctx context.Context) ([]*Order, error) {
 					_, err = mutators[i+1].Mutate(root, ocb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = ocb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, ocb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -240,6 +555,183 @@ func (ocb *OrderCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (ocb *OrderCreateBulk) ExecX(ctx context.Context) {
 	if err := ocb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.Order.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.OrderUpsert) {
+//			SetApprovalLimit(v+v).
+//		}).
+//		Exec(ctx)
+func (ocb *OrderCreateBulk) OnConflict(opts ...sql.ConflictOption) *OrderUpsertBulk {
+	ocb.conflict = opts
+	return &OrderUpsertBulk{
+		create: ocb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.Order.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (ocb *OrderCreateBulk) OnConflictColumns(columns ...string) *OrderUpsertBulk {
+	ocb.conflict = append(ocb.conflict, sql.ConflictColumns(columns...))
+	return &OrderUpsertBulk{
+		create: ocb,
+	}
+}
+
+// OrderUpsertBulk is the builder for "upsert"-ing
+// a bulk of Order nodes.
+type OrderUpsertBulk struct {
+	create *OrderCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.Order.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(order.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *OrderUpsertBulk) UpdateNewValues() *OrderUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(order.FieldID)
+			}
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.Order.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *OrderUpsertBulk) Ignore() *OrderUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *OrderUpsertBulk) DoNothing() *OrderUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the OrderCreateBulk.OnConflict
+// documentation for more info.
+func (u *OrderUpsertBulk) Update(set func(*OrderUpsert)) *OrderUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&OrderUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetApprovalLimit sets the "approvalLimit" field.
+func (u *OrderUpsertBulk) SetApprovalLimit(v int64) *OrderUpsertBulk {
+	return u.Update(func(s *OrderUpsert) {
+		s.SetApprovalLimit(v)
+	})
+}
+
+// AddApprovalLimit adds v to the "approvalLimit" field.
+func (u *OrderUpsertBulk) AddApprovalLimit(v int64) *OrderUpsertBulk {
+	return u.Update(func(s *OrderUpsert) {
+		s.AddApprovalLimit(v)
+	})
+}
+
+// UpdateApprovalLimit sets the "approvalLimit" field to the value that was provided on create.
+func (u *OrderUpsertBulk) UpdateApprovalLimit() *OrderUpsertBulk {
+	return u.Update(func(s *OrderUpsert) {
+		s.UpdateApprovalLimit()
+	})
+}
+
+// SetStatus sets the "status" field.
+func (u *OrderUpsertBulk) SetStatus(v order.Status) *OrderUpsertBulk {
+	return u.Update(func(s *OrderUpsert) {
+		s.SetStatus(v)
+	})
+}
+
+// UpdateStatus sets the "status" field to the value that was provided on create.
+func (u *OrderUpsertBulk) UpdateStatus() *OrderUpsertBulk {
+	return u.Update(func(s *OrderUpsert) {
+		s.UpdateStatus()
+	})
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (u *OrderUpsertBulk) SetCreatedAt(v time.Time) *OrderUpsertBulk {
+	return u.Update(func(s *OrderUpsert) {
+		s.SetCreatedAt(v)
+	})
+}
+
+// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
+func (u *OrderUpsertBulk) UpdateCreatedAt() *OrderUpsertBulk {
+	return u.Update(func(s *OrderUpsert) {
+		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *OrderUpsertBulk) SetUpdatedAt(v time.Time) *OrderUpsertBulk {
+	return u.Update(func(s *OrderUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *OrderUpsertBulk) UpdateUpdatedAt() *OrderUpsertBulk {
+	return u.Update(func(s *OrderUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// Exec executes the query.
+func (u *OrderUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the OrderCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for OrderCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *OrderUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

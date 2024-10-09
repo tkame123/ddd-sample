@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -38,6 +39,8 @@ type OrderMutation struct {
 	approvalLimit     *int64
 	addapprovalLimit  *int64
 	status            *order.Status
+	created_at        *time.Time
+	updated_at        *time.Time
 	clearedFields     map[string]struct{}
 	orderItems        map[uuid.UUID]struct{}
 	removedorderItems map[uuid.UUID]struct{}
@@ -243,6 +246,78 @@ func (m *OrderMutation) ResetStatus() {
 	m.status = nil
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (m *OrderMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *OrderMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the Order entity.
+// If the Order object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *OrderMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *OrderMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *OrderMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the Order entity.
+// If the Order object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *OrderMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
 // AddOrderItemIDs adds the "orderItems" edge to the OrderItem entity by ids.
 func (m *OrderMutation) AddOrderItemIDs(ids ...uuid.UUID) {
 	if m.orderItems == nil {
@@ -331,12 +406,18 @@ func (m *OrderMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *OrderMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 4)
 	if m.approvalLimit != nil {
 		fields = append(fields, order.FieldApprovalLimit)
 	}
 	if m.status != nil {
 		fields = append(fields, order.FieldStatus)
+	}
+	if m.created_at != nil {
+		fields = append(fields, order.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, order.FieldUpdatedAt)
 	}
 	return fields
 }
@@ -350,6 +431,10 @@ func (m *OrderMutation) Field(name string) (ent.Value, bool) {
 		return m.ApprovalLimit()
 	case order.FieldStatus:
 		return m.Status()
+	case order.FieldCreatedAt:
+		return m.CreatedAt()
+	case order.FieldUpdatedAt:
+		return m.UpdatedAt()
 	}
 	return nil, false
 }
@@ -363,6 +448,10 @@ func (m *OrderMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldApprovalLimit(ctx)
 	case order.FieldStatus:
 		return m.OldStatus(ctx)
+	case order.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case order.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Order field %s", name)
 }
@@ -385,6 +474,20 @@ func (m *OrderMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetStatus(v)
+		return nil
+	case order.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case order.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Order field %s", name)
@@ -455,6 +558,12 @@ func (m *OrderMutation) ResetField(name string) error {
 		return nil
 	case order.FieldStatus:
 		m.ResetStatus()
+		return nil
+	case order.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case order.FieldUpdatedAt:
+		m.ResetUpdatedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Order field %s", name)
@@ -556,6 +665,8 @@ type OrderItemMutation struct {
 	addprice      *int64
 	quantity      *int32
 	addquantity   *int32
+	created_at    *time.Time
+	updated_at    *time.Time
 	clearedFields map[string]struct{}
 	owner         *uuid.UUID
 	clearedowner  bool
@@ -836,6 +947,78 @@ func (m *OrderItemMutation) ResetQuantity() {
 	m.addquantity = nil
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (m *OrderItemMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *OrderItemMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the OrderItem entity.
+// If the OrderItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderItemMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *OrderItemMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *OrderItemMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *OrderItemMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the OrderItem entity.
+// If the OrderItem object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderItemMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *OrderItemMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
 // SetOwnerID sets the "owner" edge to the Order entity by id.
 func (m *OrderItemMutation) SetOwnerID(id uuid.UUID) {
 	m.owner = &id
@@ -909,7 +1092,7 @@ func (m *OrderItemMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *OrderItemMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 5)
 	if m.sortNo != nil {
 		fields = append(fields, orderitem.FieldSortNo)
 	}
@@ -918,6 +1101,12 @@ func (m *OrderItemMutation) Fields() []string {
 	}
 	if m.quantity != nil {
 		fields = append(fields, orderitem.FieldQuantity)
+	}
+	if m.created_at != nil {
+		fields = append(fields, orderitem.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, orderitem.FieldUpdatedAt)
 	}
 	return fields
 }
@@ -933,6 +1122,10 @@ func (m *OrderItemMutation) Field(name string) (ent.Value, bool) {
 		return m.Price()
 	case orderitem.FieldQuantity:
 		return m.Quantity()
+	case orderitem.FieldCreatedAt:
+		return m.CreatedAt()
+	case orderitem.FieldUpdatedAt:
+		return m.UpdatedAt()
 	}
 	return nil, false
 }
@@ -948,6 +1141,10 @@ func (m *OrderItemMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldPrice(ctx)
 	case orderitem.FieldQuantity:
 		return m.OldQuantity(ctx)
+	case orderitem.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case orderitem.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown OrderItem field %s", name)
 }
@@ -977,6 +1174,20 @@ func (m *OrderItemMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetQuantity(v)
+		return nil
+	case orderitem.FieldCreatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case orderitem.FieldUpdatedAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown OrderItem field %s", name)
@@ -1074,6 +1285,12 @@ func (m *OrderItemMutation) ResetField(name string) error {
 		return nil
 	case orderitem.FieldQuantity:
 		m.ResetQuantity()
+		return nil
+	case orderitem.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case orderitem.FieldUpdatedAt:
+		m.ResetUpdatedAt()
 		return nil
 	}
 	return fmt.Errorf("unknown OrderItem field %s", name)

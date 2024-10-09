@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -24,6 +25,10 @@ type OrderItem struct {
 	Price int64 `json:"price,omitempty"`
 	// Quantity holds the value of the "quantity" field.
 	Quantity int32 `json:"quantity,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the OrderItemQuery when eager-loading is set.
 	Edges        OrderItemEdges `json:"edges"`
@@ -58,6 +63,8 @@ func (*OrderItem) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case orderitem.FieldSortNo, orderitem.FieldPrice, orderitem.FieldQuantity:
 			values[i] = new(sql.NullInt64)
+		case orderitem.FieldCreatedAt, orderitem.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		case orderitem.FieldID:
 			values[i] = new(uuid.UUID)
 		case orderitem.ForeignKeys[0]: // order_id
@@ -100,6 +107,18 @@ func (oi *OrderItem) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field quantity", values[i])
 			} else if value.Valid {
 				oi.Quantity = int32(value.Int64)
+			}
+		case orderitem.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				oi.CreatedAt = value.Time
+			}
+		case orderitem.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				oi.UpdatedAt = value.Time
 			}
 		case orderitem.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullScanner); !ok {
@@ -157,6 +176,12 @@ func (oi *OrderItem) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("quantity=")
 	builder.WriteString(fmt.Sprintf("%v", oi.Quantity))
+	builder.WriteString(", ")
+	builder.WriteString("created_at=")
+	builder.WriteString(oi.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(oi.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

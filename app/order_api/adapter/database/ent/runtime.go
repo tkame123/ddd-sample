@@ -3,6 +3,9 @@
 package ent
 
 import (
+	"time"
+
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/orderitem"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/schema"
 )
@@ -11,6 +14,18 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	orderFields := schema.Order{}.Fields()
+	_ = orderFields
+	// orderDescCreatedAt is the schema descriptor for created_at field.
+	orderDescCreatedAt := orderFields[3].Descriptor()
+	// order.DefaultCreatedAt holds the default value on creation for the created_at field.
+	order.DefaultCreatedAt = orderDescCreatedAt.Default.(time.Time)
+	// orderDescUpdatedAt is the schema descriptor for updated_at field.
+	orderDescUpdatedAt := orderFields[4].Descriptor()
+	// order.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	order.DefaultUpdatedAt = orderDescUpdatedAt.Default.(time.Time)
+	// order.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	order.UpdateDefaultUpdatedAt = orderDescUpdatedAt.UpdateDefault.(func() time.Time)
 	orderitemFields := schema.OrderItem{}.Fields()
 	_ = orderitemFields
 	// orderitemDescPrice is the schema descriptor for price field.
@@ -21,4 +36,14 @@ func init() {
 	orderitemDescQuantity := orderitemFields[3].Descriptor()
 	// orderitem.DefaultQuantity holds the default value on creation for the quantity field.
 	orderitem.DefaultQuantity = orderitemDescQuantity.Default.(int32)
+	// orderitemDescCreatedAt is the schema descriptor for created_at field.
+	orderitemDescCreatedAt := orderitemFields[4].Descriptor()
+	// orderitem.DefaultCreatedAt holds the default value on creation for the created_at field.
+	orderitem.DefaultCreatedAt = orderitemDescCreatedAt.Default.(time.Time)
+	// orderitemDescUpdatedAt is the schema descriptor for updated_at field.
+	orderitemDescUpdatedAt := orderitemFields[5].Descriptor()
+	// orderitem.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	orderitem.DefaultUpdatedAt = orderitemDescUpdatedAt.Default.(time.Time)
+	// orderitem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	orderitem.UpdateDefaultUpdatedAt = orderitemDescUpdatedAt.UpdateDefault.(func() time.Time)
 }

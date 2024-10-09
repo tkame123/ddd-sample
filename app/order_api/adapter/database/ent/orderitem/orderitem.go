@@ -3,6 +3,8 @@
 package orderitem
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -18,6 +20,10 @@ const (
 	FieldPrice = "price"
 	// FieldQuantity holds the string denoting the quantity field in the database.
 	FieldQuantity = "quantity"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
+	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
+	FieldUpdatedAt = "updated_at"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
 	// Table holds the table name of the orderitem in the database.
@@ -37,6 +43,8 @@ var Columns = []string{
 	FieldSortNo,
 	FieldPrice,
 	FieldQuantity,
+	FieldCreatedAt,
+	FieldUpdatedAt,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "order_items"
@@ -65,6 +73,12 @@ var (
 	DefaultPrice int64
 	// DefaultQuantity holds the default value on creation for the "quantity" field.
 	DefaultQuantity int32
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt time.Time
+	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
+	DefaultUpdatedAt time.Time
+	// UpdateDefaultUpdatedAt holds the default value on update for the "updated_at" field.
+	UpdateDefaultUpdatedAt func() time.Time
 )
 
 // OrderOption defines the ordering options for the OrderItem queries.
@@ -88,6 +102,16 @@ func ByPrice(opts ...sql.OrderTermOption) OrderOption {
 // ByQuantity orders the results by the quantity field.
 func ByQuantity(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldQuantity, opts...).ToFunc()
+}
+
+// ByCreatedAt orders the results by the created_at field.
+func ByCreatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreatedAt, opts...).ToFunc()
+}
+
+// ByUpdatedAt orders the results by the updated_at field.
+func ByUpdatedAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldUpdatedAt, opts...).ToFunc()
 }
 
 // ByOwnerField orders the results by owner field.

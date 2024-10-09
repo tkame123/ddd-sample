@@ -13,6 +13,8 @@ var (
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "approval_limit", Type: field.TypeInt64},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"ApprovalPending", "OrderApproved", "OrderRejected"}},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "datetime"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "datetime"}},
 	}
 	// OrdersTable holds the schema information for the "orders" table.
 	OrdersTable = &schema.Table{
@@ -26,6 +28,8 @@ var (
 		{Name: "sort_no", Type: field.TypeInt32},
 		{Name: "price", Type: field.TypeInt64, Default: 0},
 		{Name: "quantity", Type: field.TypeInt32, Default: 0},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "datetime"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "datetime"}},
 		{Name: "order_id", Type: field.TypeUUID},
 	}
 	// OrderItemsTable holds the schema information for the "order_items" table.
@@ -36,7 +40,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "order_items_orders_orderItems",
-				Columns:    []*schema.Column{OrderItemsColumns[4]},
+				Columns:    []*schema.Column{OrderItemsColumns[6]},
 				RefColumns: []*schema.Column{OrdersColumns[0]},
 				OnDelete:   schema.NoAction,
 			},

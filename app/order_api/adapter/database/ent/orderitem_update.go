@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -92,6 +93,26 @@ func (oiu *OrderItemUpdate) AddQuantity(i int32) *OrderItemUpdate {
 	return oiu
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (oiu *OrderItemUpdate) SetCreatedAt(t time.Time) *OrderItemUpdate {
+	oiu.mutation.SetCreatedAt(t)
+	return oiu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (oiu *OrderItemUpdate) SetNillableCreatedAt(t *time.Time) *OrderItemUpdate {
+	if t != nil {
+		oiu.SetCreatedAt(*t)
+	}
+	return oiu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (oiu *OrderItemUpdate) SetUpdatedAt(t time.Time) *OrderItemUpdate {
+	oiu.mutation.SetUpdatedAt(t)
+	return oiu
+}
+
 // SetOwnerID sets the "owner" edge to the Order entity by ID.
 func (oiu *OrderItemUpdate) SetOwnerID(id uuid.UUID) *OrderItemUpdate {
 	oiu.mutation.SetOwnerID(id)
@@ -116,6 +137,7 @@ func (oiu *OrderItemUpdate) ClearOwner() *OrderItemUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (oiu *OrderItemUpdate) Save(ctx context.Context) (int, error) {
+	oiu.defaults()
 	return withHooks(ctx, oiu.sqlSave, oiu.mutation, oiu.hooks)
 }
 
@@ -138,6 +160,14 @@ func (oiu *OrderItemUpdate) Exec(ctx context.Context) error {
 func (oiu *OrderItemUpdate) ExecX(ctx context.Context) {
 	if err := oiu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (oiu *OrderItemUpdate) defaults() {
+	if _, ok := oiu.mutation.UpdatedAt(); !ok {
+		v := orderitem.UpdateDefaultUpdatedAt()
+		oiu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -178,6 +208,12 @@ func (oiu *OrderItemUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := oiu.mutation.AddedQuantity(); ok {
 		_spec.AddField(orderitem.FieldQuantity, field.TypeInt32, value)
+	}
+	if value, ok := oiu.mutation.CreatedAt(); ok {
+		_spec.SetField(orderitem.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := oiu.mutation.UpdatedAt(); ok {
+		_spec.SetField(orderitem.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if oiu.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -291,6 +327,26 @@ func (oiuo *OrderItemUpdateOne) AddQuantity(i int32) *OrderItemUpdateOne {
 	return oiuo
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (oiuo *OrderItemUpdateOne) SetCreatedAt(t time.Time) *OrderItemUpdateOne {
+	oiuo.mutation.SetCreatedAt(t)
+	return oiuo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (oiuo *OrderItemUpdateOne) SetNillableCreatedAt(t *time.Time) *OrderItemUpdateOne {
+	if t != nil {
+		oiuo.SetCreatedAt(*t)
+	}
+	return oiuo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (oiuo *OrderItemUpdateOne) SetUpdatedAt(t time.Time) *OrderItemUpdateOne {
+	oiuo.mutation.SetUpdatedAt(t)
+	return oiuo
+}
+
 // SetOwnerID sets the "owner" edge to the Order entity by ID.
 func (oiuo *OrderItemUpdateOne) SetOwnerID(id uuid.UUID) *OrderItemUpdateOne {
 	oiuo.mutation.SetOwnerID(id)
@@ -328,6 +384,7 @@ func (oiuo *OrderItemUpdateOne) Select(field string, fields ...string) *OrderIte
 
 // Save executes the query and returns the updated OrderItem entity.
 func (oiuo *OrderItemUpdateOne) Save(ctx context.Context) (*OrderItem, error) {
+	oiuo.defaults()
 	return withHooks(ctx, oiuo.sqlSave, oiuo.mutation, oiuo.hooks)
 }
 
@@ -350,6 +407,14 @@ func (oiuo *OrderItemUpdateOne) Exec(ctx context.Context) error {
 func (oiuo *OrderItemUpdateOne) ExecX(ctx context.Context) {
 	if err := oiuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (oiuo *OrderItemUpdateOne) defaults() {
+	if _, ok := oiuo.mutation.UpdatedAt(); !ok {
+		v := orderitem.UpdateDefaultUpdatedAt()
+		oiuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -407,6 +472,12 @@ func (oiuo *OrderItemUpdateOne) sqlSave(ctx context.Context) (_node *OrderItem, 
 	}
 	if value, ok := oiuo.mutation.AddedQuantity(); ok {
 		_spec.AddField(orderitem.FieldQuantity, field.TypeInt32, value)
+	}
+	if value, ok := oiuo.mutation.CreatedAt(); ok {
+		_spec.SetField(orderitem.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := oiuo.mutation.UpdatedAt(); ok {
+		_spec.SetField(orderitem.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if oiuo.mutation.OwnerCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -6,7 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
@@ -19,6 +22,7 @@ type OrderItemCreate struct {
 	config
 	mutation *OrderItemMutation
 	hooks    []Hook
+	conflict []sql.ConflictOption
 }
 
 // SetSortNo sets the "sortNo" field.
@@ -51,6 +55,34 @@ func (oic *OrderItemCreate) SetQuantity(i int32) *OrderItemCreate {
 func (oic *OrderItemCreate) SetNillableQuantity(i *int32) *OrderItemCreate {
 	if i != nil {
 		oic.SetQuantity(*i)
+	}
+	return oic
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (oic *OrderItemCreate) SetCreatedAt(t time.Time) *OrderItemCreate {
+	oic.mutation.SetCreatedAt(t)
+	return oic
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (oic *OrderItemCreate) SetNillableCreatedAt(t *time.Time) *OrderItemCreate {
+	if t != nil {
+		oic.SetCreatedAt(*t)
+	}
+	return oic
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (oic *OrderItemCreate) SetUpdatedAt(t time.Time) *OrderItemCreate {
+	oic.mutation.SetUpdatedAt(t)
+	return oic
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (oic *OrderItemCreate) SetNillableUpdatedAt(t *time.Time) *OrderItemCreate {
+	if t != nil {
+		oic.SetUpdatedAt(*t)
 	}
 	return oic
 }
@@ -115,6 +147,14 @@ func (oic *OrderItemCreate) defaults() {
 		v := orderitem.DefaultQuantity
 		oic.mutation.SetQuantity(v)
 	}
+	if _, ok := oic.mutation.CreatedAt(); !ok {
+		v := orderitem.DefaultCreatedAt
+		oic.mutation.SetCreatedAt(v)
+	}
+	if _, ok := oic.mutation.UpdatedAt(); !ok {
+		v := orderitem.DefaultUpdatedAt
+		oic.mutation.SetUpdatedAt(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -127,6 +167,12 @@ func (oic *OrderItemCreate) check() error {
 	}
 	if _, ok := oic.mutation.Quantity(); !ok {
 		return &ValidationError{Name: "quantity", err: errors.New(`ent: missing required field "OrderItem.quantity"`)}
+	}
+	if _, ok := oic.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "OrderItem.created_at"`)}
+	}
+	if _, ok := oic.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "OrderItem.updated_at"`)}
 	}
 	if len(oic.mutation.OwnerIDs()) == 0 {
 		return &ValidationError{Name: "owner", err: errors.New(`ent: missing required edge "OrderItem.owner"`)}
@@ -162,6 +208,7 @@ func (oic *OrderItemCreate) createSpec() (*OrderItem, *sqlgraph.CreateSpec) {
 		_node = &OrderItem{config: oic.config}
 		_spec = sqlgraph.NewCreateSpec(orderitem.Table, sqlgraph.NewFieldSpec(orderitem.FieldID, field.TypeUUID))
 	)
+	_spec.OnConflict = oic.conflict
 	if id, ok := oic.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = &id
@@ -177,6 +224,14 @@ func (oic *OrderItemCreate) createSpec() (*OrderItem, *sqlgraph.CreateSpec) {
 	if value, ok := oic.mutation.Quantity(); ok {
 		_spec.SetField(orderitem.FieldQuantity, field.TypeInt32, value)
 		_node.Quantity = value
+	}
+	if value, ok := oic.mutation.CreatedAt(); ok {
+		_spec.SetField(orderitem.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := oic.mutation.UpdatedAt(); ok {
+		_spec.SetField(orderitem.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
 	}
 	if nodes := oic.mutation.OwnerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -198,11 +253,316 @@ func (oic *OrderItemCreate) createSpec() (*OrderItem, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.OrderItem.Create().
+//		SetSortNo(v).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.OrderItemUpsert) {
+//			SetSortNo(v+v).
+//		}).
+//		Exec(ctx)
+func (oic *OrderItemCreate) OnConflict(opts ...sql.ConflictOption) *OrderItemUpsertOne {
+	oic.conflict = opts
+	return &OrderItemUpsertOne{
+		create: oic,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.OrderItem.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (oic *OrderItemCreate) OnConflictColumns(columns ...string) *OrderItemUpsertOne {
+	oic.conflict = append(oic.conflict, sql.ConflictColumns(columns...))
+	return &OrderItemUpsertOne{
+		create: oic,
+	}
+}
+
+type (
+	// OrderItemUpsertOne is the builder for "upsert"-ing
+	//  one OrderItem node.
+	OrderItemUpsertOne struct {
+		create *OrderItemCreate
+	}
+
+	// OrderItemUpsert is the "OnConflict" setter.
+	OrderItemUpsert struct {
+		*sql.UpdateSet
+	}
+)
+
+// SetSortNo sets the "sortNo" field.
+func (u *OrderItemUpsert) SetSortNo(v int32) *OrderItemUpsert {
+	u.Set(orderitem.FieldSortNo, v)
+	return u
+}
+
+// UpdateSortNo sets the "sortNo" field to the value that was provided on create.
+func (u *OrderItemUpsert) UpdateSortNo() *OrderItemUpsert {
+	u.SetExcluded(orderitem.FieldSortNo)
+	return u
+}
+
+// AddSortNo adds v to the "sortNo" field.
+func (u *OrderItemUpsert) AddSortNo(v int32) *OrderItemUpsert {
+	u.Add(orderitem.FieldSortNo, v)
+	return u
+}
+
+// SetPrice sets the "price" field.
+func (u *OrderItemUpsert) SetPrice(v int64) *OrderItemUpsert {
+	u.Set(orderitem.FieldPrice, v)
+	return u
+}
+
+// UpdatePrice sets the "price" field to the value that was provided on create.
+func (u *OrderItemUpsert) UpdatePrice() *OrderItemUpsert {
+	u.SetExcluded(orderitem.FieldPrice)
+	return u
+}
+
+// AddPrice adds v to the "price" field.
+func (u *OrderItemUpsert) AddPrice(v int64) *OrderItemUpsert {
+	u.Add(orderitem.FieldPrice, v)
+	return u
+}
+
+// SetQuantity sets the "quantity" field.
+func (u *OrderItemUpsert) SetQuantity(v int32) *OrderItemUpsert {
+	u.Set(orderitem.FieldQuantity, v)
+	return u
+}
+
+// UpdateQuantity sets the "quantity" field to the value that was provided on create.
+func (u *OrderItemUpsert) UpdateQuantity() *OrderItemUpsert {
+	u.SetExcluded(orderitem.FieldQuantity)
+	return u
+}
+
+// AddQuantity adds v to the "quantity" field.
+func (u *OrderItemUpsert) AddQuantity(v int32) *OrderItemUpsert {
+	u.Add(orderitem.FieldQuantity, v)
+	return u
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (u *OrderItemUpsert) SetCreatedAt(v time.Time) *OrderItemUpsert {
+	u.Set(orderitem.FieldCreatedAt, v)
+	return u
+}
+
+// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
+func (u *OrderItemUpsert) UpdateCreatedAt() *OrderItemUpsert {
+	u.SetExcluded(orderitem.FieldCreatedAt)
+	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *OrderItemUpsert) SetUpdatedAt(v time.Time) *OrderItemUpsert {
+	u.Set(orderitem.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *OrderItemUpsert) UpdateUpdatedAt() *OrderItemUpsert {
+	u.SetExcluded(orderitem.FieldUpdatedAt)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
+// Using this option is equivalent to using:
+//
+//	client.OrderItem.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(orderitem.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *OrderItemUpsertOne) UpdateNewValues() *OrderItemUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(orderitem.FieldID)
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.OrderItem.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
+func (u *OrderItemUpsertOne) Ignore() *OrderItemUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *OrderItemUpsertOne) DoNothing() *OrderItemUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the OrderItemCreate.OnConflict
+// documentation for more info.
+func (u *OrderItemUpsertOne) Update(set func(*OrderItemUpsert)) *OrderItemUpsertOne {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&OrderItemUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetSortNo sets the "sortNo" field.
+func (u *OrderItemUpsertOne) SetSortNo(v int32) *OrderItemUpsertOne {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.SetSortNo(v)
+	})
+}
+
+// AddSortNo adds v to the "sortNo" field.
+func (u *OrderItemUpsertOne) AddSortNo(v int32) *OrderItemUpsertOne {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.AddSortNo(v)
+	})
+}
+
+// UpdateSortNo sets the "sortNo" field to the value that was provided on create.
+func (u *OrderItemUpsertOne) UpdateSortNo() *OrderItemUpsertOne {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.UpdateSortNo()
+	})
+}
+
+// SetPrice sets the "price" field.
+func (u *OrderItemUpsertOne) SetPrice(v int64) *OrderItemUpsertOne {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.SetPrice(v)
+	})
+}
+
+// AddPrice adds v to the "price" field.
+func (u *OrderItemUpsertOne) AddPrice(v int64) *OrderItemUpsertOne {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.AddPrice(v)
+	})
+}
+
+// UpdatePrice sets the "price" field to the value that was provided on create.
+func (u *OrderItemUpsertOne) UpdatePrice() *OrderItemUpsertOne {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.UpdatePrice()
+	})
+}
+
+// SetQuantity sets the "quantity" field.
+func (u *OrderItemUpsertOne) SetQuantity(v int32) *OrderItemUpsertOne {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.SetQuantity(v)
+	})
+}
+
+// AddQuantity adds v to the "quantity" field.
+func (u *OrderItemUpsertOne) AddQuantity(v int32) *OrderItemUpsertOne {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.AddQuantity(v)
+	})
+}
+
+// UpdateQuantity sets the "quantity" field to the value that was provided on create.
+func (u *OrderItemUpsertOne) UpdateQuantity() *OrderItemUpsertOne {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.UpdateQuantity()
+	})
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (u *OrderItemUpsertOne) SetCreatedAt(v time.Time) *OrderItemUpsertOne {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.SetCreatedAt(v)
+	})
+}
+
+// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
+func (u *OrderItemUpsertOne) UpdateCreatedAt() *OrderItemUpsertOne {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *OrderItemUpsertOne) SetUpdatedAt(v time.Time) *OrderItemUpsertOne {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *OrderItemUpsertOne) UpdateUpdatedAt() *OrderItemUpsertOne {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// Exec executes the query.
+func (u *OrderItemUpsertOne) Exec(ctx context.Context) error {
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for OrderItemCreate.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *OrderItemUpsertOne) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// Exec executes the UPSERT query and returns the inserted/updated ID.
+func (u *OrderItemUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: OrderItemUpsertOne.ID is not supported by MySQL driver. Use OrderItemUpsertOne.Exec instead")
+	}
+	node, err := u.create.Save(ctx)
+	if err != nil {
+		return id, err
+	}
+	return node.ID, nil
+}
+
+// IDX is like ID, but panics if an error occurs.
+func (u *OrderItemUpsertOne) IDX(ctx context.Context) uuid.UUID {
+	id, err := u.ID(ctx)
+	if err != nil {
+		panic(err)
+	}
+	return id
+}
+
 // OrderItemCreateBulk is the builder for creating many OrderItem entities in bulk.
 type OrderItemCreateBulk struct {
 	config
 	err      error
 	builders []*OrderItemCreate
+	conflict []sql.ConflictOption
 }
 
 // Save creates the OrderItem entities in the database.
@@ -232,6 +592,7 @@ func (oicb *OrderItemCreateBulk) Save(ctx context.Context) ([]*OrderItem, error)
 					_, err = mutators[i+1].Mutate(root, oicb.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
+					spec.OnConflict = oicb.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, oicb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
@@ -278,6 +639,211 @@ func (oicb *OrderItemCreateBulk) Exec(ctx context.Context) error {
 // ExecX is like Exec, but panics if an error occurs.
 func (oicb *OrderItemCreateBulk) ExecX(ctx context.Context) {
 	if err := oicb.Exec(ctx); err != nil {
+		panic(err)
+	}
+}
+
+// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
+// of the `INSERT` statement. For example:
+//
+//	client.OrderItem.CreateBulk(builders...).
+//		OnConflict(
+//			// Update the row with the new values
+//			// the was proposed for insertion.
+//			sql.ResolveWithNewValues(),
+//		).
+//		// Override some of the fields with custom
+//		// update values.
+//		Update(func(u *ent.OrderItemUpsert) {
+//			SetSortNo(v+v).
+//		}).
+//		Exec(ctx)
+func (oicb *OrderItemCreateBulk) OnConflict(opts ...sql.ConflictOption) *OrderItemUpsertBulk {
+	oicb.conflict = opts
+	return &OrderItemUpsertBulk{
+		create: oicb,
+	}
+}
+
+// OnConflictColumns calls `OnConflict` and configures the columns
+// as conflict target. Using this option is equivalent to using:
+//
+//	client.OrderItem.Create().
+//		OnConflict(sql.ConflictColumns(columns...)).
+//		Exec(ctx)
+func (oicb *OrderItemCreateBulk) OnConflictColumns(columns ...string) *OrderItemUpsertBulk {
+	oicb.conflict = append(oicb.conflict, sql.ConflictColumns(columns...))
+	return &OrderItemUpsertBulk{
+		create: oicb,
+	}
+}
+
+// OrderItemUpsertBulk is the builder for "upsert"-ing
+// a bulk of OrderItem nodes.
+type OrderItemUpsertBulk struct {
+	create *OrderItemCreateBulk
+}
+
+// UpdateNewValues updates the mutable fields using the new values that
+// were set on create. Using this option is equivalent to using:
+//
+//	client.OrderItem.Create().
+//		OnConflict(
+//			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(orderitem.FieldID)
+//			}),
+//		).
+//		Exec(ctx)
+func (u *OrderItemUpsertBulk) UpdateNewValues() *OrderItemUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(orderitem.FieldID)
+			}
+		}
+	}))
+	return u
+}
+
+// Ignore sets each column to itself in case of conflict.
+// Using this option is equivalent to using:
+//
+//	client.OrderItem.Create().
+//		OnConflict(sql.ResolveWithIgnore()).
+//		Exec(ctx)
+func (u *OrderItemUpsertBulk) Ignore() *OrderItemUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
+	return u
+}
+
+// DoNothing configures the conflict_action to `DO NOTHING`.
+// Supported only by SQLite and PostgreSQL.
+func (u *OrderItemUpsertBulk) DoNothing() *OrderItemUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.DoNothing())
+	return u
+}
+
+// Update allows overriding fields `UPDATE` values. See the OrderItemCreateBulk.OnConflict
+// documentation for more info.
+func (u *OrderItemUpsertBulk) Update(set func(*OrderItemUpsert)) *OrderItemUpsertBulk {
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
+		set(&OrderItemUpsert{UpdateSet: update})
+	}))
+	return u
+}
+
+// SetSortNo sets the "sortNo" field.
+func (u *OrderItemUpsertBulk) SetSortNo(v int32) *OrderItemUpsertBulk {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.SetSortNo(v)
+	})
+}
+
+// AddSortNo adds v to the "sortNo" field.
+func (u *OrderItemUpsertBulk) AddSortNo(v int32) *OrderItemUpsertBulk {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.AddSortNo(v)
+	})
+}
+
+// UpdateSortNo sets the "sortNo" field to the value that was provided on create.
+func (u *OrderItemUpsertBulk) UpdateSortNo() *OrderItemUpsertBulk {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.UpdateSortNo()
+	})
+}
+
+// SetPrice sets the "price" field.
+func (u *OrderItemUpsertBulk) SetPrice(v int64) *OrderItemUpsertBulk {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.SetPrice(v)
+	})
+}
+
+// AddPrice adds v to the "price" field.
+func (u *OrderItemUpsertBulk) AddPrice(v int64) *OrderItemUpsertBulk {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.AddPrice(v)
+	})
+}
+
+// UpdatePrice sets the "price" field to the value that was provided on create.
+func (u *OrderItemUpsertBulk) UpdatePrice() *OrderItemUpsertBulk {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.UpdatePrice()
+	})
+}
+
+// SetQuantity sets the "quantity" field.
+func (u *OrderItemUpsertBulk) SetQuantity(v int32) *OrderItemUpsertBulk {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.SetQuantity(v)
+	})
+}
+
+// AddQuantity adds v to the "quantity" field.
+func (u *OrderItemUpsertBulk) AddQuantity(v int32) *OrderItemUpsertBulk {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.AddQuantity(v)
+	})
+}
+
+// UpdateQuantity sets the "quantity" field to the value that was provided on create.
+func (u *OrderItemUpsertBulk) UpdateQuantity() *OrderItemUpsertBulk {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.UpdateQuantity()
+	})
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (u *OrderItemUpsertBulk) SetCreatedAt(v time.Time) *OrderItemUpsertBulk {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.SetCreatedAt(v)
+	})
+}
+
+// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
+func (u *OrderItemUpsertBulk) UpdateCreatedAt() *OrderItemUpsertBulk {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *OrderItemUpsertBulk) SetUpdatedAt(v time.Time) *OrderItemUpsertBulk {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *OrderItemUpsertBulk) UpdateUpdatedAt() *OrderItemUpsertBulk {
+	return u.Update(func(s *OrderItemUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
+// Exec executes the query.
+func (u *OrderItemUpsertBulk) Exec(ctx context.Context) error {
+	if u.create.err != nil {
+		return u.create.err
+	}
+	for i, b := range u.create.builders {
+		if len(b.conflict) != 0 {
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the OrderItemCreateBulk instead", i)
+		}
+	}
+	if len(u.create.conflict) == 0 {
+		return errors.New("ent: missing options for OrderItemCreateBulk.OnConflict")
+	}
+	return u.create.Exec(ctx)
+}
+
+// ExecX is like Exec, but panics if an error occurs.
+func (u *OrderItemUpsertBulk) ExecX(ctx context.Context) {
+	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

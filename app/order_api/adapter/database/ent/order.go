@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -21,6 +22,10 @@ type Order struct {
 	ApprovalLimit int64 `json:"approvalLimit,omitempty"`
 	// Status holds the value of the "status" field.
 	Status order.Status `json:"status,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the OrderQuery when eager-loading is set.
 	Edges        OrderEdges `json:"edges"`
@@ -54,6 +59,8 @@ func (*Order) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case order.FieldStatus:
 			values[i] = new(sql.NullString)
+		case order.FieldCreatedAt, order.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		case order.FieldID:
 			values[i] = new(uuid.UUID)
 		default:
@@ -88,6 +95,18 @@ func (o *Order) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
 				o.Status = order.Status(value.String)
+			}
+		case order.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				o.CreatedAt = value.Time
+			}
+		case order.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				o.UpdatedAt = value.Time
 			}
 		default:
 			o.selectValues.Set(columns[i], values[i])
@@ -135,6 +154,12 @@ func (o *Order) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", o.Status))
+	builder.WriteString(", ")
+	builder.WriteString("created_at=")
+	builder.WriteString(o.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(o.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

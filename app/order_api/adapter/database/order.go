@@ -11,15 +11,28 @@ func (r *repo) OrderFindOne(ctx context.Context, id model.OrderID) (*model.Order
 }
 
 func (r *repo) OrderSave(ctx context.Context, order *model.Order) error {
-	// TODO: oredr -> Update Or Insert / OrderItem -> Replace
+	err := r.db.Order.Create().
+		SetID(order.OrderID()).
+		SetApprovalLimit(int64(order.ApprovalLimit())).
+		SetStatus(fromModelStatus(order.Status())).
+		OnConflict().
+		UpdateNewValues().
+		Exec(ctx)
 
-	_, err := r.db.Order.Create().
-		SetApprovalLimit(1000).
-		SetStatus(e_order.StatusApprovalPending).
-		Save(ctx)
-	if err != nil {
-		return err
+	// TODO: OrderItem対応
+
+	return err
+}
+
+func fromModelStatus(status model.OrderStatus) e_order.Status {
+	switch status {
+	case model.OrderStatus_ApprovalPending:
+		return e_order.StatusApprovalPending
+	case model.OrderStatus_OrderApproved:
+		return e_order.StatusOrderApproved
+	case model.OrderStatus_OrderRejected:
+		return e_order.StatusOrderRejected
+	default:
+		panic("invalid status")
 	}
-
-	return nil
 }
