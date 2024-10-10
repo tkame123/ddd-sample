@@ -30,4 +30,5 @@ const (
 type Event interface {
 	ID() uuid.UUID
 	Name() Name
+	ToBody() (string, error)
 }

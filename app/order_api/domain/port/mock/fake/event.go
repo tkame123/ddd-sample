@@ -24,3 +24,7 @@ func (e *GeneralEvent) Name() event2.Name {
 func (e *GeneralEvent) ID() uuid.UUID {
 	return e.id
 }
+
+func (e *GeneralEvent) ToBody() (string, error) {
+	return "", nil
+}
