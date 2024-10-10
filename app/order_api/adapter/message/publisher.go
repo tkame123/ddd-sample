@@ -1,4 +1,4 @@
-package sqs
+package message
 
 import (
 	"context"

@@ -1,0 +1,18 @@
+# TODO: API毎に分離する
+
+# AWS
+export AWS_ACCESS_KEY_ID=dummy
+export AWS_SECRET_ACCESS_KEY=dummy
+export AWS_DEFAULT_REGION=ap-northeast-1
+export AWS_ENDPOINT_URL=http://localhost:4566
+
+# AWS SNS
+export TOPIC_ARN_EVENT_ORDER_ORDER_CREATED=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-order-order_created
+export TOPIC_ARN_EVENT_ORDER_ORDER_APPROVED=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-order-order_approved
+export TOPIC_ARN_EVENT_ORDER_ORDER_REJECTED=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-order-order_rejected
+export TOPIC_ARN_COMMAND_ORDER_ORDER_APPROVE=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-order-order_approve
+export TOPIC_ARN_COMMAND_ORDER_ORDER_REJECT=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-order-order_reject
+export TOPIC_ARN_COMMAND_KITCHEN_TICKET_CREATE=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-kitchen-ticket_create
+export TOPIC_ARN_COMMAND_KITCHEN_TICKET_APPROVE=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-kitchen-ticket_approve
+export TOPIC_ARN_COMMAND_KITCHEN_TICKET_REJECT=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-kitchen-ticket_reject
+export TOPIC_ARN_COMMAND_BILLING_CARD_AUTHORIZE=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-billing-card_authorize
