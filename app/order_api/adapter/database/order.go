@@ -24,7 +24,6 @@ func (r *repo) OrderSave(ctx context.Context, order *model.Order) error {
 	if err := r.WithTx(ctx, func(tx *ent.Tx) error {
 		err := tx.Order.Create().
 			SetID(order.OrderID).
-			SetApprovalLimit(int64(order.ApprovalLimit)).
 			SetStatus(fromModelOrderStatus(order.Status)).
 			OnConflictColumns("id").
 			UpdateNewValues().
@@ -73,10 +72,9 @@ func toModelOrder(order *ent.Order) *model.Order {
 	}
 
 	return &model.Order{
-		OrderID:       order.ID,
-		ApprovalLimit: int(order.ApprovalLimit),
-		Status:        toModelOrderStatus(order.Status),
-		OrderItems:    items,
+		OrderID:    order.ID,
+		Status:     toModelOrderStatus(order.Status),
+		OrderItems: items,
 	}
 }
 

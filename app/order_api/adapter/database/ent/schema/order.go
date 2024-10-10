@@ -23,7 +23,6 @@ func (Order) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).
 			Unique(),
-		field.Int64("approvalLimit"),
 		field.Enum("status").
 			Values(
 				model.OrderStatus_ApprovalPending,

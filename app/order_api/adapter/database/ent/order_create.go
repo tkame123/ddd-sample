@@ -25,12 +25,6 @@ type OrderCreate struct {
 	conflict []sql.ConflictOption
 }
 
-// SetApprovalLimit sets the "approvalLimit" field.
-func (oc *OrderCreate) SetApprovalLimit(i int64) *OrderCreate {
-	oc.mutation.SetApprovalLimit(i)
-	return oc
-}
-
 // SetStatus sets the "status" field.
 func (oc *OrderCreate) SetStatus(o order.Status) *OrderCreate {
 	oc.mutation.SetStatus(o)
@@ -133,9 +127,6 @@ func (oc *OrderCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (oc *OrderCreate) check() error {
-	if _, ok := oc.mutation.ApprovalLimit(); !ok {
-		return &ValidationError{Name: "approvalLimit", err: errors.New(`ent: missing required field "Order.approvalLimit"`)}
-	}
 	if _, ok := oc.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Order.status"`)}
 	}
@@ -186,10 +177,6 @@ func (oc *OrderCreate) createSpec() (*Order, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := oc.mutation.ApprovalLimit(); ok {
-		_spec.SetField(order.FieldApprovalLimit, field.TypeInt64, value)
-		_node.ApprovalLimit = value
-	}
 	if value, ok := oc.mutation.Status(); ok {
 		_spec.SetField(order.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
@@ -225,7 +212,7 @@ func (oc *OrderCreate) createSpec() (*Order, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Order.Create().
-//		SetApprovalLimit(v).
+//		SetStatus(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -234,7 +221,7 @@ func (oc *OrderCreate) createSpec() (*Order, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.OrderUpsert) {
-//			SetApprovalLimit(v+v).
+//			SetStatus(v+v).
 //		}).
 //		Exec(ctx)
 func (oc *OrderCreate) OnConflict(opts ...sql.ConflictOption) *OrderUpsertOne {
@@ -269,24 +256,6 @@ type (
 		*sql.UpdateSet
 	}
 )
-
-// SetApprovalLimit sets the "approvalLimit" field.
-func (u *OrderUpsert) SetApprovalLimit(v int64) *OrderUpsert {
-	u.Set(order.FieldApprovalLimit, v)
-	return u
-}
-
-// UpdateApprovalLimit sets the "approvalLimit" field to the value that was provided on create.
-func (u *OrderUpsert) UpdateApprovalLimit() *OrderUpsert {
-	u.SetExcluded(order.FieldApprovalLimit)
-	return u
-}
-
-// AddApprovalLimit adds v to the "approvalLimit" field.
-func (u *OrderUpsert) AddApprovalLimit(v int64) *OrderUpsert {
-	u.Add(order.FieldApprovalLimit, v)
-	return u
-}
 
 // SetStatus sets the "status" field.
 func (u *OrderUpsert) SetStatus(v order.Status) *OrderUpsert {
@@ -370,27 +339,6 @@ func (u *OrderUpsertOne) Update(set func(*OrderUpsert)) *OrderUpsertOne {
 		set(&OrderUpsert{UpdateSet: update})
 	}))
 	return u
-}
-
-// SetApprovalLimit sets the "approvalLimit" field.
-func (u *OrderUpsertOne) SetApprovalLimit(v int64) *OrderUpsertOne {
-	return u.Update(func(s *OrderUpsert) {
-		s.SetApprovalLimit(v)
-	})
-}
-
-// AddApprovalLimit adds v to the "approvalLimit" field.
-func (u *OrderUpsertOne) AddApprovalLimit(v int64) *OrderUpsertOne {
-	return u.Update(func(s *OrderUpsert) {
-		s.AddApprovalLimit(v)
-	})
-}
-
-// UpdateApprovalLimit sets the "approvalLimit" field to the value that was provided on create.
-func (u *OrderUpsertOne) UpdateApprovalLimit() *OrderUpsertOne {
-	return u.Update(func(s *OrderUpsert) {
-		s.UpdateApprovalLimit()
-	})
 }
 
 // SetStatus sets the "status" field.
@@ -571,7 +519,7 @@ func (ocb *OrderCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.OrderUpsert) {
-//			SetApprovalLimit(v+v).
+//			SetStatus(v+v).
 //		}).
 //		Exec(ctx)
 func (ocb *OrderCreateBulk) OnConflict(opts ...sql.ConflictOption) *OrderUpsertBulk {
@@ -648,27 +596,6 @@ func (u *OrderUpsertBulk) Update(set func(*OrderUpsert)) *OrderUpsertBulk {
 		set(&OrderUpsert{UpdateSet: update})
 	}))
 	return u
-}
-
-// SetApprovalLimit sets the "approvalLimit" field.
-func (u *OrderUpsertBulk) SetApprovalLimit(v int64) *OrderUpsertBulk {
-	return u.Update(func(s *OrderUpsert) {
-		s.SetApprovalLimit(v)
-	})
-}
-
-// AddApprovalLimit adds v to the "approvalLimit" field.
-func (u *OrderUpsertBulk) AddApprovalLimit(v int64) *OrderUpsertBulk {
-	return u.Update(func(s *OrderUpsert) {
-		s.AddApprovalLimit(v)
-	})
-}
-
-// UpdateApprovalLimit sets the "approvalLimit" field to the value that was provided on create.
-func (u *OrderUpsertBulk) UpdateApprovalLimit() *OrderUpsertBulk {
-	return u.Update(func(s *OrderUpsert) {
-		s.UpdateApprovalLimit()
-	})
 }
 
 // SetStatus sets the "status" field.

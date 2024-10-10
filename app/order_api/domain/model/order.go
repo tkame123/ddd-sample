@@ -8,10 +8,9 @@ const APPOVAL_LIMIT = 10000
 
 // 集約ルート
 type Order struct {
-	OrderID       OrderID
-	ApprovalLimit int
-	OrderItems    []*OrderItem
-	Status        OrderStatus
+	OrderID    OrderID
+	OrderItems []*OrderItem
+	Status     OrderStatus
 }
 
 type OrderItem struct {
@@ -52,10 +51,13 @@ func NewOrder(items []*OrderItemRequest) (*Order, []OrderEvent, error) {
 	}
 
 	order := &Order{
-		OrderID:       orderID,
-		OrderItems:    orderItems,
-		ApprovalLimit: APPOVAL_LIMIT,
-		Status:        OrderStatus_ApprovalPending,
+		OrderID:    orderID,
+		OrderItems: orderItems,
+		Status:     OrderStatus_ApprovalPending,
+	}
+
+	if !order.validateApprovalLimit() {
+		return nil, nil, errors.New("approval limit over")
 	}
 
 	createdEvent := NewOrderCreatedEvent(order.OrderID)
@@ -78,4 +80,13 @@ func (o *Order) RejectOrder() ([]OrderEvent, error) {
 
 	o.Status = OrderStatus_OrderRejected
 	return []OrderEvent{NewOrderRejectedEvent(o.OrderID)}, nil
+}
+
+func (o *Order) validateApprovalLimit() bool {
+	sum := 0
+	for _, v := range o.OrderItems {
+		sum += v.Price * v.Quantity
+	}
+
+	return sum <= APPOVAL_LIMIT
 }

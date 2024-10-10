@@ -11,7 +11,6 @@ var (
 	// OrdersColumns holds the columns for the "orders" table.
 	OrdersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "approval_limit", Type: field.TypeInt64},
 		{Name: "status", Type: field.TypeEnum, Enums: []string{"ApprovalPending", "OrderApproved", "OrderRejected"}},
 		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "datetime"}},
 		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "datetime"}},

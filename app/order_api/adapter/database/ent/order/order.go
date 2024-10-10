@@ -15,8 +15,6 @@ const (
 	Label = "order"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldApprovalLimit holds the string denoting the approvallimit field in the database.
-	FieldApprovalLimit = "approval_limit"
 	// FieldStatus holds the string denoting the status field in the database.
 	FieldStatus = "status"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -39,7 +37,6 @@ const (
 // Columns holds all SQL columns for order fields.
 var Columns = []string{
 	FieldID,
-	FieldApprovalLimit,
 	FieldStatus,
 	FieldCreatedAt,
 	FieldUpdatedAt,
@@ -94,11 +91,6 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// ByApprovalLimit orders the results by the approvalLimit field.
-func ByApprovalLimit(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldApprovalLimit, opts...).ToFunc()
 }
 
 // ByStatus orders the results by the status field.

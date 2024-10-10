@@ -30,27 +30,6 @@ func (ou *OrderUpdate) Where(ps ...predicate.Order) *OrderUpdate {
 	return ou
 }
 
-// SetApprovalLimit sets the "approvalLimit" field.
-func (ou *OrderUpdate) SetApprovalLimit(i int64) *OrderUpdate {
-	ou.mutation.ResetApprovalLimit()
-	ou.mutation.SetApprovalLimit(i)
-	return ou
-}
-
-// SetNillableApprovalLimit sets the "approvalLimit" field if the given value is not nil.
-func (ou *OrderUpdate) SetNillableApprovalLimit(i *int64) *OrderUpdate {
-	if i != nil {
-		ou.SetApprovalLimit(*i)
-	}
-	return ou
-}
-
-// AddApprovalLimit adds i to the "approvalLimit" field.
-func (ou *OrderUpdate) AddApprovalLimit(i int64) *OrderUpdate {
-	ou.mutation.AddApprovalLimit(i)
-	return ou
-}
-
 // SetStatus sets the "status" field.
 func (ou *OrderUpdate) SetStatus(o order.Status) *OrderUpdate {
 	ou.mutation.SetStatus(o)
@@ -184,12 +163,6 @@ func (ou *OrderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := ou.mutation.ApprovalLimit(); ok {
-		_spec.SetField(order.FieldApprovalLimit, field.TypeInt64, value)
-	}
-	if value, ok := ou.mutation.AddedApprovalLimit(); ok {
-		_spec.AddField(order.FieldApprovalLimit, field.TypeInt64, value)
-	}
 	if value, ok := ou.mutation.Status(); ok {
 		_spec.SetField(order.FieldStatus, field.TypeEnum, value)
 	}
@@ -262,27 +235,6 @@ type OrderUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *OrderMutation
-}
-
-// SetApprovalLimit sets the "approvalLimit" field.
-func (ouo *OrderUpdateOne) SetApprovalLimit(i int64) *OrderUpdateOne {
-	ouo.mutation.ResetApprovalLimit()
-	ouo.mutation.SetApprovalLimit(i)
-	return ouo
-}
-
-// SetNillableApprovalLimit sets the "approvalLimit" field if the given value is not nil.
-func (ouo *OrderUpdateOne) SetNillableApprovalLimit(i *int64) *OrderUpdateOne {
-	if i != nil {
-		ouo.SetApprovalLimit(*i)
-	}
-	return ouo
-}
-
-// AddApprovalLimit adds i to the "approvalLimit" field.
-func (ouo *OrderUpdateOne) AddApprovalLimit(i int64) *OrderUpdateOne {
-	ouo.mutation.AddApprovalLimit(i)
-	return ouo
 }
 
 // SetStatus sets the "status" field.
@@ -447,12 +399,6 @@ func (ouo *OrderUpdateOne) sqlSave(ctx context.Context) (_node *Order, err error
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := ouo.mutation.ApprovalLimit(); ok {
-		_spec.SetField(order.FieldApprovalLimit, field.TypeInt64, value)
-	}
-	if value, ok := ouo.mutation.AddedApprovalLimit(); ok {
-		_spec.AddField(order.FieldApprovalLimit, field.TypeInt64, value)
 	}
 	if value, ok := ouo.mutation.Status(); ok {
 		_spec.SetField(order.FieldStatus, field.TypeEnum, value)

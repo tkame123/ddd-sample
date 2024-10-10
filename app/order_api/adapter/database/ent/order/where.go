@@ -56,11 +56,6 @@ func IDLTE(id uuid.UUID) predicate.Order {
 	return predicate.Order(sql.FieldLTE(FieldID, id))
 }
 
-// ApprovalLimit applies equality check predicate on the "approvalLimit" field. It's identical to ApprovalLimitEQ.
-func ApprovalLimit(v int64) predicate.Order {
-	return predicate.Order(sql.FieldEQ(FieldApprovalLimit, v))
-}
-
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Order {
 	return predicate.Order(sql.FieldEQ(FieldCreatedAt, v))
@@ -69,46 +64,6 @@ func CreatedAt(v time.Time) predicate.Order {
 // UpdatedAt applies equality check predicate on the "updated_at" field. It's identical to UpdatedAtEQ.
 func UpdatedAt(v time.Time) predicate.Order {
 	return predicate.Order(sql.FieldEQ(FieldUpdatedAt, v))
-}
-
-// ApprovalLimitEQ applies the EQ predicate on the "approvalLimit" field.
-func ApprovalLimitEQ(v int64) predicate.Order {
-	return predicate.Order(sql.FieldEQ(FieldApprovalLimit, v))
-}
-
-// ApprovalLimitNEQ applies the NEQ predicate on the "approvalLimit" field.
-func ApprovalLimitNEQ(v int64) predicate.Order {
-	return predicate.Order(sql.FieldNEQ(FieldApprovalLimit, v))
-}
-
-// ApprovalLimitIn applies the In predicate on the "approvalLimit" field.
-func ApprovalLimitIn(vs ...int64) predicate.Order {
-	return predicate.Order(sql.FieldIn(FieldApprovalLimit, vs...))
-}
-
-// ApprovalLimitNotIn applies the NotIn predicate on the "approvalLimit" field.
-func ApprovalLimitNotIn(vs ...int64) predicate.Order {
-	return predicate.Order(sql.FieldNotIn(FieldApprovalLimit, vs...))
-}
-
-// ApprovalLimitGT applies the GT predicate on the "approvalLimit" field.
-func ApprovalLimitGT(v int64) predicate.Order {
-	return predicate.Order(sql.FieldGT(FieldApprovalLimit, v))
-}
-
-// ApprovalLimitGTE applies the GTE predicate on the "approvalLimit" field.
-func ApprovalLimitGTE(v int64) predicate.Order {
-	return predicate.Order(sql.FieldGTE(FieldApprovalLimit, v))
-}
-
-// ApprovalLimitLT applies the LT predicate on the "approvalLimit" field.
-func ApprovalLimitLT(v int64) predicate.Order {
-	return predicate.Order(sql.FieldLT(FieldApprovalLimit, v))
-}
-
-// ApprovalLimitLTE applies the LTE predicate on the "approvalLimit" field.
-func ApprovalLimitLTE(v int64) predicate.Order {
-	return predicate.Order(sql.FieldLTE(FieldApprovalLimit, v))
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.

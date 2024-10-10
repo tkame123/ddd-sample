@@ -36,8 +36,6 @@ type OrderMutation struct {
 	op                Op
 	typ               string
 	id                *uuid.UUID
-	approvalLimit     *int64
-	addapprovalLimit  *int64
 	status            *order.Status
 	created_at        *time.Time
 	updated_at        *time.Time
@@ -152,62 +150,6 @@ func (m *OrderMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetApprovalLimit sets the "approvalLimit" field.
-func (m *OrderMutation) SetApprovalLimit(i int64) {
-	m.approvalLimit = &i
-	m.addapprovalLimit = nil
-}
-
-// ApprovalLimit returns the value of the "approvalLimit" field in the mutation.
-func (m *OrderMutation) ApprovalLimit() (r int64, exists bool) {
-	v := m.approvalLimit
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldApprovalLimit returns the old "approvalLimit" field's value of the Order entity.
-// If the Order object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *OrderMutation) OldApprovalLimit(ctx context.Context) (v int64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldApprovalLimit is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldApprovalLimit requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldApprovalLimit: %w", err)
-	}
-	return oldValue.ApprovalLimit, nil
-}
-
-// AddApprovalLimit adds i to the "approvalLimit" field.
-func (m *OrderMutation) AddApprovalLimit(i int64) {
-	if m.addapprovalLimit != nil {
-		*m.addapprovalLimit += i
-	} else {
-		m.addapprovalLimit = &i
-	}
-}
-
-// AddedApprovalLimit returns the value that was added to the "approvalLimit" field in this mutation.
-func (m *OrderMutation) AddedApprovalLimit() (r int64, exists bool) {
-	v := m.addapprovalLimit
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetApprovalLimit resets all changes to the "approvalLimit" field.
-func (m *OrderMutation) ResetApprovalLimit() {
-	m.approvalLimit = nil
-	m.addapprovalLimit = nil
 }
 
 // SetStatus sets the "status" field.
@@ -406,10 +348,7 @@ func (m *OrderMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *OrderMutation) Fields() []string {
-	fields := make([]string, 0, 4)
-	if m.approvalLimit != nil {
-		fields = append(fields, order.FieldApprovalLimit)
-	}
+	fields := make([]string, 0, 3)
 	if m.status != nil {
 		fields = append(fields, order.FieldStatus)
 	}
@@ -427,8 +366,6 @@ func (m *OrderMutation) Fields() []string {
 // schema.
 func (m *OrderMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case order.FieldApprovalLimit:
-		return m.ApprovalLimit()
 	case order.FieldStatus:
 		return m.Status()
 	case order.FieldCreatedAt:
@@ -444,8 +381,6 @@ func (m *OrderMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *OrderMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case order.FieldApprovalLimit:
-		return m.OldApprovalLimit(ctx)
 	case order.FieldStatus:
 		return m.OldStatus(ctx)
 	case order.FieldCreatedAt:
@@ -461,13 +396,6 @@ func (m *OrderMutation) OldField(ctx context.Context, name string) (ent.Value, e
 // type.
 func (m *OrderMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case order.FieldApprovalLimit:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetApprovalLimit(v)
-		return nil
 	case order.FieldStatus:
 		v, ok := value.(order.Status)
 		if !ok {
@@ -496,21 +424,13 @@ func (m *OrderMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *OrderMutation) AddedFields() []string {
-	var fields []string
-	if m.addapprovalLimit != nil {
-		fields = append(fields, order.FieldApprovalLimit)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *OrderMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case order.FieldApprovalLimit:
-		return m.AddedApprovalLimit()
-	}
 	return nil, false
 }
 
@@ -519,13 +439,6 @@ func (m *OrderMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *OrderMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case order.FieldApprovalLimit:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddApprovalLimit(v)
-		return nil
 	}
 	return fmt.Errorf("unknown Order numeric field %s", name)
 }
@@ -553,9 +466,6 @@ func (m *OrderMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *OrderMutation) ResetField(name string) error {
 	switch name {
-	case order.FieldApprovalLimit:
-		m.ResetApprovalLimit()
-		return nil
 	case order.FieldStatus:
 		m.ResetStatus()
 		return nil

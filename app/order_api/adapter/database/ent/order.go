@@ -18,8 +18,6 @@ type Order struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID uuid.UUID `json:"id,omitempty"`
-	// ApprovalLimit holds the value of the "approvalLimit" field.
-	ApprovalLimit int64 `json:"approvalLimit,omitempty"`
 	// Status holds the value of the "status" field.
 	Status order.Status `json:"status,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -55,8 +53,6 @@ func (*Order) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case order.FieldApprovalLimit:
-			values[i] = new(sql.NullInt64)
 		case order.FieldStatus:
 			values[i] = new(sql.NullString)
 		case order.FieldCreatedAt, order.FieldUpdatedAt:
@@ -83,12 +79,6 @@ func (o *Order) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value != nil {
 				o.ID = *value
-			}
-		case order.FieldApprovalLimit:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field approvalLimit", values[i])
-			} else if value.Valid {
-				o.ApprovalLimit = value.Int64
 			}
 		case order.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -149,9 +139,6 @@ func (o *Order) String() string {
 	var builder strings.Builder
 	builder.WriteString("Order(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", o.ID))
-	builder.WriteString("approvalLimit=")
-	builder.WriteString(fmt.Sprintf("%v", o.ApprovalLimit))
-	builder.WriteString(", ")
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", o.Status))
 	builder.WriteString(", ")
