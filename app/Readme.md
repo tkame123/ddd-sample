@@ -31,6 +31,10 @@ awslocal sns create-topic --name ddd-sample-event-order-order_created
 awslocal sns create-topic --name ddd-sample-event-order-order_approved
 
 awslocal sns create-topic --name ddd-sample-event-order-order_rejected
+
+awslocal sns create-topic --name ddd-sample-command-order-order_approve
+
+awslocal sns create-topic --name ddd-sample-command-order-order_reject
 ```
 
 ```
@@ -90,6 +94,9 @@ awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-
 
 awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-billing-card_authorize_failed" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-reply-queque"
 
+awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-order-order_approve" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-command-queque"
+
+awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-order-order_reject" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-command-queque"
 ```
 
 ## KitchenAPI
