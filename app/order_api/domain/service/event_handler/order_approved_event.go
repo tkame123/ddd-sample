@@ -3,7 +3,7 @@ package event_handler
 import (
 	"context"
 	"errors"
-	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/port/domain_event"
 	servive "github.com/tkame123/ddd-sample/app/order_api/domain/service"
 	ev "github.com/tkame123/ddd-sample/lib/event"
 )
@@ -12,13 +12,13 @@ type NextStepSagaWhenOrderApprovedHandler struct {
 	saga *servive.CreateOrderSaga
 }
 
-func NewNextStepSagaWhenOrderApprovedHandler(saga *servive.CreateOrderSaga) *NextStepSagaWhenOrderApprovedHandler {
+func NewNextStepSagaWhenOrderApprovedHandler(saga *servive.CreateOrderSaga) domain_event.EventHandler {
 	return &NextStepSagaWhenOrderApprovedHandler{
 		saga: saga,
 	}
 }
 
-func (h *NextStepSagaWhenOrderApprovedHandler) Handler(ctx context.Context, event model.OrderApprovedEvent) error {
+func (h *NextStepSagaWhenOrderApprovedHandler) Handler(ctx context.Context, event ev.Event) error {
 	if event.Name() != ev.EventName_OrderApproved {
 		return errors.New("invalid event")
 	}

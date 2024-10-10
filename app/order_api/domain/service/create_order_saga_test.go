@@ -187,7 +187,7 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 	}
 
 	err = event_handler.NewNextStepSagaWhenOrderRejectedHandler(saga).
-		Handler(ctx, *model.NewOrderRejectedEvent(orderID))
+		Handler(ctx, event.Event(model.NewOrderRejectedEvent(orderID)))
 	if err != nil {
 		t.Errorf("err: %v\n", err)
 	}
