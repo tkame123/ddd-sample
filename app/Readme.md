@@ -1,4 +1,6 @@
-> [!WARNING]
+# localstack
+
+> > [!WARNING]
 > DockerFileなどに後ほどまとめるまでの覚書メモ
 
 # 操作方法（CLIメモ)
@@ -70,6 +72,8 @@ awslocal sqs create-queue --queue-name ddd-sample-order-reply-queque
 ### Topic SubScribe
 
 ```
+awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-order-order_created" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-event-queque"
+
 awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-order-order_approved" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-event-queque"
 
 awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-order-order_rejected" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-event-queque"
@@ -88,7 +92,7 @@ awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-
 
 ```
 
-## BillingAPI
+## KitchenAPI
 
 ### SQS
 ```
@@ -100,9 +104,16 @@ awslocal sqs create-queue --queue-name ddd-sample-kitchen-reply-queque
 ```
 
 ### Topic SubScribe
-TODO
 
-## KitchenAPI
+```
+awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-kitchen-ticket_create" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-kitchen-command-queque"
+
+awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-kitchen-ticket_approve" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-kitchen-command-queque"
+
+awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-kitchen-ticket_reject" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-kitchen-command-queque"
+```
+
+## BillingAPI
 
 ### SQS
 ```
@@ -114,5 +125,7 @@ awslocal sqs create-queue --queue-name ddd-sample-billing-reply-queque
 ```
 
 ### Topic SubScribe
-TODO
 
+```
+awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-billing-card_authorize" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:queue-name ddd-sample-billing-command-queque"
+```
