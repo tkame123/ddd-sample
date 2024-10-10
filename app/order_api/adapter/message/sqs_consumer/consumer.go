@@ -40,7 +40,7 @@ func (c *SQSConsumer) PollMessages(ctx context.Context, maxMessages int, message
 			log.Println("Polling stopped")
 			return
 		default:
-			output, err := c.sqsClient.ReceiveMessage(ctx, &sqs.ReceiveMessageInput{
+			output, err := c.sqsClient.ReceiveMessage(context.Background(), &sqs.ReceiveMessageInput{
 				QueueUrl:            aws.String(c.queueUrl),
 				MaxNumberOfMessages: int32(maxMessages),
 				WaitTimeSeconds:     20, // Long Polling

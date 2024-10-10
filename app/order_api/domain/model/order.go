@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"github.com/tkame123/ddd-sample/lib/event"
 )
 
 const APPOVAL_LIMIT = 10000
@@ -35,7 +36,7 @@ type OrderItemRequest struct {
 	Quantity int
 }
 
-func NewOrder(items []*OrderItemRequest) (*Order, []OrderEvent, error) {
+func NewOrder(items []*OrderItemRequest) (*Order, []event.Event, error) {
 	orderID := generateID()
 
 	orderItems := make([]*OrderItem, 0, len(items))
@@ -60,26 +61,25 @@ func NewOrder(items []*OrderItemRequest) (*Order, []OrderEvent, error) {
 		return nil, nil, errors.New("approval limit over")
 	}
 
-	createdEvent := NewOrderCreatedEvent(order.OrderID)
-	return order, []OrderEvent{createdEvent}, nil
+	return order, []event.Event{&OrderCreatedEvent{OrderID: order.OrderID}}, nil
 }
 
-func (o *Order) ApproveOrder() ([]OrderEvent, error) {
+func (o *Order) ApproveOrder() ([]event.Event, error) {
 	if o.Status != OrderStatus_ApprovalPending {
 		return nil, errors.New("order is not in approval pending status")
 	}
 
 	o.Status = OrderStatus_OrderApproved
-	return []OrderEvent{NewOrderApprovedEvent(o.OrderID)}, nil
+	return []event.Event{&OrderApprovedEvent{o.OrderID}}, nil
 }
 
-func (o *Order) RejectOrder() ([]OrderEvent, error) {
+func (o *Order) RejectOrder() ([]event.Event, error) {
 	if o.Status != OrderStatus_ApprovalPending {
 		return nil, errors.New("order is not in approval pending status")
 	}
 
 	o.Status = OrderStatus_OrderRejected
-	return []OrderEvent{NewOrderRejectedEvent(o.OrderID)}, nil
+	return []event.Event{&OrderRejectedEvent{o.OrderID}}, nil
 }
 
 func (o *Order) validateApprovalLimit() bool {

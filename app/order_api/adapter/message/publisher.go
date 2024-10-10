@@ -3,7 +3,6 @@ package message
 import (
 	"context"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/message/sns"
-	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/domain_event"
 	"github.com/tkame123/ddd-sample/lib/event"
 	"log"
@@ -27,7 +26,7 @@ func NewEventPublisher(sns *sns.Actions) domain_event.Publisher {
 	return &eventPublisher{sns: *sns}
 }
 
-func (s *eventPublisher) PublishMessages(ctx context.Context, events []model.OrderEvent) {
+func (s *eventPublisher) PublishMessages(ctx context.Context, events []event.Event) {
 	for _, e := range events {
 		var topic sns.Topic
 		topic, ok := topicMap[e.Name()]

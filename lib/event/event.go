@@ -28,25 +28,6 @@ const (
 )
 
 type Event interface {
+	ID() uuid.UUID
 	Name() Name
-}
-
-type GeneralEvent struct {
-	id   uuid.UUID
-	name string
-}
-
-func NewGeneralEvent(id uuid.UUID, name string) *GeneralEvent {
-	return &GeneralEvent{
-		id:   id,
-		name: name,
-	}
-}
-
-func (e *GeneralEvent) Name() Name {
-	return e.name
-}
-
-func (e *GeneralEvent) ID() uuid.UUID {
-	return e.id
 }

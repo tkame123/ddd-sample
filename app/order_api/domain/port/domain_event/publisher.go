@@ -2,9 +2,9 @@ package domain_event
 
 import (
 	"context"
-	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
+	"github.com/tkame123/ddd-sample/lib/event"
 )
 
 type Publisher interface {
-	PublishMessages(ctx context.Context, events []model.OrderEvent)
+	PublishMessages(ctx context.Context, events []event.Event)
 }
