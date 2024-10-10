@@ -18,16 +18,13 @@ func (e *OrderCreatedEvent) ID() OrderID {
 }
 
 func (e *OrderCreatedEvent) ToBody() (string, error) {
-	var dto struct {
-		Type   string          `json:"type"`
-		Origin json.RawMessage `json:"origin"`
-	}
+	var dto event.Dto
 	dto.Type = e.Name()
-	orignByte, err := json.Marshal(e)
+	originByte, err := json.Marshal(e)
 	if err != nil {
 		return "", err
 	}
-	dto.Origin = orignByte
+	dto.Origin = originByte
 	body, err := json.Marshal(dto)
 	if err != nil {
 		return "", err
@@ -48,16 +45,13 @@ func (e *OrderApprovedEvent) ID() OrderID {
 }
 
 func (e *OrderApprovedEvent) ToBody() (string, error) {
-	var dto struct {
-		Type   string          `json:"type"`
-		Origin json.RawMessage `json:"origin"`
-	}
+	var dto event.Dto
 	dto.Type = e.Name()
-	orignByte, err := json.Marshal(e)
+	originByte, err := json.Marshal(e)
 	if err != nil {
 		return "", err
 	}
-	dto.Origin = orignByte
+	dto.Origin = originByte
 	body, err := json.Marshal(dto)
 	if err != nil {
 		return "", err
@@ -78,16 +72,13 @@ func (e *OrderRejectedEvent) ID() OrderID {
 }
 
 func (e *OrderRejectedEvent) ToBody() (string, error) {
-	var dto struct {
-		Type   string          `json:"type"`
-		Origin json.RawMessage `json:"origin"`
-	}
+	var dto event.Dto
 	dto.Type = e.Name()
-	orignByte, err := json.Marshal(e)
+	originByte, err := json.Marshal(e)
 	if err != nil {
 		return "", err
 	}
-	dto.Origin = orignByte
+	dto.Origin = originByte
 	body, err := json.Marshal(dto)
 	if err != nil {
 		return "", err

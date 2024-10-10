@@ -1,6 +1,9 @@
 package event
 
-import "github.com/google/uuid"
+import (
+	"encoding/json"
+	"github.com/google/uuid"
+)
 
 type Name = string
 
@@ -31,4 +34,10 @@ type Event interface {
 	ID() uuid.UUID
 	Name() Name
 	ToBody() (string, error)
+}
+
+// message変換用
+type Dto struct {
+	Type   string          `json:"type"`
+	Origin json.RawMessage `json:"origin"`
 }

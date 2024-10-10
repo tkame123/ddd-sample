@@ -2,15 +2,16 @@ package message
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/message/sqs_consumer"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
+	"github.com/tkame123/ddd-sample/lib/event"
 	"log"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
-	"time"
 )
 
 const (
@@ -71,7 +72,21 @@ func (e *EventConsumer) Exec() {
 }
 
 func (e *EventConsumer) workerHandler(ctx context.Context, msg *types.Message) error {
-	// TODO: job implementation
-	time.Sleep(3 * time.Second) // 処理に時間がかかる場合をシミュレーション
+	type Body struct {
+		Message string `json:"message"`
+	}
+	var body Body
+	if err := json.Unmarshal([]byte(*msg.Body), &body); err != nil {
+		return err
+	}
+	var message event.Dto
+	if err := json.Unmarshal([]byte(body.Message), &message); err != nil {
+		return err
+	}
+
+	// TODO: Event毎にHandlerをCallする
+	log.Println("type:", message.Type)
+	log.Println("body:", string(message.Origin))
+
 	return nil
 }
