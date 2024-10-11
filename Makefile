@@ -1,3 +1,7 @@
+
+wire:
+	cd di && wire
+
 order.install:
 	go install github.com/golang/mock/mockgen
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest

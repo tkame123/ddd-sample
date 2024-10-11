@@ -14,6 +14,7 @@ require (
 	github.com/caarlos0/env/v11 v11.2.2
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
+	github.com/google/wire v0.6.0
 	github.com/lib/pq v1.10.9
 	github.com/looplab/fsm v1.0.2
 	github.com/satori/go.uuid v1.2.0

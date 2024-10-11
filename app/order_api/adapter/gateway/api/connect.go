@@ -14,19 +14,19 @@ import (
 
 const address = "localhost:8080"
 
-type server struct {
+type Server struct {
 	rep repository.Repository
 }
 
 func NewServer(
 	rep repository.Repository,
-) *server {
-	return &server{
+) Server {
+	return Server{
 		rep: rep,
 	}
 }
 
-func (s *server) Run() {
+func (s *Server) Run() {
 	mux := http.NewServeMux()
 	s.applyHandlers(mux)
 	fmt.Println("... Listening on", address)
@@ -37,13 +37,13 @@ func (s *server) Run() {
 	)
 }
 
-func (s *server) applyHandlers(mux *http.ServeMux) {
+func (s *Server) applyHandlers(mux *http.ServeMux) {
 	interceptors := s.mustInterceptors()
 	// MEMO: Add handlers here.
 	mux.Handle(order_apiv1connect.NewOrderServiceHandler(&orderServiceServer{rep: s.rep}, interceptors))
 }
 
-func (s *server) mustInterceptors() connect.Option {
+func (s *Server) mustInterceptors() connect.Option {
 	return connect.WithInterceptors(
 	// MEMO: Add must interceptors here.
 	)
