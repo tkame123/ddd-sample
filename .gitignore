@@ -195,3 +195,4 @@ $RECYCLE.BIN/
 # End of https://www.gitignore.io/api/react,macos,windows,firebase,jetbrains+all
 /types_export/
 **/.envrc
+/demo/*

@@ -3,26 +3,16 @@ package sns
 import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
-	"log"
 )
 
 type Actions struct {
 	Client *sns.Client
 }
 
-func NewActions() *Actions {
-	ctx := context.Background()
-	cfg, err := config.LoadDefaultConfig(ctx)
-	if err != nil {
-		log.Fatalf("unable to load SDK config, %v", err)
-	}
-
-	snsClient := sns.NewFromConfig(cfg)
-
+func NewActions(client *sns.Client) *Actions {
 	return &Actions{
-		Client: snsClient,
+		Client: client,
 	}
 }
 
