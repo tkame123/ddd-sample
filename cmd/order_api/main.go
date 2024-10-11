@@ -1,40 +1,22 @@
 package main
 
 import (
-	connect "connectrpc.com/connect"
-	"context"
-	"fmt"
-	order_apiv1 "github.com/tkame123/ddd-sample/proto/order_api/v1"
-	"github.com/tkame123/ddd-sample/proto/order_api/v1/order_apiv1connect"
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/database"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent"
+	connect "github.com/tkame123/ddd-sample/app/order_api/adapter/gateway/api"
 	"log"
-	"net/http"
 )
 
-const address = "localhost:8080"
-
 func main() {
-	mux := http.NewServeMux()
-	path, handler := order_apiv1connect.NewOrderServiceHandler(&orderServiceServer{})
-	mux.Handle(path, handler)
-	fmt.Println("... Listening on", address)
-	http.ListenAndServe(
-		address,
-		// Use h2c so we can serve HTTP/2 without TLS.
-		h2c.NewHandler(mux, &http2.Server{}),
-	)
-}
+	//client, err := ent.Open("mysql", "root:Number@5@tcp(localhost:3306)/ddl_sample?parseTime=True")
+	client, err := ent.Open("postgres", "host=localhost port=5432 user=root dbname=ddl_sample password=Number@5 sslmode=disable")
+	if err != nil {
+		log.Fatalf("failed opening connection to mysql: %v", err)
+	}
+	defer client.Close()
 
-type orderServiceServer struct {
-	order_apiv1connect.UnimplementedOrderServiceHandler
-}
+	repo := database.NewRepository(client)
 
-func (s *orderServiceServer) PutPet(
-	ctx context.Context,
-	req *connect.Request[order_apiv1.FindOrderRequest],
-) (*connect.Response[order_apiv1.FindOrderResponse], error) {
-	id := req.Msg.GetId()
-	log.Printf("Got a request  a %v ", id)
-	return connect.NewResponse(&order_apiv1.FindOrderResponse{}), nil
+	server := connect.NewServer(repo)
+	server.Run()
 }
