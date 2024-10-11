@@ -9,6 +9,18 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent"
 )
 
+// The CreateOrderSagaStateFunc type is an adapter to allow the use of ordinary
+// function as CreateOrderSagaState mutator.
+type CreateOrderSagaStateFunc func(context.Context, *ent.CreateOrderSagaStateMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CreateOrderSagaStateFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CreateOrderSagaStateMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CreateOrderSagaStateMutation", m)
+}
+
 // The OrderFunc type is an adapter to allow the use of ordinary
 // function as Order mutator.
 type OrderFunc func(context.Context, *ent.OrderMutation) (ent.Value, error)

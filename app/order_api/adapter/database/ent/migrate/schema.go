@@ -8,6 +8,17 @@ import (
 )
 
 var (
+	// CreateOrderSagaStatesColumns holds the columns for the "create_order_saga_states" table.
+	CreateOrderSagaStatesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "current", Type: field.TypeEnum, Enums: []string{"ApprovalPending", "CreatingTicket", "AuthorizingCard", "ApprovingTicket", "ApprovingOrder", "OrderApproved", "RejectingTicket", "RejectingOrder", "OrderRejected"}},
+	}
+	// CreateOrderSagaStatesTable holds the schema information for the "create_order_saga_states" table.
+	CreateOrderSagaStatesTable = &schema.Table{
+		Name:       "create_order_saga_states",
+		Columns:    CreateOrderSagaStatesColumns,
+		PrimaryKey: []*schema.Column{CreateOrderSagaStatesColumns[0]},
+	}
 	// OrdersColumns holds the columns for the "orders" table.
 	OrdersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -48,6 +59,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		CreateOrderSagaStatesTable,
 		OrdersTable,
 		OrderItemsTable,
 	}

@@ -16,6 +16,13 @@ func (s *s) CreateOrder(ctx context.Context, items []*model.OrderItemRequest) (m
 		return uuid.Nil, err
 	}
 
+	if err := s.rep.CreateOrderSagaStateSave(ctx, &model.CreateOrderSagaState{
+		OrderID: order.OrderID,
+		Current: model.CreateOrderSagaStep_ApprovalPending,
+	}); err != nil {
+		return uuid.Nil, err
+	}
+
 	s.pub.PublishMessages(ctx, events)
 
 	return order.OrderID, nil
