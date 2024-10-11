@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -29,6 +30,34 @@ func (cossc *CreateOrderSagaStateCreate) SetCurrent(c createordersagastate.Curre
 	return cossc
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (cossc *CreateOrderSagaStateCreate) SetCreatedAt(t time.Time) *CreateOrderSagaStateCreate {
+	cossc.mutation.SetCreatedAt(t)
+	return cossc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (cossc *CreateOrderSagaStateCreate) SetNillableCreatedAt(t *time.Time) *CreateOrderSagaStateCreate {
+	if t != nil {
+		cossc.SetCreatedAt(*t)
+	}
+	return cossc
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (cossc *CreateOrderSagaStateCreate) SetUpdatedAt(t time.Time) *CreateOrderSagaStateCreate {
+	cossc.mutation.SetUpdatedAt(t)
+	return cossc
+}
+
+// SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
+func (cossc *CreateOrderSagaStateCreate) SetNillableUpdatedAt(t *time.Time) *CreateOrderSagaStateCreate {
+	if t != nil {
+		cossc.SetUpdatedAt(*t)
+	}
+	return cossc
+}
+
 // SetID sets the "id" field.
 func (cossc *CreateOrderSagaStateCreate) SetID(u uuid.UUID) *CreateOrderSagaStateCreate {
 	cossc.mutation.SetID(u)
@@ -42,6 +71,7 @@ func (cossc *CreateOrderSagaStateCreate) Mutation() *CreateOrderSagaStateMutatio
 
 // Save creates the CreateOrderSagaState in the database.
 func (cossc *CreateOrderSagaStateCreate) Save(ctx context.Context) (*CreateOrderSagaState, error) {
+	cossc.defaults()
 	return withHooks(ctx, cossc.sqlSave, cossc.mutation, cossc.hooks)
 }
 
@@ -67,6 +97,18 @@ func (cossc *CreateOrderSagaStateCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (cossc *CreateOrderSagaStateCreate) defaults() {
+	if _, ok := cossc.mutation.CreatedAt(); !ok {
+		v := createordersagastate.DefaultCreatedAt()
+		cossc.mutation.SetCreatedAt(v)
+	}
+	if _, ok := cossc.mutation.UpdatedAt(); !ok {
+		v := createordersagastate.DefaultUpdatedAt()
+		cossc.mutation.SetUpdatedAt(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (cossc *CreateOrderSagaStateCreate) check() error {
 	if _, ok := cossc.mutation.Current(); !ok {
@@ -76,6 +118,12 @@ func (cossc *CreateOrderSagaStateCreate) check() error {
 		if err := createordersagastate.CurrentValidator(v); err != nil {
 			return &ValidationError{Name: "current", err: fmt.Errorf(`ent: validator failed for field "CreateOrderSagaState.current": %w`, err)}
 		}
+	}
+	if _, ok := cossc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "CreateOrderSagaState.created_at"`)}
+	}
+	if _, ok := cossc.mutation.UpdatedAt(); !ok {
+		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "CreateOrderSagaState.updated_at"`)}
 	}
 	return nil
 }
@@ -116,6 +164,14 @@ func (cossc *CreateOrderSagaStateCreate) createSpec() (*CreateOrderSagaState, *s
 	if value, ok := cossc.mutation.Current(); ok {
 		_spec.SetField(createordersagastate.FieldCurrent, field.TypeEnum, value)
 		_node.Current = value
+	}
+	if value, ok := cossc.mutation.CreatedAt(); ok {
+		_spec.SetField(createordersagastate.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
+	}
+	if value, ok := cossc.mutation.UpdatedAt(); ok {
+		_spec.SetField(createordersagastate.FieldUpdatedAt, field.TypeTime, value)
+		_node.UpdatedAt = value
 	}
 	return _node, _spec
 }
@@ -181,6 +237,30 @@ func (u *CreateOrderSagaStateUpsert) UpdateCurrent() *CreateOrderSagaStateUpsert
 	return u
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (u *CreateOrderSagaStateUpsert) SetCreatedAt(v time.Time) *CreateOrderSagaStateUpsert {
+	u.Set(createordersagastate.FieldCreatedAt, v)
+	return u
+}
+
+// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
+func (u *CreateOrderSagaStateUpsert) UpdateCreatedAt() *CreateOrderSagaStateUpsert {
+	u.SetExcluded(createordersagastate.FieldCreatedAt)
+	return u
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *CreateOrderSagaStateUpsert) SetUpdatedAt(v time.Time) *CreateOrderSagaStateUpsert {
+	u.Set(createordersagastate.FieldUpdatedAt, v)
+	return u
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *CreateOrderSagaStateUpsert) UpdateUpdatedAt() *CreateOrderSagaStateUpsert {
+	u.SetExcluded(createordersagastate.FieldUpdatedAt)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -243,6 +323,34 @@ func (u *CreateOrderSagaStateUpsertOne) UpdateCurrent() *CreateOrderSagaStateUps
 	})
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (u *CreateOrderSagaStateUpsertOne) SetCreatedAt(v time.Time) *CreateOrderSagaStateUpsertOne {
+	return u.Update(func(s *CreateOrderSagaStateUpsert) {
+		s.SetCreatedAt(v)
+	})
+}
+
+// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
+func (u *CreateOrderSagaStateUpsertOne) UpdateCreatedAt() *CreateOrderSagaStateUpsertOne {
+	return u.Update(func(s *CreateOrderSagaStateUpsert) {
+		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *CreateOrderSagaStateUpsertOne) SetUpdatedAt(v time.Time) *CreateOrderSagaStateUpsertOne {
+	return u.Update(func(s *CreateOrderSagaStateUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *CreateOrderSagaStateUpsertOne) UpdateUpdatedAt() *CreateOrderSagaStateUpsertOne {
+	return u.Update(func(s *CreateOrderSagaStateUpsert) {
+		s.UpdateUpdatedAt()
+	})
+}
+
 // Exec executes the query.
 func (u *CreateOrderSagaStateUpsertOne) Exec(ctx context.Context) error {
 	if len(u.create.conflict) == 0 {
@@ -300,6 +408,7 @@ func (cosscb *CreateOrderSagaStateCreateBulk) Save(ctx context.Context) ([]*Crea
 	for i := range cosscb.builders {
 		func(i int, root context.Context) {
 			builder := cosscb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CreateOrderSagaStateMutation)
 				if !ok {
@@ -468,6 +577,34 @@ func (u *CreateOrderSagaStateUpsertBulk) SetCurrent(v createordersagastate.Curre
 func (u *CreateOrderSagaStateUpsertBulk) UpdateCurrent() *CreateOrderSagaStateUpsertBulk {
 	return u.Update(func(s *CreateOrderSagaStateUpsert) {
 		s.UpdateCurrent()
+	})
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (u *CreateOrderSagaStateUpsertBulk) SetCreatedAt(v time.Time) *CreateOrderSagaStateUpsertBulk {
+	return u.Update(func(s *CreateOrderSagaStateUpsert) {
+		s.SetCreatedAt(v)
+	})
+}
+
+// UpdateCreatedAt sets the "created_at" field to the value that was provided on create.
+func (u *CreateOrderSagaStateUpsertBulk) UpdateCreatedAt() *CreateOrderSagaStateUpsertBulk {
+	return u.Update(func(s *CreateOrderSagaStateUpsert) {
+		s.UpdateCreatedAt()
+	})
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (u *CreateOrderSagaStateUpsertBulk) SetUpdatedAt(v time.Time) *CreateOrderSagaStateUpsertBulk {
+	return u.Update(func(s *CreateOrderSagaStateUpsert) {
+		s.SetUpdatedAt(v)
+	})
+}
+
+// UpdateUpdatedAt sets the "updated_at" field to the value that was provided on create.
+func (u *CreateOrderSagaStateUpsertBulk) UpdateUpdatedAt() *CreateOrderSagaStateUpsertBulk {
+	return u.Update(func(s *CreateOrderSagaStateUpsert) {
+		s.UpdateUpdatedAt()
 	})
 }
 

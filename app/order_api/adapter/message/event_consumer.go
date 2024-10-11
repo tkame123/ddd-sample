@@ -3,7 +3,6 @@ package message
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
@@ -113,13 +112,6 @@ func (e *EventConsumer) workerHandler(ctx context.Context, msg *types.Message) e
 	ev, err := parseEvent(msg)
 	if err != nil {
 		return err
-	}
-
-	log.Println("event: ", ev)
-	log.Println("eventName: ", ev.Name())
-	if ev == nil {
-		return errors.New("event is nil")
-
 	}
 
 	err = e.processEvent(ctx, ev)

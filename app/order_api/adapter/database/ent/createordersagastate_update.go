@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -41,6 +42,26 @@ func (cossu *CreateOrderSagaStateUpdate) SetNillableCurrent(c *createordersagast
 	return cossu
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (cossu *CreateOrderSagaStateUpdate) SetCreatedAt(t time.Time) *CreateOrderSagaStateUpdate {
+	cossu.mutation.SetCreatedAt(t)
+	return cossu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (cossu *CreateOrderSagaStateUpdate) SetNillableCreatedAt(t *time.Time) *CreateOrderSagaStateUpdate {
+	if t != nil {
+		cossu.SetCreatedAt(*t)
+	}
+	return cossu
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (cossu *CreateOrderSagaStateUpdate) SetUpdatedAt(t time.Time) *CreateOrderSagaStateUpdate {
+	cossu.mutation.SetUpdatedAt(t)
+	return cossu
+}
+
 // Mutation returns the CreateOrderSagaStateMutation object of the builder.
 func (cossu *CreateOrderSagaStateUpdate) Mutation() *CreateOrderSagaStateMutation {
 	return cossu.mutation
@@ -48,6 +69,7 @@ func (cossu *CreateOrderSagaStateUpdate) Mutation() *CreateOrderSagaStateMutatio
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (cossu *CreateOrderSagaStateUpdate) Save(ctx context.Context) (int, error) {
+	cossu.defaults()
 	return withHooks(ctx, cossu.sqlSave, cossu.mutation, cossu.hooks)
 }
 
@@ -70,6 +92,14 @@ func (cossu *CreateOrderSagaStateUpdate) Exec(ctx context.Context) error {
 func (cossu *CreateOrderSagaStateUpdate) ExecX(ctx context.Context) {
 	if err := cossu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (cossu *CreateOrderSagaStateUpdate) defaults() {
+	if _, ok := cossu.mutation.UpdatedAt(); !ok {
+		v := createordersagastate.UpdateDefaultUpdatedAt()
+		cossu.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -97,6 +127,12 @@ func (cossu *CreateOrderSagaStateUpdate) sqlSave(ctx context.Context) (n int, er
 	}
 	if value, ok := cossu.mutation.Current(); ok {
 		_spec.SetField(createordersagastate.FieldCurrent, field.TypeEnum, value)
+	}
+	if value, ok := cossu.mutation.CreatedAt(); ok {
+		_spec.SetField(createordersagastate.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := cossu.mutation.UpdatedAt(); ok {
+		_spec.SetField(createordersagastate.FieldUpdatedAt, field.TypeTime, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cossu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -132,6 +168,26 @@ func (cossuo *CreateOrderSagaStateUpdateOne) SetNillableCurrent(c *createordersa
 	return cossuo
 }
 
+// SetCreatedAt sets the "created_at" field.
+func (cossuo *CreateOrderSagaStateUpdateOne) SetCreatedAt(t time.Time) *CreateOrderSagaStateUpdateOne {
+	cossuo.mutation.SetCreatedAt(t)
+	return cossuo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (cossuo *CreateOrderSagaStateUpdateOne) SetNillableCreatedAt(t *time.Time) *CreateOrderSagaStateUpdateOne {
+	if t != nil {
+		cossuo.SetCreatedAt(*t)
+	}
+	return cossuo
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (cossuo *CreateOrderSagaStateUpdateOne) SetUpdatedAt(t time.Time) *CreateOrderSagaStateUpdateOne {
+	cossuo.mutation.SetUpdatedAt(t)
+	return cossuo
+}
+
 // Mutation returns the CreateOrderSagaStateMutation object of the builder.
 func (cossuo *CreateOrderSagaStateUpdateOne) Mutation() *CreateOrderSagaStateMutation {
 	return cossuo.mutation
@@ -152,6 +208,7 @@ func (cossuo *CreateOrderSagaStateUpdateOne) Select(field string, fields ...stri
 
 // Save executes the query and returns the updated CreateOrderSagaState entity.
 func (cossuo *CreateOrderSagaStateUpdateOne) Save(ctx context.Context) (*CreateOrderSagaState, error) {
+	cossuo.defaults()
 	return withHooks(ctx, cossuo.sqlSave, cossuo.mutation, cossuo.hooks)
 }
 
@@ -174,6 +231,14 @@ func (cossuo *CreateOrderSagaStateUpdateOne) Exec(ctx context.Context) error {
 func (cossuo *CreateOrderSagaStateUpdateOne) ExecX(ctx context.Context) {
 	if err := cossuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (cossuo *CreateOrderSagaStateUpdateOne) defaults() {
+	if _, ok := cossuo.mutation.UpdatedAt(); !ok {
+		v := createordersagastate.UpdateDefaultUpdatedAt()
+		cossuo.mutation.SetUpdatedAt(v)
 	}
 }
 
@@ -218,6 +283,12 @@ func (cossuo *CreateOrderSagaStateUpdateOne) sqlSave(ctx context.Context) (_node
 	}
 	if value, ok := cossuo.mutation.Current(); ok {
 		_spec.SetField(createordersagastate.FieldCurrent, field.TypeEnum, value)
+	}
+	if value, ok := cossuo.mutation.CreatedAt(); ok {
+		_spec.SetField(createordersagastate.FieldCreatedAt, field.TypeTime, value)
+	}
+	if value, ok := cossuo.mutation.UpdatedAt(); ok {
+		_spec.SetField(createordersagastate.FieldUpdatedAt, field.TypeTime, value)
 	}
 	_node = &CreateOrderSagaState{config: cossuo.config}
 	_spec.Assign = _node.assignValues

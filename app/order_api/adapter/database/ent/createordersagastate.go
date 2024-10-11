@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -19,7 +20,11 @@ type CreateOrderSagaState struct {
 	// id is orderID
 	ID uuid.UUID `json:"id,omitempty"`
 	// Current holds the value of the "current" field.
-	Current      createordersagastate.Current `json:"current,omitempty"`
+	Current createordersagastate.Current `json:"current,omitempty"`
+	// CreatedAt holds the value of the "created_at" field.
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	// UpdatedAt holds the value of the "updated_at" field.
+	UpdatedAt    time.Time `json:"updated_at,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -30,6 +35,8 @@ func (*CreateOrderSagaState) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case createordersagastate.FieldCurrent:
 			values[i] = new(sql.NullString)
+		case createordersagastate.FieldCreatedAt, createordersagastate.FieldUpdatedAt:
+			values[i] = new(sql.NullTime)
 		case createordersagastate.FieldID:
 			values[i] = new(uuid.UUID)
 		default:
@@ -58,6 +65,18 @@ func (coss *CreateOrderSagaState) assignValues(columns []string, values []any) e
 				return fmt.Errorf("unexpected type %T for field current", values[i])
 			} else if value.Valid {
 				coss.Current = createordersagastate.Current(value.String)
+			}
+		case createordersagastate.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				coss.CreatedAt = value.Time
+			}
+		case createordersagastate.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				coss.UpdatedAt = value.Time
 			}
 		default:
 			coss.selectValues.Set(columns[i], values[i])
@@ -97,6 +116,12 @@ func (coss *CreateOrderSagaState) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", coss.ID))
 	builder.WriteString("current=")
 	builder.WriteString(fmt.Sprintf("%v", coss.Current))
+	builder.WriteString(", ")
+	builder.WriteString("created_at=")
+	builder.WriteString(coss.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("updated_at=")
+	builder.WriteString(coss.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
