@@ -6,8 +6,10 @@ import (
 )
 
 type EnvConfig struct {
+	// DB
 	OrderAPIDSN string `env:"ORDER_API_DSN"`
 
+	// SNS
 	ArnTopicEventOrderOrderCreated      string `env:"TOPIC_ARN_EVENT_ORDER_ORDER_CREATED"`
 	ArnTopicEventOrderOrderApproved     string `env:"TOPIC_ARN_EVENT_ORDER_ORDER_APPROVED"`
 	ArnTopicEventOrderOrderRejected     string `env:"TOPIC_ARN_EVENT_ORDER_ORDER_REJECTED"`
@@ -17,6 +19,9 @@ type EnvConfig struct {
 	ArnTopicCommandKitchenTicketApprove string `env:"TOPIC_ARN_COMMAND_KITCHEN_TICKET_APPROVE"`
 	ArnTopicCommandKitchenTicketReject  string `env:"TOPIC_ARN_COMMAND_KITCHEN_TICKET_REJECT"`
 	ArnTopicCommandBillingCardAuthorize string `env:"TOPIC_ARN_COMMAND_BILLING_CARD_AUTHORIZE"`
+
+	// SQS
+	SqsUrlOrderEvent string `env:"SQS_URL_ORDER_EVENT"`
 }
 
 func NewENV() (*EnvConfig, error) {

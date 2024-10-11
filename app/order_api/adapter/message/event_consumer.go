@@ -4,11 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
-	"github.com/caarlos0/env/v11"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/message/sqs_consumer"
+	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/service"
@@ -28,10 +27,6 @@ const (
 	messageChan = 10
 )
 
-type queueUrlConfig struct {
-	ArnTopicEventOrderOrderCreated string `env:"SQS_URL_ORDER_EVENT"`
-}
-
 type EventConsumer struct {
 	sqsClient  *sqs.Client
 	queueUrl   string
@@ -42,25 +37,16 @@ type EventConsumer struct {
 }
 
 func NewEventConsumer(
+	envCfg *provider.EnvConfig,
+	sqsClient *sqs.Client,
 	rep repository.Repository,
 	orderSVC service.CreateOrder,
 	kitchenAPI external_service.KitchenAPI,
 	billingAPI external_service.BillingAPI,
 ) *EventConsumer {
-	ctx := context.TODO()
-	cfg, err := config.LoadDefaultConfig(ctx)
-	if err != nil {
-		log.Fatalf("unable to load SDK config, %v", err)
-	}
-	sqsClient := sqs.NewFromConfig(cfg)
-	var queueUrlCfg queueUrlConfig
-	if err := env.Parse(&queueUrlCfg); err != nil {
-		log.Fatalf("unable to parase env, %v", err)
-	}
-
 	return &EventConsumer{
 		sqsClient:  sqsClient,
-		queueUrl:   queueUrlCfg.ArnTopicEventOrderOrderCreated,
+		queueUrl:   envCfg.SqsUrlOrderEvent,
 		rep:        rep,
 		orderSVC:   orderSVC,
 		kitchenAPI: kitchenAPI,
@@ -69,7 +55,6 @@ func NewEventConsumer(
 }
 
 func (e *EventConsumer) Exec() {
-
 	// コンテキストとキャンセル関数を作成
 	ctxPolling, ctxPollingCancel := context.WithCancel(context.Background())
 	ctxWorker, ctxWorkerCancel := context.WithCancel(context.Background())

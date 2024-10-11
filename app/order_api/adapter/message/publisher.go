@@ -16,7 +16,7 @@ type eventPublisher struct {
 	topicMap map[event.Name]topicArn
 }
 
-func NewEventPublisher(sns *sns.Actions, envCfg *provider.EnvConfig) domain_event.Publisher {
+func NewEventPublisher(envCfg *provider.EnvConfig, sns *sns.Actions) domain_event.Publisher {
 	topicMap := map[event.Name]topicArn{
 		event.EventName_OrderCreated:    envCfg.ArnTopicEventOrderOrderCreated,
 		event.EventName_OrderApproved:   envCfg.ArnTopicEventOrderOrderApproved,
