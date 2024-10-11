@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
+	"github.com/caarlos0/env/v11"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/message/sqs_consumer"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
@@ -27,6 +28,10 @@ const (
 	maxWorkers  = 3
 	messageChan = 10
 )
+
+type queueUrlConfig struct {
+	ArnTopicEventOrderOrderCreated string `env:"SQS_URL_ORDER_EVENT"`
+}
 
 type EventConsumer struct {
 	sqsClient  *sqs.Client
@@ -49,11 +54,14 @@ func NewEventConsumer(
 		log.Fatalf("unable to load SDK config, %v", err)
 	}
 	sqsClient := sqs.NewFromConfig(cfg)
-	queueUrl := "https://localhost.localstack.cloud:4566/000000000000/ddd-sample-order-event-queque" //TODO: env経由へ
+	var queueUrlCfg queueUrlConfig
+	if err := env.Parse(&queueUrlCfg); err != nil {
+		log.Fatalf("unable to parase env, %v", err)
+	}
 
 	return &EventConsumer{
 		sqsClient:  sqsClient,
-		queueUrl:   queueUrl,
+		queueUrl:   queueUrlCfg.ArnTopicEventOrderOrderCreated,
 		rep:        rep,
 		orderSVC:   orderSVC,
 		kitchenAPI: kitchenAPI,
