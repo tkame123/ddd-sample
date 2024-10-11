@@ -28,3 +28,9 @@ order.ent.atlas:
       -u "ent://app/order_api/adapter/database/ent/schema" \
       --dev-url "sqlite://file?mode=memory&_fk=1" \
       -w
+
+buf.generate:
+	buf generate
+
+buf.lint:
+	buf lint

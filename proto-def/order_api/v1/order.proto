@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package order_api.v1;
+
+message Order {
+  string id = 1;
+}
+
+message FindOrderRequest {
+  string id = 1;
+}
+
+message FindOrderResponse {
+  Order order = 1;
+}
+
+service OrderService {
+  rpc FindOrder(FindOrderRequest) returns (FindOrderResponse);
+}
