@@ -11,7 +11,7 @@ import (
 
 type topicArn = string
 
-type eventPublisher struct {
+type EventPublisher struct {
 	sns      sns.Actions
 	topicMap map[event.Name]topicArn
 }
@@ -27,10 +27,10 @@ func NewEventPublisher(envCfg *provider.EnvConfig, sns *sns.Actions) domain_even
 		event.CommandName_CardAuthorize: envCfg.ArnTopicCommandBillingCardAuthorize,
 	}
 
-	return &eventPublisher{sns: *sns, topicMap: topicMap}
+	return &EventPublisher{sns: *sns, topicMap: topicMap}
 }
 
-func (s *eventPublisher) PublishMessages(ctx context.Context, events []event.Event) {
+func (s *EventPublisher) PublishMessages(ctx context.Context, events []event.Event) {
 	for _, e := range events {
 		var topic string
 		topic, ok := s.topicMap[e.Name()]

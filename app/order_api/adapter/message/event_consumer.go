@@ -54,7 +54,7 @@ func NewEventConsumer(
 	}
 }
 
-func (e *EventConsumer) Exec() {
+func (e *EventConsumer) Run() {
 	// コンテキストとキャンセル関数を作成
 	ctxPolling, ctxPollingCancel := context.WithCancel(context.Background())
 	ctxWorker, ctxWorkerCancel := context.WithCancel(context.Background())

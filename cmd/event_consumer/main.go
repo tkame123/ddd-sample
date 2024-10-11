@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	server, cleanup, err := di.InitializeOrderAPIServer()
+	server, cleanup, err := di.InitializeEventConsumer()
 	defer cleanup()
 	if err != nil {
 		panic(err)
