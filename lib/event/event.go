@@ -37,7 +37,8 @@ type Event interface {
 }
 
 // message変換用
-type Dto struct {
+type RawEvent struct {
 	Type   string          `json:"type"`
+	ID     string          `json:"id"`
 	Origin json.RawMessage `json:"origin"`
 }

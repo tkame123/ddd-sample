@@ -18,14 +18,15 @@ func (e *OrderCreatedEvent) ID() OrderID {
 }
 
 func (e *OrderCreatedEvent) ToBody() (string, error) {
-	var dto event.Dto
-	dto.Type = e.Name()
+	var raw event.RawEvent
+	raw.Type = e.Name()
+	raw.ID = e.ID().String()
 	originByte, err := json.Marshal(e)
 	if err != nil {
 		return "", err
 	}
-	dto.Origin = originByte
-	body, err := json.Marshal(dto)
+	raw.Origin = originByte
+	body, err := json.Marshal(raw)
 	if err != nil {
 		return "", err
 	}
@@ -45,14 +46,15 @@ func (e *OrderApprovedEvent) ID() OrderID {
 }
 
 func (e *OrderApprovedEvent) ToBody() (string, error) {
-	var dto event.Dto
-	dto.Type = e.Name()
+	var raw event.RawEvent
+	raw.Type = e.Name()
+	raw.ID = e.ID().String()
 	originByte, err := json.Marshal(e)
 	if err != nil {
 		return "", err
 	}
-	dto.Origin = originByte
-	body, err := json.Marshal(dto)
+	raw.Origin = originByte
+	body, err := json.Marshal(raw)
 	if err != nil {
 		return "", err
 	}
@@ -72,14 +74,15 @@ func (e *OrderRejectedEvent) ID() OrderID {
 }
 
 func (e *OrderRejectedEvent) ToBody() (string, error) {
-	var dto event.Dto
-	dto.Type = e.Name()
+	var raw event.RawEvent
+	raw.Type = e.Name()
+	raw.ID = e.ID().String()
 	originByte, err := json.Marshal(e)
 	if err != nil {
 		return "", err
 	}
-	dto.Origin = originByte
-	body, err := json.Marshal(dto)
+	raw.Origin = originByte
+	body, err := json.Marshal(raw)
 	if err != nil {
 		return "", err
 	}

@@ -21,7 +21,7 @@ func TestOrderCreatedEvent_ToBody(t *testing.T) {
 			fields: fields{
 				OrderID: uuid.Nil,
 			},
-			want:    `{"type":"event-order-order_created","origin":{"OrderID":"00000000-0000-0000-0000-000000000000"}}`,
+			want:    `{"type":"event-order-order_created","id":"00000000-0000-0000-0000-000000000000","origin":{"OrderID":"00000000-0000-0000-0000-000000000000"}}`,
 			wantErr: false,
 		},
 	}
