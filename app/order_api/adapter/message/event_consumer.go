@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/message/sqs_consumer"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
@@ -26,6 +29,8 @@ const (
 )
 
 type EventConsumer struct {
+	sqsClient  *sqs.Client
+	queueUrl   string
 	rep        repository.Repository
 	orderSVC   service.CreateOrder
 	kitchenAPI external_service.KitchenAPI
@@ -38,7 +43,17 @@ func NewEventConsumer(
 	kitchenAPI external_service.KitchenAPI,
 	billingAPI external_service.BillingAPI,
 ) *EventConsumer {
+	ctx := context.TODO()
+	cfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		log.Fatalf("unable to load SDK config, %v", err)
+	}
+	sqsClient := sqs.NewFromConfig(cfg)
+	queueUrl := "https://localhost.localstack.cloud:4566/000000000000/ddd-sample-order-event-queque" //TODO: env経由へ
+
 	return &EventConsumer{
+		sqsClient:  sqsClient,
+		queueUrl:   queueUrl,
 		rep:        rep,
 		orderSVC:   orderSVC,
 		kitchenAPI: kitchenAPI,
@@ -47,7 +62,6 @@ func NewEventConsumer(
 }
 
 func (e *EventConsumer) Exec() {
-	queueUrl := "https://localhost.localstack.cloud:4566/000000000000/ddd-sample-order-event-queque" //TODO: Constructorへ
 
 	// コンテキストとキャンセル関数を作成
 	ctxPolling, ctxPollingCancel := context.WithCancel(context.Background())
@@ -56,7 +70,7 @@ func (e *EventConsumer) Exec() {
 	// SQS コンシューマを作成
 	wgPolling := new(sync.WaitGroup)
 	wgPolling.Add(1)
-	consumer := sqs_consumer.NewSQSConsumer(queueUrl, wgPolling)
+	consumer := sqs_consumer.NewSQSConsumer(e.sqsClient, e.queueUrl, wgPolling)
 
 	// メッセージをやり取りするチャネルを作成
 	messagesChan := make(chan *types.Message, messageChan) // バッファ付きのチャネル
@@ -105,7 +119,10 @@ func (e *EventConsumer) workerHandler(ctx context.Context, msg *types.Message) e
 		return err
 	}
 
-	//TODO: DeleteMessage
+	err = e.deleteMessage(ctx, msg)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -128,6 +145,18 @@ func (e *EventConsumer) processEvent(ctx context.Context, ev event.Event) error 
 		return err
 	}
 	err = sagaHandler.Handler(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (e *EventConsumer) deleteMessage(ctx context.Context, msg *types.Message) error {
+	_, err := e.sqsClient.DeleteMessage(ctx, &sqs.DeleteMessageInput{
+		QueueUrl:      aws.String(e.queueUrl),
+		ReceiptHandle: msg.ReceiptHandle,
+	})
 	if err != nil {
 		return err
 	}

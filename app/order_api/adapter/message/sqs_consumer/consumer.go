@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 )
@@ -18,13 +17,7 @@ type SQSConsumer struct {
 	wg        *sync.WaitGroup
 }
 
-func NewSQSConsumer(queueUrl string, wg *sync.WaitGroup) *SQSConsumer {
-	ctx := context.TODO()
-	cfg, err := config.LoadDefaultConfig(ctx)
-	if err != nil {
-		log.Fatalf("unable to load SDK config, %v", err)
-	}
-	sqsClient := sqs.NewFromConfig(cfg)
+func NewSQSConsumer(sqsClient *sqs.Client, queueUrl string, wg *sync.WaitGroup) *SQSConsumer {
 	return &SQSConsumer{
 		sqsClient: sqsClient,
 		queueUrl:  queueUrl,
