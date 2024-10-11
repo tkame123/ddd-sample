@@ -51,15 +51,15 @@ func (mr *MockCreateOrderSagaStateMockRecorder) CreateOrderSagaStateFindOne(ctx,
 }
 
 // CreateOrderSagaStateSave mocks base method.
-func (m *MockCreateOrderSagaState) CreateOrderSagaStateSave(ctx context.Context, order *model.CreateOrderSagaState) error {
+func (m *MockCreateOrderSagaState) CreateOrderSagaStateSave(ctx context.Context, state *model.CreateOrderSagaState) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateOrderSagaStateSave", ctx, order)
+	ret := m.ctrl.Call(m, "CreateOrderSagaStateSave", ctx, state)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // CreateOrderSagaStateSave indicates an expected call of CreateOrderSagaStateSave.
-func (mr *MockCreateOrderSagaStateMockRecorder) CreateOrderSagaStateSave(ctx, order interface{}) *gomock.Call {
+func (mr *MockCreateOrderSagaStateMockRecorder) CreateOrderSagaStateSave(ctx, state interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrderSagaStateSave", reflect.TypeOf((*MockCreateOrderSagaState)(nil).CreateOrderSagaStateSave), ctx, order)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrderSagaStateSave", reflect.TypeOf((*MockCreateOrderSagaState)(nil).CreateOrderSagaStateSave), ctx, state)
 }

@@ -51,17 +51,17 @@ func (mr *MockRepositoryMockRecorder) CreateOrderSagaStateFindOne(ctx, id interf
 }
 
 // CreateOrderSagaStateSave mocks base method.
-func (m *MockRepository) CreateOrderSagaStateSave(ctx context.Context, order *model.CreateOrderSagaState) error {
+func (m *MockRepository) CreateOrderSagaStateSave(ctx context.Context, state *model.CreateOrderSagaState) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateOrderSagaStateSave", ctx, order)
+	ret := m.ctrl.Call(m, "CreateOrderSagaStateSave", ctx, state)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // CreateOrderSagaStateSave indicates an expected call of CreateOrderSagaStateSave.
-func (mr *MockRepositoryMockRecorder) CreateOrderSagaStateSave(ctx, order interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) CreateOrderSagaStateSave(ctx, state interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrderSagaStateSave", reflect.TypeOf((*MockRepository)(nil).CreateOrderSagaStateSave), ctx, order)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrderSagaStateSave", reflect.TypeOf((*MockRepository)(nil).CreateOrderSagaStateSave), ctx, state)
 }
 
 // OrderFindOne mocks base method.

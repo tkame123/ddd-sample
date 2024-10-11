@@ -7,5 +7,5 @@ import (
 
 type CreateOrderSagaState interface {
 	CreateOrderSagaStateFindOne(ctx context.Context, id model.OrderID) (*model.CreateOrderSagaState, error)
-	CreateOrderSagaStateSave(ctx context.Context, order *model.CreateOrderSagaState) error
+	CreateOrderSagaStateSave(ctx context.Context, state *model.CreateOrderSagaState) error
 }
