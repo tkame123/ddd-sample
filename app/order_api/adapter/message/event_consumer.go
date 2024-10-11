@@ -3,9 +3,13 @@ package message
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/message/sqs_consumer"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/port/service"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga/event_handler"
 	"github.com/tkame123/ddd-sample/lib/event"
 	"log"
@@ -22,11 +26,24 @@ const (
 )
 
 type EventConsumer struct {
-	rep repository.Repository
+	rep        repository.Repository
+	orderSVC   service.CreateOrder
+	kitchenAPI external_service.KitchenAPI
+	billingAPI external_service.BillingAPI
 }
 
-func NewEventConsumer() *EventConsumer {
-	return &EventConsumer{}
+func NewEventConsumer(
+	rep repository.Repository,
+	orderSVC service.CreateOrder,
+	kitchenAPI external_service.KitchenAPI,
+	billingAPI external_service.BillingAPI,
+) *EventConsumer {
+	return &EventConsumer{
+		rep:        rep,
+		orderSVC:   orderSVC,
+		kitchenAPI: kitchenAPI,
+		billingAPI: billingAPI,
+	}
 }
 
 func (e *EventConsumer) Exec() {
@@ -76,8 +93,44 @@ func (e *EventConsumer) workerHandler(ctx context.Context, msg *types.Message) e
 		return err
 	}
 
-	log.Println("event:", ev)
-	// TODO: HandlerのCall
+	log.Println("event: ", ev)
+	log.Println("eventName: ", ev.Name())
+	if ev == nil {
+		return errors.New("event is nil")
+
+	}
+
+	err = e.processEvent(ctx, ev)
+	if err != nil {
+		return err
+	}
+
+	//TODO: DeleteMessage
+
+	return nil
+}
+
+func (e *EventConsumer) processEvent(ctx context.Context, ev event.Event) error {
+	// CreateOrderSaga以外に活用する段階ではAbstractFactoryを使う形なのかな？
+	state, err := e.rep.CreateOrderSagaStateFindOne(ctx, ev.ID())
+	if err != nil {
+		return err
+	}
+	saga := create_order_saga.NewCreateOrderSaga(
+		state,
+		e.rep,
+		e.orderSVC,
+		e.kitchenAPI,
+		e.billingAPI,
+	)
+	sagaHandler, err := NewCreateOrderSagaContext(ev, saga)
+	if err != nil {
+		return err
+	}
+	err = sagaHandler.Handler(ctx)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

@@ -2,12 +2,12 @@ package create_order_saga
 
 import (
 	"context"
-	"fmt"
 	"github.com/looplab/fsm"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/service"
+	"log"
 )
 
 type CreateOrderSaga struct {
@@ -126,7 +126,7 @@ func NewCreateOrderSaga(
 	ms.SetState(currentState.Current)
 	c.fsm = ms
 
-	fmt.Println(c.fsm.AvailableTransitions())
+	log.Println("CreateOrderSaga initialized and available transitions are:", c.fsm.AvailableTransitions())
 
 	return c
 }
