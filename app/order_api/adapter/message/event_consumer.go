@@ -121,7 +121,8 @@ func (e *EventConsumer) workerHandler(ctx context.Context, msg *types.Message) e
 
 	err = e.deleteMessage(ctx, msg)
 	if err != nil {
-		return err
+		// TODO Transactional Outbox Patternの導入までは通知して手動対応ってなるのだろうか。。。
+		log.Printf("failed to delete message %v", err)
 	}
 
 	return nil
