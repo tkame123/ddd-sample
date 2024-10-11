@@ -2,7 +2,7 @@ package main
 
 import (
 	_ "github.com/lib/pq"
-	"github.com/tkame123/ddd-sample/di"
+	"github.com/tkame123/ddd-sample/app/order_api/di"
 )
 
 func main() {

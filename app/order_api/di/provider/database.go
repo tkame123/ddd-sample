@@ -6,8 +6,8 @@ import (
 	"log"
 )
 
-func NewOrderApiDB(cfg *Config) (*ent.Client, func(), error) {
-	client, err := ent.Open("postgres", cfg.OrderAPIDSN)
+func NewOrderApiDB(env *EnvConfig) (*ent.Client, func(), error) {
+	client, err := ent.Open("postgres", env.OrderAPIDSN)
 	if err != nil {
 		return nil, nil, err
 	}

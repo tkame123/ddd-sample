@@ -1,6 +1,6 @@
 
-wire:
-	cd di && wire
+order.wire:
+	cd app/order_api/di && wire
 
 order.install:
 	go install github.com/golang/mock/mockgen

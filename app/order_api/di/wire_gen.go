@@ -10,7 +10,7 @@ import (
 	"github.com/google/wire"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/gateway/api"
-	"github.com/tkame123/ddd-sample/di/provider"
+	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
 )
 
 import (
@@ -20,11 +20,11 @@ import (
 // Injectors from wire.go:
 
 func InitializeOrderAPIServer() (connect.Server, func(), error) {
-	config, err := provider.NewConfig()
+	envConfig, err := provider.NewENV()
 	if err != nil {
 		return connect.Server{}, nil, err
 	}
-	client, cleanup, err := provider.NewOrderApiDB(config)
+	client, cleanup, err := provider.NewOrderApiDB(envConfig)
 	if err != nil {
 		return connect.Server{}, nil, err
 	}
@@ -37,4 +37,4 @@ func InitializeOrderAPIServer() (connect.Server, func(), error) {
 
 // wire.go:
 
-var providerOrderAPIServerSet = wire.NewSet(connect.NewServer, database.NewRepository, provider.NewConfig, provider.NewOrderApiDB)
+var providerOrderAPIServerSet = wire.NewSet(connect.NewServer, database.NewRepository, provider.NewENV, provider.NewOrderApiDB)

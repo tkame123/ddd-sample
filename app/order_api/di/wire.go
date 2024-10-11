@@ -4,18 +4,19 @@
 package di
 
 import (
-	"github.com/google/wire"
 	_ "github.com/lib/pq"
+
+	"github.com/google/wire"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database"
 	connect "github.com/tkame123/ddd-sample/app/order_api/adapter/gateway/api"
-	"github.com/tkame123/ddd-sample/di/provider"
+	provider "github.com/tkame123/ddd-sample/app/order_api/di/provider"
 )
 
 var providerOrderAPIServerSet = wire.NewSet(
 	connect.NewServer,
 	database.NewRepository,
 
-	provider.NewConfig,
+	provider.NewENV,
 	provider.NewOrderApiDB,
 )
 
