@@ -5,6 +5,8 @@ package di
 
 import (
 	_ "github.com/lib/pq"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/gateway/consumer"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/gateway/publisher"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/message/sns"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/proxy"
 	"github.com/tkame123/ddd-sample/app/order_api/usecase/create_order"
@@ -12,14 +14,13 @@ import (
 	"github.com/google/wire"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database"
 	connect "github.com/tkame123/ddd-sample/app/order_api/adapter/gateway/api"
-	"github.com/tkame123/ddd-sample/app/order_api/adapter/message"
 	provider "github.com/tkame123/ddd-sample/app/order_api/di/provider"
 )
 
 var providerServerSet = wire.NewSet(
 	connect.NewServer,
 	database.NewRepository,
-	message.NewEventPublisher,
+	publisher.NewEventPublisher,
 	sns.NewActions,
 
 	provider.NewENV,
@@ -29,8 +30,8 @@ var providerServerSet = wire.NewSet(
 )
 
 var providerEventConsumerSet = wire.NewSet(
-	message.NewEventConsumer,
-	message.NewEventPublisher,
+	consumer.NewEventConsumer,
+	publisher.NewEventPublisher,
 	database.NewRepository,
 	create_order.NewService,
 	proxy.NewBillingAPI,
@@ -49,7 +50,7 @@ func InitializeAPIServer() (connect.Server, func(), error) {
 	return connect.Server{}, nil, nil
 }
 
-func InitializeEventConsumer() (*message.EventConsumer, func(), error) {
+func InitializeEventConsumer() (*consumer.EventConsumer, func(), error) {
 	wire.Build(providerEventConsumerSet)
 	return nil, nil, nil
 }
