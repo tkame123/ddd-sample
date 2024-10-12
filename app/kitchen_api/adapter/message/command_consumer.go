@@ -3,11 +3,13 @@ package message
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/di/provider"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/port/service"
+	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/service/create_ticket/event_handler"
 	"github.com/tkame123/ddd-sample/lib/sqs_consumer"
 	"github.com/tkame123/ddd-sample/proto/message"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -102,11 +104,10 @@ func (e *CommandConsumer) workerHandler(ctx context.Context, msg *types.Message)
 }
 
 func (e *CommandConsumer) processEvent(ctx context.Context, mes *message.Message) error {
-	handler, err := NewCreateTicketContext(mes, e.svc)
-	if err != nil {
-		return err
+	if !event_handler.IsCreateTicketEvent(mes.Subject.Type) {
+		return fmt.Errorf("invalid event: %s", mes.Subject.Type)
 	}
-	err = handler.Handler(ctx)
+	err := event_handler.EventMap[mes.Subject.Type](e.svc).Handler(ctx, mes)
 	if err != nil {
 		return err
 	}
