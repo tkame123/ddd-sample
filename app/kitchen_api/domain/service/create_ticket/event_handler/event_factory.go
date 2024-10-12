@@ -12,7 +12,7 @@ type factory struct {
 	raw event_helper.RawEvent
 }
 
-func NewCreateTicketServiceEventFactory(raw event_helper.RawEvent) (domain_event.EventFactory, error) {
+func NewCreateTicketServiceEventFactory(raw event_helper.RawEvent) (domain_event.MessageFactory, error) {
 	return &factory{raw: raw}, nil
 }
 

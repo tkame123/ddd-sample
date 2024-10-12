@@ -1,7 +1,15 @@
 package domain_event
 
-import "github.com/tkame123/ddd-sample/lib/event_helper"
+import (
+	"github.com/google/uuid"
+	"github.com/tkame123/ddd-sample/proto/message"
+)
 
-type EventFactory interface {
-	Event() (event_helper.Event, error)
+type Message interface {
+	ID() uuid.UUID
+	Raw() *message.Message
+}
+
+type MessageFactory interface {
+	Event() (Message, error)
 }

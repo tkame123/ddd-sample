@@ -114,7 +114,7 @@ func (e *EventConsumer) workerHandler(ctx context.Context, msg *types.Message) e
 	return nil
 }
 
-func (e *EventConsumer) processEvent(ctx context.Context, mes domain_event.SagaMessage) error {
+func (e *EventConsumer) processEvent(ctx context.Context, mes domain_event.Message) error {
 	// CreateOrderSaga以外に活用する段階ではAbstractFactoryを使う形なのかな？
 	state, err := e.rep.CreateOrderSagaStateFindOne(ctx, mes.ID())
 	if err != nil {
@@ -151,7 +151,7 @@ func (e *EventConsumer) deleteMessage(ctx context.Context, msg *types.Message) e
 	return nil
 }
 
-func parseMessage(msg *types.Message) (domain_event.SagaMessage, error) {
+func parseMessage(msg *types.Message) (domain_event.Message, error) {
 	type Body struct {
 		Message string `json:"message"`
 	}

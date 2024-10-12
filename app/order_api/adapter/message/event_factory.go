@@ -22,7 +22,7 @@ func (m *m) Raw() *message.Message {
 	return m.raw
 }
 
-func NewSagaMessage(id uuid.UUID, mes *message.Message) domain_event.SagaMessage {
+func NewSagaMessage(id uuid.UUID, mes *message.Message) domain_event.Message {
 	return &m{id: id, raw: mes}
 }
 
@@ -30,7 +30,7 @@ type factory struct {
 	mes *message.Message
 }
 
-func NewCreateOrderSagaEventFactory(tp message.Type, mes *message.Message) (domain_event.SagaEventFactory, error) {
+func NewCreateOrderSagaEventFactory(tp message.Type, mes *message.Message) (domain_event.MessageFactory, error) {
 	if !event_handler.IsCreateOrderSagaEvent(tp) {
 		return nil, fmt.Errorf("invalid event type: %v", tp)
 	}
@@ -38,7 +38,7 @@ func NewCreateOrderSagaEventFactory(tp message.Type, mes *message.Message) (doma
 	return &factory{mes: mes}, nil
 }
 
-func (f *factory) Event() (domain_event.SagaMessage, error) {
+func (f *factory) Event() (domain_event.Message, error) {
 	// TODO: いい感じにまとめられないのだろうか。。
 	switch f.mes.Subject.Type {
 	case message.Type_TYPE_EVENT_ORDER_CREATED:

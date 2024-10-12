@@ -5,11 +5,11 @@ import (
 	"github.com/tkame123/ddd-sample/proto/message"
 )
 
-type SagaMessage interface {
+type Message interface {
 	ID() uuid.UUID
 	Raw() *message.Message
 }
 
-type SagaEventFactory interface {
-	Event() (SagaMessage, error)
+type MessageFactory interface {
+	Event() (Message, error)
 }
