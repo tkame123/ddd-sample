@@ -21,6 +21,7 @@ var providerCommandConsumerSet = wire.NewSet(
 
 	provider.NewENV,
 	provider.NewAWSConfig,
+	provider.NewConsumerConfig,
 	provider.NewSQSClient,
 	provider.NewSNSClient,
 )

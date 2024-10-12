@@ -39,6 +39,7 @@ var providerEventConsumerSet = wire.NewSet(
 
 	provider.NewENV,
 	provider.NewAWSConfig,
+	provider.NewConsumerConfig,
 	provider.NewOrderApiDB,
 	provider.NewSQSClient,
 	provider.NewSNSClient,

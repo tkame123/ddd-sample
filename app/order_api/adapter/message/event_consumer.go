@@ -2,7 +2,6 @@ package message
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
@@ -14,9 +13,9 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga/event_handler"
+	"github.com/tkame123/ddd-sample/lib/event_helper"
 	"github.com/tkame123/ddd-sample/lib/sqs_consumer"
 	"github.com/tkame123/ddd-sample/proto/message"
-	"google.golang.org/protobuf/encoding/protojson"
 	"log"
 	"os"
 	"os/signal"
@@ -24,13 +23,8 @@ import (
 	"syscall"
 )
 
-const (
-	maxMessages = 5
-	maxWorkers  = 3
-	messageChan = 10
-)
-
 type EventConsumer struct {
+	cfg        *provider.ConsumerConfig
 	sqsClient  *sqs.Client
 	queueUrl   string
 	rep        repository.Repository
@@ -40,6 +34,7 @@ type EventConsumer struct {
 }
 
 func NewEventConsumer(
+	cfg *provider.ConsumerConfig,
 	envCfg *provider.EnvConfig,
 	sqsClient *sqs.Client,
 	rep repository.Repository,
@@ -48,6 +43,7 @@ func NewEventConsumer(
 	billingAPI external_service.BillingAPI,
 ) *EventConsumer {
 	return &EventConsumer{
+		cfg:        cfg,
 		sqsClient:  sqsClient,
 		queueUrl:   envCfg.SqsUrlOrderEvent,
 		rep:        rep,
@@ -68,14 +64,20 @@ func (e *EventConsumer) Run() {
 	consumer := sqs_consumer.NewSQSConsumer(e.sqsClient, e.queueUrl, wgPolling)
 
 	// メッセージをやり取りするチャネルを作成
-	messagesChan := make(chan *types.Message, messageChan) // バッファ付きのチャネル
+	messagesChan := make(chan *types.Message, e.cfg.Event.MessageChan) // バッファ付きのチャネル
 
 	// Poller を起動
-	go consumer.PollMessages(ctxPolling, maxMessages, messagesChan)
+	go consumer.PollMessages(
+		ctxPolling,
+		messagesChan,
+		e.cfg.Event.MaxMessages,
+		e.cfg.Event.PollingWaitTimeSecond,
+		e.cfg.Event.VisibilityTimeoutSecond,
+	)
 
 	// ワーカーを並列に起動
 	wgWorker := new(sync.WaitGroup)
-	for i := 0; i < maxWorkers; i++ {
+	for i := 0; i < e.cfg.Event.MaxWorkers; i++ {
 		wgWorker.Add(1)
 		worker := sqs_consumer.NewWorker(i, wgWorker, e.workerHandler)
 		go worker.Start(ctxWorker, messagesChan)
@@ -97,7 +99,7 @@ func (e *EventConsumer) Run() {
 }
 
 func (e *EventConsumer) workerHandler(ctx context.Context, msg *types.Message) error {
-	mes, err := parseMessage(msg)
+	mes, err := event_helper.ParseMessageFromSQS(msg)
 	if err != nil {
 		return err
 	}
@@ -155,20 +157,4 @@ func (e *EventConsumer) deleteMessage(ctx context.Context, msg *types.Message) e
 	}
 
 	return nil
-}
-
-func parseMessage(msg *types.Message) (*message.Message, error) {
-	type Body struct {
-		Message string `json:"message"`
-	}
-	var body Body
-	if err := json.Unmarshal([]byte(*msg.Body), &body); err != nil {
-		return nil, err
-	}
-	var m message.Message
-	if err := protojson.Unmarshal([]byte(body.Message), &m); err != nil {
-		return nil, err
-	}
-
-	return &m, nil
 }

@@ -2,7 +2,6 @@ package message
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
@@ -10,9 +9,9 @@ import (
 	"github.com/tkame123/ddd-sample/app/kitchen_api/di/provider"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/port/service"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/service/create_ticket/event_handler"
+	"github.com/tkame123/ddd-sample/lib/event_helper"
 	"github.com/tkame123/ddd-sample/lib/sqs_consumer"
 	"github.com/tkame123/ddd-sample/proto/message"
-	"google.golang.org/protobuf/encoding/protojson"
 	"log"
 	"os"
 	"os/signal"
@@ -20,24 +19,21 @@ import (
 	"syscall"
 )
 
-const (
-	maxMessages = 5
-	maxWorkers  = 3
-	messageChan = 10
-)
-
 type CommandConsumer struct {
+	cfg       *provider.ConsumerConfig
 	sqsClient *sqs.Client
 	queueUrl  string
 	svc       service.CreateTicket
 }
 
 func NewCommandConsumer(
+	cfg *provider.ConsumerConfig,
 	envCfg *provider.EnvConfig,
 	sqsClient *sqs.Client,
 	svc service.CreateTicket,
 ) *CommandConsumer {
 	return &CommandConsumer{
+		cfg:       cfg,
 		sqsClient: sqsClient,
 		queueUrl:  envCfg.SqsUrlTicketCommand,
 		svc:       svc,
@@ -55,14 +51,20 @@ func (e *CommandConsumer) Run() {
 	consumer := sqs_consumer.NewSQSConsumer(e.sqsClient, e.queueUrl, wgPolling)
 
 	// メッセージをやり取りするチャネルを作成
-	messagesChan := make(chan *types.Message, messageChan) // バッファ付きのチャネル
+	messagesChan := make(chan *types.Message, e.cfg.Command.MessageChan) // バッファ付きのチャネル
 
 	// Poller を起動
-	go consumer.PollMessages(ctxPolling, maxMessages, messagesChan)
+	go consumer.PollMessages(
+		ctxPolling,
+		messagesChan,
+		e.cfg.Command.MaxMessages,
+		e.cfg.Command.PollingWaitTimeSecond,
+		e.cfg.Command.VisibilityTimeoutSecond,
+	)
 
 	// ワーカーを並列に起動
 	wgWorker := new(sync.WaitGroup)
-	for i := 0; i < maxWorkers; i++ {
+	for i := 0; i < e.cfg.Command.MaxWorkers; i++ {
 		wgWorker.Add(1)
 		worker := sqs_consumer.NewWorker(i, wgWorker, e.workerHandler)
 		go worker.Start(ctxWorker, messagesChan)
@@ -84,7 +86,7 @@ func (e *CommandConsumer) Run() {
 }
 
 func (e *CommandConsumer) workerHandler(ctx context.Context, msg *types.Message) error {
-	ev, err := parseEvent(msg)
+	ev, err := event_helper.ParseMessageFromSQS(msg)
 	if err != nil {
 		return err
 	}
@@ -125,20 +127,4 @@ func (e *CommandConsumer) deleteMessage(ctx context.Context, msg *types.Message)
 	}
 
 	return nil
-}
-
-func parseEvent(msg *types.Message) (*message.Message, error) {
-	type Body struct {
-		Message string `json:"message"`
-	}
-	var body Body
-	if err := json.Unmarshal([]byte(*msg.Body), &body); err != nil {
-		return nil, err
-	}
-	var m message.Message
-	if err := protojson.Unmarshal([]byte(body.Message), &m); err != nil {
-		return nil, err
-	}
-
-	return &m, nil
 }

@@ -18,6 +18,7 @@ import (
 // Injectors from wire.go:
 
 func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
+	consumerConfig := provider.NewConsumerConfig()
 	envConfig, err := provider.NewENV()
 	if err != nil {
 		return nil, nil, err
@@ -38,11 +39,11 @@ func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
 	publisher := sns.NewPublisher(envConfig, snsClient)
 	domain_eventPublisher := message.NewEventPublisher(publisher)
 	createTicket := create_ticket.NewService(repository, domain_eventPublisher)
-	commandConsumer := message.NewCommandConsumer(envConfig, client, createTicket)
+	commandConsumer := message.NewCommandConsumer(consumerConfig, envConfig, client, createTicket)
 	return commandConsumer, func() {
 	}, nil
 }
 
 // wire.go:
 
-var providerCommandConsumerSet = wire.NewSet(message.NewCommandConsumer, create_ticket.NewService, message.NewEventPublisher, database.NewRepository, sns.NewPublisher, provider.NewENV, provider.NewAWSConfig, provider.NewSQSClient, provider.NewSNSClient)
+var providerCommandConsumerSet = wire.NewSet(message.NewCommandConsumer, create_ticket.NewService, message.NewEventPublisher, database.NewRepository, sns.NewPublisher, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewSQSClient, provider.NewSNSClient)

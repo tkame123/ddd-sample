@@ -25,7 +25,13 @@ func NewSQSConsumer(sqsClient *sqs.Client, queueUrl string, wg *sync.WaitGroup) 
 	}
 }
 
-func (c *SQSConsumer) PollMessages(ctx context.Context, maxMessages int, messagesChan chan<- *types.Message) {
+func (c *SQSConsumer) PollMessages(
+	ctx context.Context,
+	messagesChan chan<- *types.Message,
+	maxMessages int,
+	pollingWaitTimeSecond int,
+	visibilityTimeoutSecond int,
+) {
 	defer c.wg.Done()
 	for {
 		select {
@@ -36,7 +42,8 @@ func (c *SQSConsumer) PollMessages(ctx context.Context, maxMessages int, message
 			output, err := c.sqsClient.ReceiveMessage(context.Background(), &sqs.ReceiveMessageInput{
 				QueueUrl:            aws.String(c.queueUrl),
 				MaxNumberOfMessages: int32(maxMessages),
-				WaitTimeSeconds:     20, // Long Polling
+				WaitTimeSeconds:     int32(pollingWaitTimeSecond), // Long Polling
+				VisibilityTimeout:   int32(visibilityTimeoutSecond),
 			})
 			if err != nil {
 				log.Println("Error receiving messages:", err)

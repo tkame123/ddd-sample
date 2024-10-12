@@ -52,6 +52,7 @@ func InitializeAPIServer() (connect.Server, func(), error) {
 }
 
 func InitializeEventConsumer() (*message.EventConsumer, func(), error) {
+	consumerConfig := provider.NewConsumerConfig()
 	envConfig, err := provider.NewENV()
 	if err != nil {
 		return nil, nil, err
@@ -79,7 +80,7 @@ func InitializeEventConsumer() (*message.EventConsumer, func(), error) {
 	createOrder := create_order.NewService(repository, domain_eventPublisher)
 	kitchenAPI := proxy.NewKitchenAPI(repository, domain_eventPublisher)
 	billingAPI := proxy.NewBillingAPI()
-	eventConsumer := message.NewEventConsumer(envConfig, client, repository, createOrder, kitchenAPI, billingAPI)
+	eventConsumer := message.NewEventConsumer(consumerConfig, envConfig, client, repository, createOrder, kitchenAPI, billingAPI)
 	return eventConsumer, func() {
 		cleanup()
 	}, nil
@@ -89,4 +90,4 @@ func InitializeEventConsumer() (*message.EventConsumer, func(), error) {
 
 var providerServerSet = wire.NewSet(connect.NewServer, database.NewRepository, message.NewEventPublisher, sns.NewPublisher, provider.NewENV, provider.NewAWSConfig, provider.NewOrderApiDB, provider.NewSNSClient)
 
-var providerEventConsumerSet = wire.NewSet(message.NewEventConsumer, message.NewEventPublisher, database.NewRepository, create_order.NewService, proxy.NewBillingAPI, proxy.NewKitchenAPI, sns.NewPublisher, provider.NewENV, provider.NewAWSConfig, provider.NewOrderApiDB, provider.NewSQSClient, provider.NewSNSClient)
+var providerEventConsumerSet = wire.NewSet(message.NewEventConsumer, message.NewEventPublisher, database.NewRepository, create_order.NewService, proxy.NewBillingAPI, proxy.NewKitchenAPI, sns.NewPublisher, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewOrderApiDB, provider.NewSQSClient, provider.NewSNSClient)
