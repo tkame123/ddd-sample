@@ -22,7 +22,7 @@ func (m *m) Raw() *message.Message {
 	return m.raw
 }
 
-func NewSagaMessage(id uuid.UUID, mes *message.Message) domain_event.Message {
+func NewMessage(id uuid.UUID, mes *message.Message) domain_event.Message {
 	return &m{id: id, raw: mes}
 }
 
@@ -50,7 +50,7 @@ func (f *factory) Event() (domain_event.Message, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewSagaMessage(id, f.mes), nil
+		return NewMessage(id, f.mes), nil
 
 	case message.Type_TYPE_EVENT_ORDER_APPROVED:
 		var c message.EventOrderApproved
@@ -61,7 +61,7 @@ func (f *factory) Event() (domain_event.Message, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewSagaMessage(id, f.mes), nil
+		return NewMessage(id, f.mes), nil
 
 	case message.Type_TYPE_EVENT_ORDER_REJECTED:
 		var c message.EventOrderRejected
@@ -72,7 +72,7 @@ func (f *factory) Event() (domain_event.Message, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewSagaMessage(id, f.mes), nil
+		return NewMessage(id, f.mes), nil
 
 	case message.Type_TYPE_EVENT_TICKET_CREATED:
 		var c message.EventTicketCreated
@@ -83,7 +83,7 @@ func (f *factory) Event() (domain_event.Message, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewSagaMessage(id, f.mes), nil
+		return NewMessage(id, f.mes), nil
 
 	case message.Type_TYPE_EVENT_TICKET_CREATION_FAILED:
 		var c message.EventTicketCreationFailed
@@ -94,7 +94,7 @@ func (f *factory) Event() (domain_event.Message, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewSagaMessage(id, f.mes), nil
+		return NewMessage(id, f.mes), nil
 
 	case message.Type_TYPE_EVENT_TICKET_APPROVED:
 		var c message.EventTicketApproved
@@ -105,7 +105,7 @@ func (f *factory) Event() (domain_event.Message, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewSagaMessage(id, f.mes), nil
+		return NewMessage(id, f.mes), nil
 
 	case message.Type_TYPE_EVENT_TICKET_REJECTED:
 		var c message.EventTicketRejected
@@ -116,7 +116,7 @@ func (f *factory) Event() (domain_event.Message, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewSagaMessage(id, f.mes), nil
+		return NewMessage(id, f.mes), nil
 
 	case message.Type_TYPE_EVENT_CARD_AUTHORIZED:
 		var c message.EventCardAuthorized
@@ -127,7 +127,7 @@ func (f *factory) Event() (domain_event.Message, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewSagaMessage(id, f.mes), nil
+		return NewMessage(id, f.mes), nil
 
 	case message.Type_TYPE_EVENT_CARD_AUTHORIZATION_FAILED:
 		var c message.EventCardAuthorizationFailed
@@ -138,7 +138,7 @@ func (f *factory) Event() (domain_event.Message, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewSagaMessage(id, f.mes), nil
+		return NewMessage(id, f.mes), nil
 
 	}
 	return nil, fmt.Errorf("invalid event type: %v", f.mes.Subject.Type)

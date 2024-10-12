@@ -7,10 +7,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/di/provider"
+	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/port/domain_event"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/port/service"
-	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/service/create_ticket/event_handler"
-	"github.com/tkame123/ddd-sample/lib/event_helper"
 	"github.com/tkame123/ddd-sample/lib/sqs_consumer"
+	"github.com/tkame123/ddd-sample/proto/message"
+	"google.golang.org/protobuf/encoding/protojson"
 	"log"
 	"os"
 	"os/signal"
@@ -101,8 +102,8 @@ func (e *CommandConsumer) workerHandler(ctx context.Context, msg *types.Message)
 	return nil
 }
 
-func (e *CommandConsumer) processEvent(ctx context.Context, ev event_helper.Event) error {
-	handler, err := NewCreateTicketContext(ev, e.svc)
+func (e *CommandConsumer) processEvent(ctx context.Context, mes domain_event.Message) error {
+	handler, err := NewCreateTicketContext(mes, e.svc)
 	if err != nil {
 		return err
 	}
@@ -126,7 +127,7 @@ func (e *CommandConsumer) deleteMessage(ctx context.Context, msg *types.Message)
 	return nil
 }
 
-func parseEvent(msg *types.Message) (event_helper.Event, error) {
+func parseEvent(msg *types.Message) (domain_event.Message, error) {
 	type Body struct {
 		Message string `json:"message"`
 	}
@@ -134,12 +135,12 @@ func parseEvent(msg *types.Message) (event_helper.Event, error) {
 	if err := json.Unmarshal([]byte(*msg.Body), &body); err != nil {
 		return nil, err
 	}
-	var message event_helper.RawEvent
-	if err := json.Unmarshal([]byte(body.Message), &message); err != nil {
+	var m message.Message
+	if err := protojson.Unmarshal([]byte(body.Message), &m); err != nil {
 		return nil, err
 	}
 
-	eventFac, err := event_handler.NewCreateTicketServiceEventFactory(message)
+	eventFac, err := NewCreateTicketServiceEventFactory(m.Subject.Type, &m)
 	if err != nil {
 		return nil, err
 	}
