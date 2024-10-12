@@ -19,7 +19,7 @@ func NewNextStepSagaWhenTicketRejectedHandler(saga *servive.CreateOrderSaga) dom
 }
 
 func (h *NextStepSagaWhenTicketRejectedHandler) Handler(ctx context.Context, mes *message.Message) error {
-	if mes.Subject.Type != message.Type_TYPE_EVENT_ORDER_REJECTED {
+	if mes.Subject.Type != message.Type_TYPE_EVENT_TICKET_REJECTED {
 		return fmt.Errorf("invalid event type: %v", mes.Subject.Type)
 	}
 
