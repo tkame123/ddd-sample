@@ -12,7 +12,7 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga/event_handler"
-	"github.com/tkame123/ddd-sample/lib/event"
+	"github.com/tkame123/ddd-sample/lib/event_helper"
 	"github.com/tkame123/ddd-sample/lib/sqs_consumer"
 	"log"
 	"os"
@@ -94,6 +94,12 @@ func (e *EventConsumer) Run() {
 }
 
 func (e *EventConsumer) workerHandler(ctx context.Context, msg *types.Message) error {
+
+	return nil
+}
+
+// WORN: 消さないで！！！
+func (e *EventConsumer) workerHandler2(ctx context.Context, msg *types.Message) error {
 	ev, err := parseEvent(msg)
 	if err != nil {
 		return err
@@ -113,7 +119,7 @@ func (e *EventConsumer) workerHandler(ctx context.Context, msg *types.Message) e
 	return nil
 }
 
-func (e *EventConsumer) processEvent(ctx context.Context, ev event.Event) error {
+func (e *EventConsumer) processEvent(ctx context.Context, ev event_helper.Event) error {
 	// CreateOrderSaga以外に活用する段階ではAbstractFactoryを使う形なのかな？
 	state, err := e.rep.CreateOrderSagaStateFindOne(ctx, ev.ID())
 	if err != nil {
@@ -150,7 +156,7 @@ func (e *EventConsumer) deleteMessage(ctx context.Context, msg *types.Message) e
 	return nil
 }
 
-func parseEvent(msg *types.Message) (event.Event, error) {
+func parseEvent(msg *types.Message) (event_helper.Event, error) {
 	type Body struct {
 		Message string `json:"message"`
 	}
@@ -158,7 +164,7 @@ func parseEvent(msg *types.Message) (event.Event, error) {
 	if err := json.Unmarshal([]byte(*msg.Body), &body); err != nil {
 		return nil, err
 	}
-	var message event.RawEvent
+	var message event_helper.RawEvent
 	if err := json.Unmarshal([]byte(body.Message), &message); err != nil {
 		return nil, err
 	}

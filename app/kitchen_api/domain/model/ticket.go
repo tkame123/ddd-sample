@@ -2,7 +2,7 @@ package model
 
 import (
 	"errors"
-	"github.com/tkame123/ddd-sample/lib/event"
+	"github.com/tkame123/ddd-sample/lib/event_helper"
 )
 
 type TicketStatus = string
@@ -33,7 +33,7 @@ type TicketItemRequest struct {
 }
 
 // TODO: 重複オーダチェックの際に、TicketCreationFailedEventを発行する
-func NewTicket(orderID OrderID, items []*TicketItemRequest) (*Ticket, []event.Event, error) {
+func NewTicket(orderID OrderID, items []*TicketItemRequest) (*Ticket, []event_helper.Event, error) {
 	ticketID := generateID()
 
 	ticketItems := make([]*TicketItem, 0, len(items))
@@ -51,23 +51,23 @@ func NewTicket(orderID OrderID, items []*TicketItemRequest) (*Ticket, []event.Ev
 		TicketItems: ticketItems,
 	}
 
-	return ticket, []event.Event{&TicketCreatedEvent{TicketID: ticket.TicketID}}, nil
+	return ticket, []event_helper.Event{&TicketCreatedEvent{TicketID: ticket.TicketID}}, nil
 }
 
-func (t *Ticket) ApproveTicket() ([]event.Event, error) {
+func (t *Ticket) ApproveTicket() ([]event_helper.Event, error) {
 	if t.Status != Tickettatus_ApprovalPending {
 		return nil, errors.New("ticket is not approval pending status")
 	}
 
 	t.Status = Tickettatus_Approved
-	return []event.Event{&TicketApprovedEvent{TicketID: t.TicketID}}, nil
+	return []event_helper.Event{&TicketApprovedEvent{TicketID: t.TicketID}}, nil
 }
 
-func (t *Ticket) RejectTicket() ([]event.Event, error) {
+func (t *Ticket) RejectTicket() ([]event_helper.Event, error) {
 	if t.Status != Tickettatus_ApprovalPending {
 		return nil, errors.New("ticket is not approval pending status")
 	}
 
 	t.Status = TicketStatus_Rejected
-	return []event.Event{&TicketRejectedEvent{TicketID: t.TicketID}}, nil
+	return []event_helper.Event{&TicketRejectedEvent{TicketID: t.TicketID}}, nil
 }

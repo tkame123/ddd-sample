@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/adapter/message/sns"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/port/domain_event"
-	"github.com/tkame123/ddd-sample/lib/event"
+	"github.com/tkame123/ddd-sample/lib/event_helper"
 	"log"
 )
 
@@ -16,7 +16,7 @@ func NewEventPublisher(publisher *sns.Publisher) domain_event.Publisher {
 	return &EventPublisher{publisher: publisher}
 }
 
-func (s *EventPublisher) PublishMessages(ctx context.Context, events []event.Event) {
+func (s *EventPublisher) PublishMessages(ctx context.Context, events []event_helper.Event) {
 	for _, e := range events {
 		body, err := e.ToBody()
 		if err != nil {

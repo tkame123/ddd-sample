@@ -8,7 +8,7 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/domain_event"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
-	"github.com/tkame123/ddd-sample/lib/event"
+	"github.com/tkame123/ddd-sample/lib/event_helper"
 	"log"
 )
 
@@ -46,7 +46,7 @@ func (k *KitchenAPI) CreateTicket(ctx context.Context, orderID model.OrderID) {
 		command.Items = items
 	}
 
-	k.pub.PublishMessages(ctx, []event.Event{command})
+	k.pub.PublishMessages(ctx, []event_helper.Event{command})
 }
 
 func (k *KitchenAPI) ApproveTicket(ctx context.Context, orderID model.OrderID) {
@@ -71,7 +71,7 @@ type TicketCreateCommand struct {
 }
 
 func (e *TicketCreateCommand) Name() string {
-	return event.CommandName_TicketCreate
+	return event_helper.CommandName_TicketCreate
 }
 
 func (e *TicketCreateCommand) ID() uuid.UUID {
@@ -79,7 +79,7 @@ func (e *TicketCreateCommand) ID() uuid.UUID {
 }
 
 func (e *TicketCreateCommand) ToBody() (string, error) {
-	var raw event.RawEvent
+	var raw event_helper.RawEvent
 	raw.Type = e.Name()
 	raw.ID = e.ID().String()
 	originByte, err := json.Marshal(e)

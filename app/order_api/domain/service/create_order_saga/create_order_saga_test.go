@@ -10,7 +10,7 @@ import (
 	mockOSVS "github.com/tkame123/ddd-sample/app/order_api/domain/port/mock/service"
 	servive "github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga"
 	event_handler2 "github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga/event_handler"
-	"github.com/tkame123/ddd-sample/lib/event"
+	"github.com/tkame123/ddd-sample/lib/event_helper"
 	"testing"
 )
 
@@ -54,19 +54,19 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 	}
 
 	err = event_handler2.NewNextStepSagaWhenTicketCreatedHandler(saga).
-		Handler(ctx, event.NewGeneralEvent(orderID, event.EventName_TicketCreated))
+		Handler(ctx, event_helper.NewGeneralEvent(orderID, event_helper.EventName_TicketCreated))
 	if err != nil {
 		t.Errorf("err: %v\n", err)
 	}
 
 	err = event_handler2.NewNextStepSagaWhenCardAuthorizedHandler(saga).
-		Handler(ctx, event.NewGeneralEvent(orderID, event.EventName_CardAuthorized))
+		Handler(ctx, event_helper.NewGeneralEvent(orderID, event_helper.EventName_CardAuthorized))
 	if err != nil {
 		t.Errorf("err: %v\n", err)
 	}
 
 	err = event_handler2.NewNextStepSagaWhenTicketApprovedHandler(saga).
-		Handler(ctx, event.NewGeneralEvent(orderID, event.EventName_TicketApproved))
+		Handler(ctx, event_helper.NewGeneralEvent(orderID, event_helper.EventName_TicketApproved))
 	if err != nil {
 		t.Errorf("err: %v\n", err)
 	}
@@ -119,7 +119,7 @@ func TestCreateOrderSaga_OrderRejectedDutToTicketCreationFailed(t *testing.T) {
 	}
 
 	err = event_handler2.NewNextStepSagaWhenTicketCreationFailedHandler(saga).
-		Handler(ctx, event.NewGeneralEvent(orderID, event.EventName_TicketCreationFailed))
+		Handler(ctx, event_helper.NewGeneralEvent(orderID, event_helper.EventName_TicketCreationFailed))
 	if err != nil {
 		t.Errorf("err: %v\n", err)
 	}
@@ -169,19 +169,19 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 	}
 
 	err = event_handler2.NewNextStepSagaWhenTicketCreatedHandler(saga).
-		Handler(ctx, event.NewGeneralEvent(orderID, event.EventName_TicketCreated))
+		Handler(ctx, event_helper.NewGeneralEvent(orderID, event_helper.EventName_TicketCreated))
 	if err != nil {
 		t.Errorf("err: %v\n", err)
 	}
 
 	err = event_handler2.NewNextStepSagaWhenCardAuthorizeFailedHandler(saga).
-		Handler(ctx, event.NewGeneralEvent(orderID, event.EventName_CardAuthorizeFailed))
+		Handler(ctx, event_helper.NewGeneralEvent(orderID, event_helper.EventName_CardAuthorizeFailed))
 	if err != nil {
 		t.Errorf("err: %v\n", err)
 	}
 
 	err = event_handler2.NewNextStepSagaWhenTicketRejectedHandler(saga).
-		Handler(ctx, event.NewGeneralEvent(orderID, event.EventName_TicketRejected))
+		Handler(ctx, event_helper.NewGeneralEvent(orderID, event_helper.EventName_TicketRejected))
 	if err != nil {
 		t.Errorf("err: %v\n", err)
 	}

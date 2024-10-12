@@ -6,7 +6,7 @@ import (
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/model"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/port/domain_event"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/port/service"
-	ev "github.com/tkame123/ddd-sample/lib/event"
+	ev "github.com/tkame123/ddd-sample/lib/event_helper"
 )
 
 type TicketRejectWhenTicketRejectHandler struct {

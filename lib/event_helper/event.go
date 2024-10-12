@@ -1,10 +1,14 @@
-package event
+package event_helper
 
 import (
 	"encoding/json"
 	"github.com/google/uuid"
+	"github.com/tkame123/ddd-sample/proto/message"
+	pb "google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
+// Deprecated: use ProtoEvent
 type Name = string
 
 const (
@@ -30,6 +34,7 @@ const (
 	CommandName_CardAuthorize Name = "command-billing-card_authorize"
 )
 
+// Deprecated: use ProtoEvent
 type Event interface {
 	ID() uuid.UUID
 	Name() Name
@@ -37,8 +42,24 @@ type Event interface {
 }
 
 // message送受信用の構造体
+// Deprecated: use ProtoEvent
 type RawEvent struct {
 	Type   string          `json:"type"`
 	ID     string          `json:"id"`
 	Origin json.RawMessage `json:"origin"`
+}
+
+func CreateMessage(t message.Type, s message.Service, envelop pb.Message) (*message.Message, error) {
+	v, err := anypb.New(envelop)
+	if err != nil {
+		return nil, err
+	}
+
+	return &message.Message{
+		Subject: &message.Subject{
+			Type:   t,
+			Source: s,
+		},
+		Envelope: v,
+	}, nil
 }

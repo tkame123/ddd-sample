@@ -5,19 +5,19 @@ import (
 	"errors"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/model"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/port/domain_event"
-	"github.com/tkame123/ddd-sample/lib/event"
+	"github.com/tkame123/ddd-sample/lib/event_helper"
 )
 
 type factory struct {
-	raw event.RawEvent
+	raw event_helper.RawEvent
 }
 
-func NewCreateTicketServiceEventFactory(raw event.RawEvent) (domain_event.EventFactory, error) {
+func NewCreateTicketServiceEventFactory(raw event_helper.RawEvent) (domain_event.EventFactory, error) {
 	return &factory{raw: raw}, nil
 }
 
-func (f *factory) Event() (event.Event, error) {
-	ev, err := event.NewGeneralEventFromRaw(f.raw)
+func (f *factory) Event() (event_helper.Event, error) {
+	ev, err := event_helper.NewGeneralEventFromRaw(f.raw)
 	if err != nil {
 		return nil, err
 	}
@@ -27,14 +27,14 @@ func (f *factory) Event() (event.Event, error) {
 	}
 
 	// CreateTicketはパラメータの抽出が必要なのでOriginを復元する
-	if ev.Name() == event.CommandName_TicketCreate {
+	if ev.Name() == event_helper.CommandName_TicketCreate {
 		return f.createTicketEvent()
 	}
 
 	return ev, nil
 }
 
-func (f *factory) createTicketEvent() (event.Event, error) {
+func (f *factory) createTicketEvent() (event_helper.Event, error) {
 	var e model.TicketCreateCommand
 	if err := json.Unmarshal(f.raw.Origin, &e); err != nil {
 		return nil, err

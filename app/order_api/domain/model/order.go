@@ -2,7 +2,9 @@ package model
 
 import (
 	"errors"
-	"github.com/tkame123/ddd-sample/lib/event"
+	"github.com/google/uuid"
+	"github.com/tkame123/ddd-sample/lib/event_helper"
+	"github.com/tkame123/ddd-sample/proto/message"
 )
 
 const APPOVAL_LIMIT = 10000
@@ -36,7 +38,7 @@ type OrderItemRequest struct {
 	Quantity int
 }
 
-func NewOrder(items []*OrderItemRequest) (*Order, []event.Event, error) {
+func NewOrder(items []*OrderItemRequest) (*Order, []*message.Message, error) {
 	orderID := generateID()
 
 	orderItems := make([]*OrderItem, 0, len(items))
@@ -61,25 +63,61 @@ func NewOrder(items []*OrderItemRequest) (*Order, []event.Event, error) {
 		return nil, nil, errors.New("approval limit over")
 	}
 
-	return order, []event.Event{&OrderCreatedEvent{OrderID: order.OrderID}}, nil
+	mes, err := event_helper.CreateMessage(
+		message.Type_TYPE_EVENT_ORDER_CREATED,
+		message.Service_SERVICE_ORDER,
+		&message.EventOrderCreated{
+			OrderId: uuid.New().String(),
+			// TODO: 詳細のアイテム対応
+		},
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return order, []*message.Message{mes}, nil
 }
 
-func (o *Order) ApproveOrder() ([]event.Event, error) {
+func (o *Order) ApproveOrder() ([]*message.Message, error) {
 	if o.Status != OrderStatus_ApprovalPending {
 		return nil, errors.New("order is not in approval pending status")
 	}
 
 	o.Status = OrderStatus_Approved
-	return []event.Event{&OrderApprovedEvent{o.OrderID}}, nil
+
+	mes, err := event_helper.CreateMessage(
+		message.Type_TYPE_EVENT_ORDER_APPROVED,
+		message.Service_SERVICE_ORDER,
+		&message.EventOrderApproved{
+			OrderId: uuid.New().String(),
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return []*message.Message{mes}, nil
 }
 
-func (o *Order) RejectOrder() ([]event.Event, error) {
+func (o *Order) RejectOrder() ([]*message.Message, error) {
 	if o.Status != OrderStatus_ApprovalPending {
 		return nil, errors.New("order is not in approval pending status")
 	}
 
 	o.Status = OrderStatus_Rejected
-	return []event.Event{&OrderRejectedEvent{o.OrderID}}, nil
+
+	mes, err := event_helper.CreateMessage(
+		message.Type_TYPE_EVENT_ORDER_REJECTED,
+		message.Service_SERVICE_ORDER,
+		&message.EventOrderRejected{
+			OrderId: uuid.New().String(),
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return []*message.Message{mes}, nil
 }
 
 func (o *Order) validateApprovalLimit() bool {

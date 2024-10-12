@@ -9,7 +9,7 @@ import (
 	"github.com/tkame123/ddd-sample/app/kitchen_api/di/provider"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/port/service"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/service/create_ticket/event_handler"
-	"github.com/tkame123/ddd-sample/lib/event"
+	"github.com/tkame123/ddd-sample/lib/event_helper"
 	"github.com/tkame123/ddd-sample/lib/sqs_consumer"
 	"log"
 	"os"
@@ -101,7 +101,7 @@ func (e *CommandConsumer) workerHandler(ctx context.Context, msg *types.Message)
 	return nil
 }
 
-func (e *CommandConsumer) processEvent(ctx context.Context, ev event.Event) error {
+func (e *CommandConsumer) processEvent(ctx context.Context, ev event_helper.Event) error {
 	handler, err := NewCreateTicketContext(ev, e.svc)
 	if err != nil {
 		return err
@@ -126,7 +126,7 @@ func (e *CommandConsumer) deleteMessage(ctx context.Context, msg *types.Message)
 	return nil
 }
 
-func parseEvent(msg *types.Message) (event.Event, error) {
+func parseEvent(msg *types.Message) (event_helper.Event, error) {
 	type Body struct {
 		Message string `json:"message"`
 	}
@@ -134,7 +134,7 @@ func parseEvent(msg *types.Message) (event.Event, error) {
 	if err := json.Unmarshal([]byte(*msg.Body), &body); err != nil {
 		return nil, err
 	}
-	var message event.RawEvent
+	var message event_helper.RawEvent
 	if err := json.Unmarshal([]byte(body.Message), &message); err != nil {
 		return nil, err
 	}

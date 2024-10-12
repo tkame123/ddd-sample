@@ -7,31 +7,31 @@ import (
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/port/domain_event"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/port/service"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/service/create_ticket/event_handler"
-	"github.com/tkame123/ddd-sample/lib/event"
+	"github.com/tkame123/ddd-sample/lib/event_helper"
 )
 
 type CreateTicketContext struct {
 	strategy domain_event.EventHandler
-	event    event.Event
+	event    event_helper.Event
 	svc      service.CreateTicket
 }
 
-func NewCreateTicketContext(ev event.Event, svc service.CreateTicket) (*CreateTicketContext, error) {
+func NewCreateTicketContext(ev event_helper.Event, svc service.CreateTicket) (*CreateTicketContext, error) {
 	if !event_handler.IsCreateTicketEvent(ev.Name()) {
 		return nil, errors.New("unknown event by CreateTicketService")
 	}
 
 	var strategy domain_event.EventHandler
 	switch ev.Name() {
-	case event.CommandName_TicketCreate:
+	case event_helper.CommandName_TicketCreate:
 		v, ok := ev.(*model.TicketCreateCommand)
 		if !ok {
 			return nil, errors.New("invalid event")
 		}
 		strategy = event_handler.NewTicketCreateWhenTicketCreateHandler(v.OrderID, v.Items, svc)
-	case event.CommandName_TicketApprove:
+	case event_helper.CommandName_TicketApprove:
 		strategy = event_handler.NewTicketApproveWhenTicketApproveHandler(ev.ID(), svc)
-	case event.CommandName_TicketReject:
+	case event_helper.CommandName_TicketReject:
 		strategy = event_handler.NewTicketRejectWhenTicketRejectHandler(ev.ID(), svc)
 
 	default:

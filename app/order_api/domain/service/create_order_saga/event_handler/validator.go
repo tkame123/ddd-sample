@@ -1,14 +1,16 @@
 package event_handler
 
-import "github.com/tkame123/ddd-sample/lib/event"
+import (
+	"github.com/tkame123/ddd-sample/proto/message"
+)
 
-func IsCreateOrderSagaEvent(name event.Name) bool {
-	switch name {
-	case event.EventName_OrderCreated, event.EventName_OrderApproved, event.EventName_OrderRejected:
+func IsCreateOrderSagaEvent(tp message.Type) bool {
+	switch tp {
+	case message.Type_TYPE_EVENT_ORDER_CREATED, message.Type_TYPE_EVENT_ORDER_APPROVED, message.Type_TYPE_EVENT_ORDER_REJECTED:
 		return true
-	case event.EventName_TicketCreated, event.EventName_TicketCreationFailed, event.EventName_TicketApproved, event.EventName_TicketRejected:
+	case message.Type_TYPE_EVENT_TICKET_CREATED, message.Type_TYPE_EVENT_TICKET_CREATION_FAILED, message.Type_TYPE_EVENT_TICKET_APPROVED, message.Type_TYPE_EVENT_TICKET_REJECTED:
 		return true
-	case event.EventName_CardAuthorized, event.EventName_CardAuthorizeFailed:
+	case message.Type_TYPE_EVENT_CARD_AUTHORIZED, message.Type_TYPE_EVENT_CARD_AUTHORIZATION_FAILED:
 		return true
 	}
 	return false

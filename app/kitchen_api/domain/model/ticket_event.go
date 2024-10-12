@@ -3,7 +3,7 @@ package model
 import (
 	"encoding/json"
 	"github.com/google/uuid"
-	"github.com/tkame123/ddd-sample/lib/event"
+	"github.com/tkame123/ddd-sample/lib/event_helper"
 )
 
 type TicketCreateCommand struct {
@@ -12,7 +12,7 @@ type TicketCreateCommand struct {
 }
 
 func (e *TicketCreateCommand) Name() string {
-	return event.CommandName_TicketCreate
+	return event_helper.CommandName_TicketCreate
 }
 
 func (e *TicketCreateCommand) ID() TicketID {
@@ -20,7 +20,7 @@ func (e *TicketCreateCommand) ID() TicketID {
 }
 
 func (e *TicketCreateCommand) ToBody() (string, error) {
-	var raw event.RawEvent
+	var raw event_helper.RawEvent
 	raw.Type = e.Name()
 	raw.ID = e.ID().String()
 	originByte, err := json.Marshal(e)
@@ -40,7 +40,7 @@ type TicketCreatedEvent struct {
 }
 
 func (e *TicketCreatedEvent) Name() string {
-	return event.EventName_TicketCreated
+	return event_helper.EventName_TicketCreated
 }
 
 func (e *TicketCreatedEvent) ID() TicketID {
@@ -48,7 +48,7 @@ func (e *TicketCreatedEvent) ID() TicketID {
 }
 
 func (e *TicketCreatedEvent) ToBody() (string, error) {
-	var raw event.RawEvent
+	var raw event_helper.RawEvent
 	raw.Type = e.Name()
 	raw.ID = e.ID().String()
 	originByte, err := json.Marshal(e)
@@ -68,7 +68,7 @@ type TicketCreationFailedEvent struct {
 }
 
 func (e *TicketCreationFailedEvent) Name() string {
-	return event.EventName_TicketCreationFailed
+	return event_helper.EventName_TicketCreationFailed
 }
 
 func (e *TicketCreationFailedEvent) ID() TicketID {
@@ -76,7 +76,7 @@ func (e *TicketCreationFailedEvent) ID() TicketID {
 }
 
 func (e *TicketCreationFailedEvent) ToBody() (string, error) {
-	var raw event.RawEvent
+	var raw event_helper.RawEvent
 	raw.Type = e.Name()
 	raw.ID = e.ID().String()
 	originByte, err := json.Marshal(e)
@@ -96,7 +96,7 @@ type TicketApprovedEvent struct {
 }
 
 func (e *TicketApprovedEvent) Name() string {
-	return event.EventName_TicketApproved
+	return event_helper.EventName_TicketApproved
 }
 
 func (e *TicketApprovedEvent) ID() TicketID {
@@ -104,7 +104,7 @@ func (e *TicketApprovedEvent) ID() TicketID {
 }
 
 func (e *TicketApprovedEvent) ToBody() (string, error) {
-	var raw event.RawEvent
+	var raw event_helper.RawEvent
 	raw.Type = e.Name()
 	raw.ID = e.ID().String()
 	originByte, err := json.Marshal(e)
@@ -124,7 +124,7 @@ type TicketRejectedEvent struct {
 }
 
 func (e *TicketRejectedEvent) Name() string {
-	return event.EventName_TicketRejected
+	return event_helper.EventName_TicketRejected
 }
 
 func (e *TicketRejectedEvent) ID() TicketID {
@@ -132,7 +132,7 @@ func (e *TicketRejectedEvent) ID() TicketID {
 }
 
 func (e *TicketRejectedEvent) ToBody() (string, error) {
-	var raw event.RawEvent
+	var raw event_helper.RawEvent
 	raw.Type = e.Name()
 	raw.ID = e.ID().String()
 	originByte, err := json.Marshal(e)

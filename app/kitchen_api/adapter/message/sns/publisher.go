@@ -6,22 +6,22 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/di/provider"
-	"github.com/tkame123/ddd-sample/lib/event"
+	"github.com/tkame123/ddd-sample/lib/event_helper"
 )
 
 type topicArn = string
 
 type Publisher struct {
 	Client   *sns.Client
-	topicMap map[event.Name]topicArn
+	topicMap map[event_helper.Name]topicArn
 }
 
 func NewPublisher(envCfg *provider.EnvConfig, client *sns.Client) *Publisher {
-	topicMap := map[event.Name]topicArn{
-		event.EventName_TicketCreated:        envCfg.ArnTopicEventKitchenTicketCreated,
-		event.EventName_TicketCreationFailed: envCfg.ArnTopicEventKitchenTicketCreationFailed,
-		event.EventName_TicketApproved:       envCfg.ArnTopicEventKitchenTicketApproved,
-		event.EventName_TicketRejected:       envCfg.ArnTopicEventKitchenTicketRejected,
+	topicMap := map[event_helper.Name]topicArn{
+		event_helper.EventName_TicketCreated:        envCfg.ArnTopicEventKitchenTicketCreated,
+		event_helper.EventName_TicketCreationFailed: envCfg.ArnTopicEventKitchenTicketCreationFailed,
+		event_helper.EventName_TicketApproved:       envCfg.ArnTopicEventKitchenTicketApproved,
+		event_helper.EventName_TicketRejected:       envCfg.ArnTopicEventKitchenTicketRejected,
 	}
 
 	return &Publisher{
@@ -30,7 +30,7 @@ func NewPublisher(envCfg *provider.EnvConfig, client *sns.Client) *Publisher {
 	}
 }
 
-func (a Publisher) PublishMessage(ctx context.Context, eventName event.Name, message string) error {
+func (a Publisher) PublishMessage(ctx context.Context, eventName event_helper.Name, message string) error {
 	arn, ok := a.topicMap[eventName]
 	if !ok {
 		return fmt.Errorf("topic not found: %s", eventName)

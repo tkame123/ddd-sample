@@ -5,32 +5,32 @@ import (
 	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/model"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/service/create_ticket/event_handler"
-	"github.com/tkame123/ddd-sample/lib/event"
+	"github.com/tkame123/ddd-sample/lib/event_helper"
 	"testing"
 )
 
 func Test_factory_Event(t *testing.T) {
 	type fields struct {
-		raw event.RawEvent
+		raw event_helper.RawEvent
 	}
 	tests := []struct {
 		name    string
 		fields  fields
-		want    event.Event
+		want    event_helper.Event
 		wantErr bool
 	}{
 		{
 			name: "Test generalEvent success",
 			fields: fields{
-				raw: event.RawEvent{
-					Type:   event.CommandName_TicketApprove,
+				raw: event_helper.RawEvent{
+					Type:   event_helper.CommandName_TicketApprove,
 					ID:     uuid.Nil.String(),
 					Origin: []byte(`{}`),
 				},
 			},
-			want: &event.GeneralEvent{
+			want: &event_helper.GeneralEvent{
 				Id:     uuid.Nil,
-				Type:   event.CommandName_TicketApprove,
+				Type:   event_helper.CommandName_TicketApprove,
 				Origin: []byte(`{}`),
 			},
 			wantErr: false,
@@ -38,8 +38,8 @@ func Test_factory_Event(t *testing.T) {
 		{
 			name: "Test generalEvent failed",
 			fields: fields{
-				raw: event.RawEvent{
-					Type:   event.EventName_TicketCreated,
+				raw: event_helper.RawEvent{
+					Type:   event_helper.EventName_TicketCreated,
 					ID:     uuid.Nil.String(),
 					Origin: []byte(`{}`),
 				},
@@ -50,8 +50,8 @@ func Test_factory_Event(t *testing.T) {
 		{
 			name: "Test CommandName_TicketCreate success",
 			fields: fields{
-				raw: event.RawEvent{
-					Type:   event.CommandName_TicketCreate,
+				raw: event_helper.RawEvent{
+					Type:   event_helper.CommandName_TicketCreate,
 					ID:     uuid.Nil.String(),
 					Origin: []byte(`{"order_id":"00000000-0000-0000-0000-000000000000","items":[{"item_id":"00000000-0000-0000-0000-000000000000","quantity":1}]}`),
 				},

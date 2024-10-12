@@ -2,7 +2,7 @@ package model
 
 import (
 	"github.com/google/uuid"
-	"github.com/tkame123/ddd-sample/lib/event"
+	"github.com/tkame123/ddd-sample/lib/event_helper"
 )
 
 type OrderID = uuid.UUID
@@ -16,7 +16,7 @@ func generateID() uuid.UUID {
 }
 
 func OrderIdParse(id string) (*OrderID, error) {
-	parsedId, err := event.ParseID(id)
+	parsedId, err := event_helper.ParseID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +25,7 @@ func OrderIdParse(id string) (*OrderID, error) {
 }
 
 func OrderItemIdParse(id string) (*OrderItemID, error) {
-	parsedId, err := event.ParseID(id)
+	parsedId, err := event_helper.ParseID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +34,7 @@ func OrderItemIdParse(id string) (*OrderItemID, error) {
 }
 
 func ItemIdParse(id string) (*ItemID, error) {
-	parsedId, err := event.ParseID(id)
+	parsedId, err := event_helper.ParseID(id)
 	if err != nil {
 		return nil, err
 	}
