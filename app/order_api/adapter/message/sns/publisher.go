@@ -6,17 +6,17 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sns"
 )
 
-type Actions struct {
+type Publisher struct {
 	Client *sns.Client
 }
 
-func NewActions(client *sns.Client) *Actions {
-	return &Actions{
+func NewPublisher(client *sns.Client) *Publisher {
+	return &Publisher{
 		Client: client,
 	}
 }
 
-func (a Actions) PublishMessage(ctx context.Context, arn string, message string) error {
+func (a Publisher) PublishMessage(ctx context.Context, arn string, message string) error {
 	input := sns.PublishInput{
 		TopicArn: aws.String(arn),
 		Message:  aws.String(message),

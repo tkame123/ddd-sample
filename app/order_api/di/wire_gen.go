@@ -44,8 +44,8 @@ func InitializeAPIServer() (connect.Server, func(), error) {
 		cleanup()
 		return connect.Server{}, nil, err
 	}
-	actions := sns.NewActions(snsClient)
-	domain_eventPublisher := publisher.NewEventPublisher(envConfig, actions)
+	snsPublisher := sns.NewPublisher(snsClient)
+	domain_eventPublisher := publisher.NewEventPublisher(envConfig, snsPublisher)
 	server := connect.NewServer(repository, domain_eventPublisher)
 	return server, func() {
 		cleanup()
@@ -75,8 +75,8 @@ func InitializeEventConsumer() (*consumer.EventConsumer, func(), error) {
 		cleanup()
 		return nil, nil, err
 	}
-	actions := sns.NewActions(snsClient)
-	domain_eventPublisher := publisher.NewEventPublisher(envConfig, actions)
+	snsPublisher := sns.NewPublisher(snsClient)
+	domain_eventPublisher := publisher.NewEventPublisher(envConfig, snsPublisher)
 	createOrder := create_order.NewService(repository, domain_eventPublisher)
 	kitchenAPI := proxy.NewKitchenAPI()
 	billingAPI := proxy.NewBillingAPI()
@@ -88,6 +88,6 @@ func InitializeEventConsumer() (*consumer.EventConsumer, func(), error) {
 
 // wire.go:
 
-var providerServerSet = wire.NewSet(connect.NewServer, database.NewRepository, publisher.NewEventPublisher, sns.NewActions, provider.NewENV, provider.NewAWSConfig, provider.NewOrderApiDB, provider.NewSNSClient)
+var providerServerSet = wire.NewSet(connect.NewServer, database.NewRepository, publisher.NewEventPublisher, sns.NewPublisher, provider.NewENV, provider.NewAWSConfig, provider.NewOrderApiDB, provider.NewSNSClient)
 
-var providerEventConsumerSet = wire.NewSet(consumer.NewEventConsumer, publisher.NewEventPublisher, database.NewRepository, create_order.NewService, proxy.NewBillingAPI, proxy.NewKitchenAPI, sns.NewActions, provider.NewENV, provider.NewAWSConfig, provider.NewOrderApiDB, provider.NewSQSClient, provider.NewSNSClient)
+var providerEventConsumerSet = wire.NewSet(consumer.NewEventConsumer, publisher.NewEventPublisher, database.NewRepository, create_order.NewService, proxy.NewBillingAPI, proxy.NewKitchenAPI, sns.NewPublisher, provider.NewENV, provider.NewAWSConfig, provider.NewOrderApiDB, provider.NewSQSClient, provider.NewSNSClient)

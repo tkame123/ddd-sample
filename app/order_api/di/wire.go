@@ -21,7 +21,7 @@ var providerServerSet = wire.NewSet(
 	connect.NewServer,
 	database.NewRepository,
 	publisher.NewEventPublisher,
-	sns.NewActions,
+	sns.NewPublisher,
 
 	provider.NewENV,
 	provider.NewAWSConfig,
@@ -36,7 +36,7 @@ var providerEventConsumerSet = wire.NewSet(
 	create_order.NewService,
 	proxy.NewBillingAPI,
 	proxy.NewKitchenAPI,
-	sns.NewActions,
+	sns.NewPublisher,
 
 	provider.NewENV,
 	provider.NewAWSConfig,
