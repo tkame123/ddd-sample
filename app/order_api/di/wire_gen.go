@@ -10,8 +10,7 @@ import (
 	"github.com/google/wire"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/gateway/api"
-	"github.com/tkame123/ddd-sample/app/order_api/adapter/gateway/consumer"
-	"github.com/tkame123/ddd-sample/app/order_api/adapter/gateway/publisher"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/message"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/message/sns"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/proxy"
 	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
@@ -44,15 +43,15 @@ func InitializeAPIServer() (connect.Server, func(), error) {
 		cleanup()
 		return connect.Server{}, nil, err
 	}
-	snsPublisher := sns.NewPublisher(snsClient)
-	domain_eventPublisher := publisher.NewEventPublisher(envConfig, snsPublisher)
+	publisher := sns.NewPublisher(envConfig, snsClient)
+	domain_eventPublisher := message.NewEventPublisher(publisher)
 	server := connect.NewServer(repository, domain_eventPublisher)
 	return server, func() {
 		cleanup()
 	}, nil
 }
 
-func InitializeEventConsumer() (*consumer.EventConsumer, func(), error) {
+func InitializeEventConsumer() (*message.EventConsumer, func(), error) {
 	envConfig, err := provider.NewENV()
 	if err != nil {
 		return nil, nil, err
@@ -75,12 +74,12 @@ func InitializeEventConsumer() (*consumer.EventConsumer, func(), error) {
 		cleanup()
 		return nil, nil, err
 	}
-	snsPublisher := sns.NewPublisher(snsClient)
-	domain_eventPublisher := publisher.NewEventPublisher(envConfig, snsPublisher)
+	publisher := sns.NewPublisher(envConfig, snsClient)
+	domain_eventPublisher := message.NewEventPublisher(publisher)
 	createOrder := create_order.NewService(repository, domain_eventPublisher)
 	kitchenAPI := proxy.NewKitchenAPI()
 	billingAPI := proxy.NewBillingAPI()
-	eventConsumer := consumer.NewEventConsumer(envConfig, client, repository, createOrder, kitchenAPI, billingAPI)
+	eventConsumer := message.NewEventConsumer(envConfig, client, repository, createOrder, kitchenAPI, billingAPI)
 	return eventConsumer, func() {
 		cleanup()
 	}, nil
@@ -88,6 +87,6 @@ func InitializeEventConsumer() (*consumer.EventConsumer, func(), error) {
 
 // wire.go:
 
-var providerServerSet = wire.NewSet(connect.NewServer, database.NewRepository, publisher.NewEventPublisher, sns.NewPublisher, provider.NewENV, provider.NewAWSConfig, provider.NewOrderApiDB, provider.NewSNSClient)
+var providerServerSet = wire.NewSet(connect.NewServer, database.NewRepository, message.NewEventPublisher, sns.NewPublisher, provider.NewENV, provider.NewAWSConfig, provider.NewOrderApiDB, provider.NewSNSClient)
 
-var providerEventConsumerSet = wire.NewSet(consumer.NewEventConsumer, publisher.NewEventPublisher, database.NewRepository, create_order.NewService, proxy.NewBillingAPI, proxy.NewKitchenAPI, sns.NewPublisher, provider.NewENV, provider.NewAWSConfig, provider.NewOrderApiDB, provider.NewSQSClient, provider.NewSNSClient)
+var providerEventConsumerSet = wire.NewSet(message.NewEventConsumer, message.NewEventPublisher, database.NewRepository, create_order.NewService, proxy.NewBillingAPI, proxy.NewKitchenAPI, sns.NewPublisher, provider.NewENV, provider.NewAWSConfig, provider.NewOrderApiDB, provider.NewSQSClient, provider.NewSNSClient)

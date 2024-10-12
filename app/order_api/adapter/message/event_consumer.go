@@ -1,4 +1,4 @@
-package consumer
+package message
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
-	"github.com/tkame123/ddd-sample/app/order_api/adapter/message"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/message/sqs_consumer"
 	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
@@ -127,7 +126,7 @@ func (e *EventConsumer) processEvent(ctx context.Context, ev event.Event) error 
 		e.kitchenAPI,
 		e.billingAPI,
 	)
-	sagaHandler, err := message.NewCreateOrderSagaContext(ev, saga)
+	sagaHandler, err := NewCreateOrderSagaContext(ev, saga)
 	if err != nil {
 		return err
 	}

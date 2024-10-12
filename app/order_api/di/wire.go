@@ -5,8 +5,7 @@ package di
 
 import (
 	_ "github.com/lib/pq"
-	"github.com/tkame123/ddd-sample/app/order_api/adapter/gateway/consumer"
-	"github.com/tkame123/ddd-sample/app/order_api/adapter/gateway/publisher"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/message"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/message/sns"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/proxy"
 	"github.com/tkame123/ddd-sample/app/order_api/usecase/create_order"
@@ -20,7 +19,7 @@ import (
 var providerServerSet = wire.NewSet(
 	connect.NewServer,
 	database.NewRepository,
-	publisher.NewEventPublisher,
+	message.NewEventPublisher,
 	sns.NewPublisher,
 
 	provider.NewENV,
@@ -30,8 +29,8 @@ var providerServerSet = wire.NewSet(
 )
 
 var providerEventConsumerSet = wire.NewSet(
-	consumer.NewEventConsumer,
-	publisher.NewEventPublisher,
+	message.NewEventConsumer,
+	message.NewEventPublisher,
 	database.NewRepository,
 	create_order.NewService,
 	proxy.NewBillingAPI,
@@ -50,7 +49,7 @@ func InitializeAPIServer() (connect.Server, func(), error) {
 	return connect.Server{}, nil, nil
 }
 
-func InitializeEventConsumer() (*consumer.EventConsumer, func(), error) {
+func InitializeEventConsumer() (*message.EventConsumer, func(), error) {
 	wire.Build(providerEventConsumerSet)
 	return nil, nil, nil
 }
