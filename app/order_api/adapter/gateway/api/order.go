@@ -3,11 +3,11 @@ package connect
 import (
 	"connectrpc.com/connect"
 	"context"
-	"github.com/google/uuid"
+
+	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
 	order_apiv1 "github.com/tkame123/ddd-sample/proto/order_api/v1"
 	"github.com/tkame123/ddd-sample/proto/order_api/v1/order_apiv1connect"
-	"log"
 )
 
 type orderServiceServer struct {
@@ -20,11 +20,17 @@ func (s *orderServiceServer) FindOrder(
 	req *connect.Request[order_apiv1.FindOrderRequest],
 ) (*connect.Response[order_apiv1.FindOrderResponse], error) {
 	id := req.Msg.GetId()
-	log.Printf("Got a request  a %v ", id)
-	order, err := s.rep.OrderFindOne(ctx, uuid.Nil)
+	parsedId, err := model.OrderIdParse(id)
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("Got a order %v ", order)
-	return connect.NewResponse(&order_apiv1.FindOrderResponse{}), nil
+	order, err := s.rep.OrderFindOne(ctx, *parsedId)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(&order_apiv1.FindOrderResponse{
+		Order: &order_apiv1.Order{
+			Id: order.OrderID.String(),
+		},
+	}), nil
 }

@@ -17,7 +17,6 @@ require (
 	github.com/google/wire v0.6.0
 	github.com/lib/pq v1.10.9
 	github.com/looplab/fsm v1.0.2
-	github.com/satori/go.uuid v1.2.0
 	golang.org/x/net v0.30.0
 	google.golang.org/protobuf v1.35.1
 )
@@ -48,5 +47,4 @@ require (
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/text v0.19.0 // indirect
 	golang.org/x/tools v0.26.0 // indirect
-	gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 // indirect
 )

@@ -3,7 +3,6 @@ package event
 import (
 	"encoding/json"
 	"github.com/google/uuid"
-	uuid_ext "github.com/satori/go.uuid"
 )
 
 type GeneralEvent struct {
@@ -20,13 +19,13 @@ func NewGeneralEvent(id uuid.UUID, name Name) Event {
 }
 
 func NewGeneralEventFromRaw(raw RawEvent) (Event, error) {
-	id, err := uuid_ext.FromString(raw.ID)
+	id, err := uuid.Parse(raw.ID)
 	if err != nil {
 		return nil, err
 	}
 
 	return &GeneralEvent{
-		Id:     uuid.UUID(id),
+		Id:     id,
 		Type:   raw.Type,
 		Origin: raw.Origin,
 	}, nil

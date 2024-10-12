@@ -13,3 +13,12 @@ func generateID() uuid.UUID {
 
 	return id
 }
+
+func OrderIdParse(id string) (*OrderID, error) {
+	parsedId, err := uuid.Parse(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &parsedId, nil
+}
