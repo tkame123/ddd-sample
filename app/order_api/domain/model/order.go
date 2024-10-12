@@ -2,7 +2,6 @@ package model
 
 import (
 	"errors"
-	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/lib/event_helper"
 	"github.com/tkame123/ddd-sample/proto/message"
 )
@@ -67,7 +66,7 @@ func NewOrder(items []*OrderItemRequest) (*Order, []*message.Message, error) {
 		message.Type_TYPE_EVENT_ORDER_CREATED,
 		message.Service_SERVICE_ORDER,
 		&message.EventOrderCreated{
-			OrderId: uuid.New().String(),
+			OrderId: order.OrderID.String(),
 			// TODO: 詳細のアイテム対応
 		},
 	)
@@ -89,7 +88,7 @@ func (o *Order) ApproveOrder() ([]*message.Message, error) {
 		message.Type_TYPE_EVENT_ORDER_APPROVED,
 		message.Service_SERVICE_ORDER,
 		&message.EventOrderApproved{
-			OrderId: uuid.New().String(),
+			OrderId: o.OrderID.String(),
 		},
 	)
 	if err != nil {
@@ -110,7 +109,7 @@ func (o *Order) RejectOrder() ([]*message.Message, error) {
 		message.Type_TYPE_EVENT_ORDER_REJECTED,
 		message.Service_SERVICE_ORDER,
 		&message.EventOrderRejected{
-			OrderId: uuid.New().String(),
+			OrderId: o.OrderID.String(),
 		},
 	)
 	if err != nil {
