@@ -8,7 +8,7 @@ import (
 )
 
 func NewOrderApiDB(env *EnvConfig) (*ent.Client, func(), error) {
-	client, err := ent.Open("postgres", env.OrderAPIDSN)
+	client, err := ent.Open("postgres", env.DSN)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed opening connection to mysql: %w", err)
 	}
