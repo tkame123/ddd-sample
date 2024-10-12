@@ -3,15 +3,17 @@ package message
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
-	"github.com/tkame123/ddd-sample/app/order_api/domain/port/domain_event"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga/event_handler"
 	"github.com/tkame123/ddd-sample/lib/sqs_consumer"
 	"github.com/tkame123/ddd-sample/proto/message"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -114,24 +116,28 @@ func (e *EventConsumer) workerHandler(ctx context.Context, msg *types.Message) e
 	return nil
 }
 
-func (e *EventConsumer) processEvent(ctx context.Context, mes domain_event.Message) error {
-	// CreateOrderSaga以外に活用する段階ではAbstractFactoryを使う形なのかな？
-	state, err := e.rep.CreateOrderSagaStateFindOne(ctx, mes.ID())
-	if err != nil {
-		return err
+func (e *EventConsumer) processEvent(ctx context.Context, mes *message.Message) error {
+	if !event_handler.IsCreateOrderSagaEvent(mes.Subject.Type) {
+		return fmt.Errorf("invalid event type: %s", mes.Subject.Type)
 	}
-	saga := create_order_saga.NewCreateOrderSaga(
-		state,
-		e.rep,
-		e.orderSVC,
-		e.kitchenAPI,
-		e.billingAPI,
-	)
-	sagaHandler, err := NewCreateOrderSagaContext(mes.Raw())
-	if err != nil {
-		return err
+
+	sagaFactory := func(ctx context.Context, rep repository.Repository, id model.OrderID) (*create_order_saga.CreateOrderSaga, error) {
+		state, err := e.rep.CreateOrderSagaStateFindOne(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		saga := create_order_saga.NewCreateOrderSaga(
+			state,
+			e.rep,
+			e.orderSVC,
+			e.kitchenAPI,
+			e.billingAPI,
+		)
+
+		return saga, nil
 	}
-	err = sagaHandler.Handler(ctx, saga)
+
+	err := event_handler.EventMap[mes.Subject.Type](e.rep).Handler(ctx, sagaFactory, mes)
 	if err != nil {
 		return err
 	}
@@ -151,7 +157,7 @@ func (e *EventConsumer) deleteMessage(ctx context.Context, msg *types.Message) e
 	return nil
 }
 
-func parseMessage(msg *types.Message) (domain_event.Message, error) {
+func parseMessage(msg *types.Message) (*message.Message, error) {
 	type Body struct {
 		Message string `json:"message"`
 	}
@@ -164,10 +170,5 @@ func parseMessage(msg *types.Message) (domain_event.Message, error) {
 		return nil, err
 	}
 
-	// CreateOrderSaga以外に活用する段階ではAbstractFactoryを使う形なのかな？
-	eventFc, err := NewCreateOrderSagaEventFactory(m.Subject.Type, &m)
-	if err != nil {
-		return nil, err
-	}
-	return eventFc.Event()
+	return &m, nil
 }

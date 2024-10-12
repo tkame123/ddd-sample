@@ -8,6 +8,7 @@ import (
 	mockAPI "github.com/tkame123/ddd-sample/app/order_api/domain/port/mock/external_service"
 	mockRp "github.com/tkame123/ddd-sample/app/order_api/domain/port/mock/repository"
 	mockOSVS "github.com/tkame123/ddd-sample/app/order_api/domain/port/mock/service"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
 	servive "github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga"
 	event_handler2 "github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga/event_handler"
 	"github.com/tkame123/ddd-sample/lib/event_helper"
@@ -54,8 +55,12 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 	mockBillingAPI.EXPECT().AuthorizeCard(gomock.Any(), gomock.Any()).AnyTimes()
 	mockOrderSVC.EXPECT().ApproveOrder(gomock.Any(), gomock.Any()).AnyTimes()
 
-	err = event_handler2.NewNextStepSagaWhenOrderCreatedHandler().
-		Handler(ctx, saga,
+	sagaFactory := func(ctx context.Context, rep repository.Repository, id model.OrderID) (*servive.CreateOrderSaga, error) {
+		return saga, nil
+	}
+
+	err = event_handler2.NewNextStepSagaWhenOrderCreatedHandler(mockRepo).
+		Handler(ctx, sagaFactory,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_ORDER_CREATED,
 				&message.EventOrderCreated{
@@ -66,8 +71,8 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	err = event_handler2.NewNextStepSagaWhenTicketCreatedHandler().
-		Handler(ctx, saga,
+	err = event_handler2.NewNextStepSagaWhenTicketCreatedHandler(mockRepo).
+		Handler(ctx, sagaFactory,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_TICKET_CREATED,
 				&message.EventTicketCreated{
@@ -78,8 +83,8 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	err = event_handler2.NewNextStepSagaWhenCardAuthorizedHandler().
-		Handler(ctx, saga,
+	err = event_handler2.NewNextStepSagaWhenCardAuthorizedHandler(mockRepo).
+		Handler(ctx, sagaFactory,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_CARD_AUTHORIZED,
 				&message.EventCardAuthorized{
@@ -90,8 +95,8 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	err = event_handler2.NewNextStepSagaWhenTicketApprovedHandler().
-		Handler(ctx, saga,
+	err = event_handler2.NewNextStepSagaWhenTicketApprovedHandler(mockRepo).
+		Handler(ctx, sagaFactory,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_TICKET_APPROVED,
 				&message.EventTicketApproved{
@@ -102,8 +107,8 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	err = event_handler2.NewNextStepSagaWhenOrderApprovedHandler().
-		Handler(ctx, saga,
+	err = event_handler2.NewNextStepSagaWhenOrderApprovedHandler(mockRepo).
+		Handler(ctx, sagaFactory,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_ORDER_APPROVED,
 				&message.EventOrderApproved{
@@ -149,8 +154,12 @@ func TestCreateOrderSaga_OrderRejectedDutToTicketCreationFailed(t *testing.T) {
 	mockRepo.EXPECT().CreateOrderSagaStateSave(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
 	mockKitchenAPI.EXPECT().CreateTicket(gomock.Any(), gomock.Any()).AnyTimes()
 
-	err = event_handler2.NewNextStepSagaWhenOrderCreatedHandler().
-		Handler(ctx, saga,
+	sagaFactory := func(ctx context.Context, rep repository.Repository, id model.OrderID) (*servive.CreateOrderSaga, error) {
+		return saga, nil
+	}
+
+	err = event_handler2.NewNextStepSagaWhenOrderCreatedHandler(mockRepo).
+		Handler(ctx, sagaFactory,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_ORDER_CREATED,
 				&message.EventOrderCreated{
@@ -161,8 +170,8 @@ func TestCreateOrderSaga_OrderRejectedDutToTicketCreationFailed(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	err = event_handler2.NewNextStepSagaWhenTicketCreationFailedHandler().
-		Handler(ctx, saga,
+	err = event_handler2.NewNextStepSagaWhenTicketCreationFailedHandler(mockRepo).
+		Handler(ctx, sagaFactory,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_TICKET_CREATION_FAILED,
 				&message.EventTicketCreationFailed{
@@ -211,8 +220,12 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 	mockBillingAPI.EXPECT().AuthorizeCard(gomock.Any(), gomock.Any()).AnyTimes()
 	mockOrderSVC.EXPECT().RejectOrder(gomock.Any(), gomock.Any()).AnyTimes()
 
-	err = event_handler2.NewNextStepSagaWhenOrderCreatedHandler().
-		Handler(ctx, saga,
+	sagaFactory := func(ctx context.Context, rep repository.Repository, id model.OrderID) (*servive.CreateOrderSaga, error) {
+		return saga, nil
+	}
+
+	err = event_handler2.NewNextStepSagaWhenOrderCreatedHandler(mockRepo).
+		Handler(ctx, sagaFactory,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_ORDER_CREATED,
 				&message.EventOrderCreated{
@@ -223,8 +236,8 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	err = event_handler2.NewNextStepSagaWhenTicketCreatedHandler().
-		Handler(ctx, saga,
+	err = event_handler2.NewNextStepSagaWhenTicketCreatedHandler(mockRepo).
+		Handler(ctx, sagaFactory,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_TICKET_CREATED,
 				&message.EventTicketCreated{
@@ -235,8 +248,8 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	err = event_handler2.NewNextStepSagaWhenCardAuthorizeFailedHandler().
-		Handler(ctx, saga,
+	err = event_handler2.NewNextStepSagaWhenCardAuthorizeFailedHandler(mockRepo).
+		Handler(ctx, sagaFactory,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_CARD_AUTHORIZATION_FAILED,
 				&message.EventCardAuthorizationFailed{
@@ -247,8 +260,8 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	err = event_handler2.NewNextStepSagaWhenTicketRejectedHandler().
-		Handler(ctx, saga,
+	err = event_handler2.NewNextStepSagaWhenTicketRejectedHandler(mockRepo).
+		Handler(ctx, sagaFactory,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_TICKET_REJECTED,
 				&message.EventTicketRejected{
@@ -259,8 +272,8 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	err = event_handler2.NewNextStepSagaWhenOrderRejectedHandler().
-		Handler(ctx, saga,
+	err = event_handler2.NewNextStepSagaWhenOrderRejectedHandler(mockRepo).
+		Handler(ctx, sagaFactory,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_ORDER_REJECTED,
 				&message.EventOrderRejected{
