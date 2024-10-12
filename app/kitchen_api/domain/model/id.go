@@ -1,16 +1,43 @@
 package model
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"github.com/tkame123/ddd-sample/lib/event"
+)
 
-type TicketID = string
-type OrderID = string
-type ItemID = string
+type TicketID = uuid.UUID
+type OrderID = uuid.UUID
+type ItemID = uuid.UUID
 
-func generateID() string {
-	id, err := uuid.NewRandom()
+func generateID() uuid.UUID {
+	id := uuid.New()
+
+	return id
+}
+
+func TicketIdParse(id string) (*TicketID, error) {
+	parsedId, err := event.ParseID(id)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return id.String()
+	return &parsedId, nil
+}
+
+func OrderIdParse(id string) (*OrderID, error) {
+	parsedId, err := event.ParseID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &parsedId, nil
+}
+
+func ItemIdParse(id string) (*ItemID, error) {
+	parsedId, err := event.ParseID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &parsedId, nil
 }

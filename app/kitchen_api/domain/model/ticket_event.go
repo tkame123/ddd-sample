@@ -1,46 +1,118 @@
 package model
 
 import (
+	"encoding/json"
 	"github.com/tkame123/ddd-sample/lib/event"
 )
 
-type TicketEvent interface {
-	event.Event
-	ID() TicketID
-}
-
 type TicketCreatedEvent struct {
-	ticketID TicketID
-}
-
-func NewTicketCreatedEvent(ticketID TicketID) *TicketCreatedEvent {
-	return &TicketCreatedEvent{
-		ticketID: ticketID,
-	}
+	TicketID TicketID
 }
 
 func (e *TicketCreatedEvent) Name() string {
-	return "event.delivery.ticket_created"
+	return event.EventName_TicketCreated
 }
 
 func (e *TicketCreatedEvent) ID() TicketID {
-	return e.ticketID
+	return e.TicketID
+}
+
+func (e *TicketCreatedEvent) ToBody() (string, error) {
+	var raw event.RawEvent
+	raw.Type = e.Name()
+	raw.ID = e.ID().String()
+	originByte, err := json.Marshal(e)
+	if err != nil {
+		return "", err
+	}
+	raw.Origin = originByte
+	body, err := json.Marshal(raw)
+	if err != nil {
+		return "", err
+	}
+	return string(body), nil
+}
+
+type TicketCreationFailedEvent struct {
+	TicketID TicketID
+}
+
+func (e *TicketCreationFailedEvent) Name() string {
+	return event.EventName_TicketCreationFailed
+}
+
+func (e *TicketCreationFailedEvent) ID() TicketID {
+	return e.TicketID
+}
+
+func (e *TicketCreationFailedEvent) ToBody() (string, error) {
+	var raw event.RawEvent
+	raw.Type = e.Name()
+	raw.ID = e.ID().String()
+	originByte, err := json.Marshal(e)
+	if err != nil {
+		return "", err
+	}
+	raw.Origin = originByte
+	body, err := json.Marshal(raw)
+	if err != nil {
+		return "", err
+	}
+	return string(body), nil
+}
+
+type TicketApprovedEvent struct {
+	TicketID TicketID
+}
+
+func (e *TicketApprovedEvent) Name() string {
+	return event.EventName_TicketApproved
+}
+
+func (e *TicketApprovedEvent) ID() TicketID {
+	return e.TicketID
+}
+
+func (e *TicketApprovedEvent) ToBody() (string, error) {
+	var raw event.RawEvent
+	raw.Type = e.Name()
+	raw.ID = e.ID().String()
+	originByte, err := json.Marshal(e)
+	if err != nil {
+		return "", err
+	}
+	raw.Origin = originByte
+	body, err := json.Marshal(raw)
+	if err != nil {
+		return "", err
+	}
+	return string(body), nil
 }
 
 type TicketRejectedEvent struct {
-	ticketID TicketID
-}
-
-func NewTTicketRejectedEvent(ticketID TicketID) *TicketRejectedEvent {
-	return &TicketRejectedEvent{
-		ticketID: ticketID,
-	}
+	TicketID TicketID
 }
 
 func (e *TicketRejectedEvent) Name() string {
-	return "event.delivery.ticket_rejected"
+	return event.EventName_TicketRejected
 }
 
 func (e *TicketRejectedEvent) ID() TicketID {
-	return e.ticketID
+	return e.TicketID
+}
+
+func (e *TicketRejectedEvent) ToBody() (string, error) {
+	var raw event.RawEvent
+	raw.Type = e.Name()
+	raw.ID = e.ID().String()
+	originByte, err := json.Marshal(e)
+	if err != nil {
+		return "", err
+	}
+	raw.Origin = originByte
+	body, err := json.Marshal(raw)
+	if err != nil {
+		return "", err
+	}
+	return string(body), nil
 }
