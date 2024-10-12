@@ -10,13 +10,11 @@ import (
 )
 
 type TicketCreateWhenTicketCreateHandler struct {
-	orderID model.OrderID
-	items   []*model.TicketItemRequest
-	svc     service.CreateTicket
+	svc service.CreateTicket
 }
 
-func NewTicketCreateWhenTicketCreateHandler(orderID model.OrderID, items []*model.TicketItemRequest, svc service.CreateTicket) domain_event.EventHandler {
-	return &TicketCreateWhenTicketCreateHandler{svc: svc, orderID: orderID, items: items}
+func NewTicketCreateWhenTicketCreateHandler(svc service.CreateTicket) domain_event.EventHandler {
+	return &TicketCreateWhenTicketCreateHandler{svc: svc}
 }
 
 func (h *TicketCreateWhenTicketCreateHandler) Handler(ctx context.Context, mes *message.Message) error {
@@ -24,7 +22,30 @@ func (h *TicketCreateWhenTicketCreateHandler) Handler(ctx context.Context, mes *
 		return fmt.Errorf("invalid event type: %v", mes.Subject.Type)
 	}
 
-	if err := h.svc.CreateTicket(ctx, h.orderID, h.items); err != nil {
+	var v message.CommandTicketCreate
+	err := mes.Envelope.UnmarshalTo(&v)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal event: %w", err)
+	}
+
+	id, err := model.OrderIdParse(v.OrderId)
+	if err != nil {
+		return fmt.Errorf("failed to parse order id: %w", err)
+	}
+
+	items := make([]*model.TicketItemRequest, 0, len(v.Items))
+	for _, i := range v.Items {
+		itemId, err := model.ItemIdParse(i.ItemId)
+		if err != nil {
+			return fmt.Errorf("failed to parse item id: %w", err)
+		}
+		items = append(items, &model.TicketItemRequest{
+			ItemID:   *itemId,
+			Quantity: int(i.Quantity),
+		})
+	}
+
+	if err := h.svc.CreateTicket(ctx, *id, items); err != nil {
 		return err
 	}
 

@@ -10,12 +10,11 @@ import (
 )
 
 type TicketApproveWhenTicketApproveHandler struct {
-	orderID model.OrderID
-	svc     service.CreateTicket
+	svc service.CreateTicket
 }
 
-func NewTicketApproveWhenTicketApproveHandler(orderID model.OrderID, svc service.CreateTicket) domain_event.EventHandler {
-	return &TicketApproveWhenTicketApproveHandler{svc: svc, orderID: orderID}
+func NewTicketApproveWhenTicketApproveHandler(svc service.CreateTicket) domain_event.EventHandler {
+	return &TicketApproveWhenTicketApproveHandler{svc: svc}
 }
 
 func (h *TicketApproveWhenTicketApproveHandler) Handler(ctx context.Context, mes *message.Message) error {
@@ -23,7 +22,18 @@ func (h *TicketApproveWhenTicketApproveHandler) Handler(ctx context.Context, mes
 		return fmt.Errorf("invalid event type: %v", mes.Subject.Type)
 	}
 
-	if err := h.svc.ApproveTicket(ctx, h.orderID); err != nil {
+	var v message.CommandTicketApprove
+	err := mes.Envelope.UnmarshalTo(&v)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal event: %w", err)
+	}
+
+	id, err := model.OrderIdParse(v.OrderId)
+	if err != nil {
+		return fmt.Errorf("failed to parse order id: %w", err)
+	}
+
+	if err := h.svc.ApproveTicket(ctx, *id); err != nil {
 		return err
 	}
 
