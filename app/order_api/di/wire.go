@@ -19,9 +19,13 @@ import (
 var providerServerSet = wire.NewSet(
 	connect.NewServer,
 	database.NewRepository,
+	message.NewEventPublisher,
+	sns.NewActions,
 
 	provider.NewENV,
+	provider.NewAWSConfig,
 	provider.NewOrderApiDB,
+	provider.NewSNSClient,
 )
 
 var providerEventConsumerSet = wire.NewSet(

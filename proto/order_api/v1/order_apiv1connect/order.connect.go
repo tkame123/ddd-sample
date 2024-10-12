@@ -33,18 +33,23 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
+	// OrderServiceCreateOrderProcedure is the fully-qualified name of the OrderService's CreateOrder
+	// RPC.
+	OrderServiceCreateOrderProcedure = "/order_api.v1.OrderService/CreateOrder"
 	// OrderServiceFindOrderProcedure is the fully-qualified name of the OrderService's FindOrder RPC.
 	OrderServiceFindOrderProcedure = "/order_api.v1.OrderService/FindOrder"
 )
 
 // These variables are the protoreflect.Descriptor objects for the RPCs defined in this package.
 var (
-	orderServiceServiceDescriptor         = v1.File_order_api_v1_order_proto.Services().ByName("OrderService")
-	orderServiceFindOrderMethodDescriptor = orderServiceServiceDescriptor.Methods().ByName("FindOrder")
+	orderServiceServiceDescriptor           = v1.File_order_api_v1_order_proto.Services().ByName("OrderService")
+	orderServiceCreateOrderMethodDescriptor = orderServiceServiceDescriptor.Methods().ByName("CreateOrder")
+	orderServiceFindOrderMethodDescriptor   = orderServiceServiceDescriptor.Methods().ByName("FindOrder")
 )
 
 // OrderServiceClient is a client for the order_api.v1.OrderService service.
 type OrderServiceClient interface {
+	CreateOrder(context.Context, *connect.Request[v1.CreateOrderRequest]) (*connect.Response[v1.CreateOrderResponse], error)
 	FindOrder(context.Context, *connect.Request[v1.FindOrderRequest]) (*connect.Response[v1.FindOrderResponse], error)
 }
 
@@ -58,6 +63,12 @@ type OrderServiceClient interface {
 func NewOrderServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) OrderServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
 	return &orderServiceClient{
+		createOrder: connect.NewClient[v1.CreateOrderRequest, v1.CreateOrderResponse](
+			httpClient,
+			baseURL+OrderServiceCreateOrderProcedure,
+			connect.WithSchema(orderServiceCreateOrderMethodDescriptor),
+			connect.WithClientOptions(opts...),
+		),
 		findOrder: connect.NewClient[v1.FindOrderRequest, v1.FindOrderResponse](
 			httpClient,
 			baseURL+OrderServiceFindOrderProcedure,
@@ -69,7 +80,13 @@ func NewOrderServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 
 // orderServiceClient implements OrderServiceClient.
 type orderServiceClient struct {
-	findOrder *connect.Client[v1.FindOrderRequest, v1.FindOrderResponse]
+	createOrder *connect.Client[v1.CreateOrderRequest, v1.CreateOrderResponse]
+	findOrder   *connect.Client[v1.FindOrderRequest, v1.FindOrderResponse]
+}
+
+// CreateOrder calls order_api.v1.OrderService.CreateOrder.
+func (c *orderServiceClient) CreateOrder(ctx context.Context, req *connect.Request[v1.CreateOrderRequest]) (*connect.Response[v1.CreateOrderResponse], error) {
+	return c.createOrder.CallUnary(ctx, req)
 }
 
 // FindOrder calls order_api.v1.OrderService.FindOrder.
@@ -79,6 +96,7 @@ func (c *orderServiceClient) FindOrder(ctx context.Context, req *connect.Request
 
 // OrderServiceHandler is an implementation of the order_api.v1.OrderService service.
 type OrderServiceHandler interface {
+	CreateOrder(context.Context, *connect.Request[v1.CreateOrderRequest]) (*connect.Response[v1.CreateOrderResponse], error)
 	FindOrder(context.Context, *connect.Request[v1.FindOrderRequest]) (*connect.Response[v1.FindOrderResponse], error)
 }
 
@@ -88,6 +106,12 @@ type OrderServiceHandler interface {
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
 func NewOrderServiceHandler(svc OrderServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	orderServiceCreateOrderHandler := connect.NewUnaryHandler(
+		OrderServiceCreateOrderProcedure,
+		svc.CreateOrder,
+		connect.WithSchema(orderServiceCreateOrderMethodDescriptor),
+		connect.WithHandlerOptions(opts...),
+	)
 	orderServiceFindOrderHandler := connect.NewUnaryHandler(
 		OrderServiceFindOrderProcedure,
 		svc.FindOrder,
@@ -96,6 +120,8 @@ func NewOrderServiceHandler(svc OrderServiceHandler, opts ...connect.HandlerOpti
 	)
 	return "/order_api.v1.OrderService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case OrderServiceCreateOrderProcedure:
+			orderServiceCreateOrderHandler.ServeHTTP(w, r)
 		case OrderServiceFindOrderProcedure:
 			orderServiceFindOrderHandler.ServeHTTP(w, r)
 		default:
@@ -106,6 +132,10 @@ func NewOrderServiceHandler(svc OrderServiceHandler, opts ...connect.HandlerOpti
 
 // UnimplementedOrderServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedOrderServiceHandler struct{}
+
+func (UnimplementedOrderServiceHandler) CreateOrder(context.Context, *connect.Request[v1.CreateOrderRequest]) (*connect.Response[v1.CreateOrderResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("order_api.v1.OrderService.CreateOrder is not implemented"))
+}
 
 func (UnimplementedOrderServiceHandler) FindOrder(context.Context, *connect.Request[v1.FindOrderRequest]) (*connect.Response[v1.FindOrderResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("order_api.v1.OrderService.FindOrder is not implemented"))

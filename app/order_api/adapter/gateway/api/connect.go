@@ -3,6 +3,7 @@ package connect
 import (
 	"connectrpc.com/connect"
 	"fmt"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/port/domain_event"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
 	"github.com/tkame123/ddd-sample/proto/order_api/v1/order_apiv1connect"
 	"golang.org/x/net/http2"
@@ -16,13 +17,16 @@ const address = "localhost:8080"
 
 type Server struct {
 	rep repository.Repository
+	pub domain_event.Publisher
 }
 
 func NewServer(
 	rep repository.Repository,
+	pub domain_event.Publisher,
 ) Server {
 	return Server{
 		rep: rep,
+		pub: pub,
 	}
 }
 
@@ -38,9 +42,9 @@ func (s *Server) Run() {
 }
 
 func (s *Server) applyHandlers(mux *http.ServeMux) {
-	interceptors := s.mustInterceptors()
+	mustInterceptors := s.mustInterceptors()
 	// MEMO: Add handlers here.
-	mux.Handle(order_apiv1connect.NewOrderServiceHandler(&orderServiceServer{rep: s.rep}, interceptors))
+	mux.Handle(order_apiv1connect.NewOrderServiceHandler(&orderServiceServer{rep: s.rep, pub: s.pub}, mustInterceptors))
 }
 
 func (s *Server) mustInterceptors() connect.Option {

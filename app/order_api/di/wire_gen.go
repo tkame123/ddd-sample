@@ -33,7 +33,19 @@ func InitializeAPIServer() (connect.Server, func(), error) {
 		return connect.Server{}, nil, err
 	}
 	repository := database.NewRepository(client)
-	server := connect.NewServer(repository)
+	config, err := provider.NewAWSConfig()
+	if err != nil {
+		cleanup()
+		return connect.Server{}, nil, err
+	}
+	snsClient, err := provider.NewSNSClient(config)
+	if err != nil {
+		cleanup()
+		return connect.Server{}, nil, err
+	}
+	actions := sns.NewActions(snsClient)
+	publisher := message.NewEventPublisher(envConfig, actions)
+	server := connect.NewServer(repository, publisher)
 	return server, func() {
 		cleanup()
 	}, nil
@@ -75,6 +87,6 @@ func InitializeEventConsumer() (*message.EventConsumer, func(), error) {
 
 // wire.go:
 
-var providerServerSet = wire.NewSet(connect.NewServer, database.NewRepository, provider.NewENV, provider.NewOrderApiDB)
+var providerServerSet = wire.NewSet(connect.NewServer, database.NewRepository, message.NewEventPublisher, sns.NewActions, provider.NewENV, provider.NewAWSConfig, provider.NewOrderApiDB, provider.NewSNSClient)
 
 var providerEventConsumerSet = wire.NewSet(message.NewEventConsumer, message.NewEventPublisher, database.NewRepository, create_order.NewService, proxy.NewBillingAPI, proxy.NewKitchenAPI, sns.NewActions, provider.NewENV, provider.NewAWSConfig, provider.NewOrderApiDB, provider.NewSQSClient, provider.NewSNSClient)

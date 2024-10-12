@@ -11,6 +11,10 @@ type GeneralEvent struct {
 	Origin json.RawMessage
 }
 
+func ParseID(id string) (uuid.UUID, error) {
+	return uuid.Parse(id)
+}
+
 func NewGeneralEvent(id uuid.UUID, name Name) Event {
 	return &GeneralEvent{
 		Id:   id,
