@@ -7,7 +7,6 @@ import (
 	"github.com/google/wire"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/adapter/database"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/adapter/message"
-	"github.com/tkame123/ddd-sample/app/kitchen_api/adapter/message/sns"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/di/provider"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/usecase/create_ticket"
 )
@@ -17,7 +16,6 @@ var providerCommandConsumerSet = wire.NewSet(
 	create_ticket.NewService,
 	message.NewEventPublisher,
 	database.NewRepository,
-	sns.NewPublisher,
 
 	provider.NewENV,
 	provider.NewAWSConfig,

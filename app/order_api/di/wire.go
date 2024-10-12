@@ -6,7 +6,6 @@ package di
 import (
 	_ "github.com/lib/pq"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/message"
-	"github.com/tkame123/ddd-sample/app/order_api/adapter/message/sns"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/proxy"
 	"github.com/tkame123/ddd-sample/app/order_api/usecase/create_order"
 
@@ -20,7 +19,6 @@ var providerServerSet = wire.NewSet(
 	connect.NewServer,
 	database.NewRepository,
 	message.NewEventPublisher,
-	sns.NewPublisher,
 
 	provider.NewENV,
 	provider.NewAWSConfig,
@@ -35,7 +33,6 @@ var providerEventConsumerSet = wire.NewSet(
 	create_order.NewService,
 	proxy.NewBillingAPI,
 	proxy.NewKitchenAPI,
-	sns.NewPublisher,
 
 	provider.NewENV,
 	provider.NewAWSConfig,

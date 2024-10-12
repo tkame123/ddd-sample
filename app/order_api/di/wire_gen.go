@@ -11,7 +11,6 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/gateway/api"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/message"
-	"github.com/tkame123/ddd-sample/app/order_api/adapter/message/sns"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/proxy"
 	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
 	"github.com/tkame123/ddd-sample/app/order_api/usecase/create_order"
@@ -43,9 +42,8 @@ func InitializeAPIServer() (connect.Server, func(), error) {
 		cleanup()
 		return connect.Server{}, nil, err
 	}
-	publisher := sns.NewPublisher(envConfig, snsClient)
-	domain_eventPublisher := message.NewEventPublisher(publisher)
-	server := connect.NewServer(repository, domain_eventPublisher)
+	publisher := message.NewEventPublisher(envConfig, snsClient)
+	server := connect.NewServer(repository, publisher)
 	return server, func() {
 		cleanup()
 	}, nil
@@ -75,10 +73,9 @@ func InitializeEventConsumer() (*message.EventConsumer, func(), error) {
 		cleanup()
 		return nil, nil, err
 	}
-	publisher := sns.NewPublisher(envConfig, snsClient)
-	domain_eventPublisher := message.NewEventPublisher(publisher)
-	createOrder := create_order.NewService(repository, domain_eventPublisher)
-	kitchenAPI := proxy.NewKitchenAPI(repository, domain_eventPublisher)
+	publisher := message.NewEventPublisher(envConfig, snsClient)
+	createOrder := create_order.NewService(repository, publisher)
+	kitchenAPI := proxy.NewKitchenAPI(repository, publisher)
 	billingAPI := proxy.NewBillingAPI()
 	eventConsumer := message.NewEventConsumer(consumerConfig, envConfig, client, repository, createOrder, kitchenAPI, billingAPI)
 	return eventConsumer, func() {
@@ -88,6 +85,6 @@ func InitializeEventConsumer() (*message.EventConsumer, func(), error) {
 
 // wire.go:
 
-var providerServerSet = wire.NewSet(connect.NewServer, database.NewRepository, message.NewEventPublisher, sns.NewPublisher, provider.NewENV, provider.NewAWSConfig, provider.NewOrderApiDB, provider.NewSNSClient)
+var providerServerSet = wire.NewSet(connect.NewServer, database.NewRepository, message.NewEventPublisher, provider.NewENV, provider.NewAWSConfig, provider.NewOrderApiDB, provider.NewSNSClient)
 
-var providerEventConsumerSet = wire.NewSet(message.NewEventConsumer, message.NewEventPublisher, database.NewRepository, create_order.NewService, proxy.NewBillingAPI, proxy.NewKitchenAPI, sns.NewPublisher, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewOrderApiDB, provider.NewSQSClient, provider.NewSNSClient)
+var providerEventConsumerSet = wire.NewSet(message.NewEventConsumer, message.NewEventPublisher, database.NewRepository, create_order.NewService, proxy.NewBillingAPI, proxy.NewKitchenAPI, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewOrderApiDB, provider.NewSQSClient, provider.NewSNSClient)

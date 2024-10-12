@@ -10,7 +10,6 @@ import (
 	"github.com/google/wire"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/adapter/database"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/adapter/message"
-	"github.com/tkame123/ddd-sample/app/kitchen_api/adapter/message/sns"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/di/provider"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/usecase/create_ticket"
 )
@@ -36,9 +35,8 @@ func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	publisher := sns.NewPublisher(envConfig, snsClient)
-	domain_eventPublisher := message.NewEventPublisher(publisher)
-	createTicket := create_ticket.NewService(repository, domain_eventPublisher)
+	publisher := message.NewEventPublisher(envConfig, snsClient)
+	createTicket := create_ticket.NewService(repository, publisher)
 	commandConsumer := message.NewCommandConsumer(consumerConfig, envConfig, client, createTicket)
 	return commandConsumer, func() {
 	}, nil
@@ -46,4 +44,4 @@ func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
 
 // wire.go:
 
-var providerCommandConsumerSet = wire.NewSet(message.NewCommandConsumer, create_ticket.NewService, message.NewEventPublisher, database.NewRepository, sns.NewPublisher, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewSQSClient, provider.NewSNSClient)
+var providerCommandConsumerSet = wire.NewSet(message.NewCommandConsumer, create_ticket.NewService, message.NewEventPublisher, database.NewRepository, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewSQSClient, provider.NewSNSClient)
