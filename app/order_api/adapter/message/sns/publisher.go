@@ -22,8 +22,8 @@ func NewPublisher(envCfg *provider.EnvConfig, client *sns.Client) *Publisher {
 		event.EventName_OrderApproved:   envCfg.ArnTopicEventOrderOrderApproved,
 		event.EventName_OrderRejected:   envCfg.ArnTopicEventOrderOrderRejected,
 		event.CommandName_TicketCreate:  envCfg.ArnTopicCommandKitchenTicketCreate,
-		event.CommandName_TicketApprove: envCfg.ArnTopicCommandOrderOrderApprove,
-		event.CommandName_TicketReject:  envCfg.ArnTopicCommandOrderOrderReject,
+		event.CommandName_TicketApprove: envCfg.ArnTopicCommandKitchenTicketApprove,
+		event.CommandName_TicketReject:  envCfg.ArnTopicCommandKitchenTicketReject,
 		event.CommandName_CardAuthorize: envCfg.ArnTopicCommandBillingCardAuthorize,
 	}
 
