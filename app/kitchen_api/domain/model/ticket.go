@@ -59,6 +59,7 @@ func (t *Ticket) ApproveTicket() ([]event.Event, error) {
 		return nil, errors.New("ticket is not approval pending status")
 	}
 
+	t.Status = Tickettatus_Approved
 	return []event.Event{&TicketApprovedEvent{TicketID: t.TicketID}}, nil
 }
 
@@ -67,5 +68,6 @@ func (t *Ticket) RejectTicket() ([]event.Event, error) {
 		return nil, errors.New("ticket is not approval pending status")
 	}
 
+	t.Status = TicketStatus_Rejected
 	return []event.Event{&TicketRejectedEvent{TicketID: t.TicketID}}, nil
 }

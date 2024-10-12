@@ -6,6 +6,7 @@ import (
 )
 
 type Ticket interface {
-	TicketFindOne(ctx context.Context, id *model.TicketID) (*model.Ticket, error)
+	TicketFindOne(ctx context.Context, id model.TicketID) (*model.Ticket, error)
+	TicketFindOneByOrderID(ctx context.Context, id model.OrderID) (*model.Ticket, error)
 	TicketSave(ctx context.Context, order *model.Ticket) error
 }

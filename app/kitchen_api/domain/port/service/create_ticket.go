@@ -6,7 +6,7 @@ import (
 )
 
 type CreateTicket interface {
-	CreateTicket(ctx context.Context, items []*model.TicketItemRequest) (model.TicketID, error)
-	ApproveTicket(ctx context.Context, ticketID model.TicketID) (model.TicketID, error)
-	RejectTicket(ctx context.Context, ticketID model.TicketID) (model.TicketID, error)
+	CreateTicket(ctx context.Context, orderID model.OrderID, items []*model.TicketItemRequest) error
+	ApproveTicket(ctx context.Context, orderID model.OrderID) error
+	RejectTicket(ctx context.Context, orderID model.OrderID) error
 }
