@@ -6,13 +6,13 @@ import (
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/port/service"
 )
 
-type s struct {
+type CreatTicketService struct {
 	rep repository.Repository
 	pub domain_event.Publisher
 }
 
 func NewService(rep repository.Repository, pub domain_event.Publisher) service.CreateTicket {
-	return &s{
+	return &CreatTicketService{
 		rep: rep,
 		pub: pub,
 	}

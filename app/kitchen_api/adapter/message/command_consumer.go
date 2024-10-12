@@ -24,25 +24,25 @@ const (
 	messageChan = 10
 )
 
-type EventConsumer struct {
+type CommandConsumer struct {
 	sqsClient *sqs.Client
 	queueUrl  string
 	svc       service.CreateTicket
 }
 
-func NewEventConsumer(
+func NewCommandConsumer(
 	envCfg *provider.EnvConfig,
 	sqsClient *sqs.Client,
 	svc service.CreateTicket,
-) *EventConsumer {
-	return &EventConsumer{
+) *CommandConsumer {
+	return &CommandConsumer{
 		sqsClient: sqsClient,
 		queueUrl:  envCfg.SqsUrlTicketCommand,
 		svc:       svc,
 	}
 }
 
-func (e *EventConsumer) Run() {
+func (e *CommandConsumer) Run() {
 	// コンテキストとキャンセル関数を作成
 	ctxPolling, ctxPollingCancel := context.WithCancel(context.Background())
 	ctxWorker, ctxWorkerCancel := context.WithCancel(context.Background())
@@ -81,7 +81,7 @@ func (e *EventConsumer) Run() {
 	wgWorker.Wait()
 }
 
-func (e *EventConsumer) workerHandler(ctx context.Context, msg *types.Message) error {
+func (e *CommandConsumer) workerHandler(ctx context.Context, msg *types.Message) error {
 	ev, err := parseEvent(msg)
 	if err != nil {
 		return err
@@ -101,7 +101,7 @@ func (e *EventConsumer) workerHandler(ctx context.Context, msg *types.Message) e
 	return nil
 }
 
-func (e *EventConsumer) processEvent(ctx context.Context, ev event.Event) error {
+func (e *CommandConsumer) processEvent(ctx context.Context, ev event.Event) error {
 	handler, err := NewCreateTicketContext(ev, e.svc)
 	if err != nil {
 		return err
@@ -114,7 +114,7 @@ func (e *EventConsumer) processEvent(ctx context.Context, ev event.Event) error 
 	return nil
 }
 
-func (e *EventConsumer) deleteMessage(ctx context.Context, msg *types.Message) error {
+func (e *CommandConsumer) deleteMessage(ctx context.Context, msg *types.Message) error {
 	_, err := e.sqsClient.DeleteMessage(ctx, &sqs.DeleteMessageInput{
 		QueueUrl:      aws.String(e.queueUrl),
 		ReceiptHandle: msg.ReceiptHandle,

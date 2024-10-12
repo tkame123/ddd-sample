@@ -1,3 +1,8 @@
+buf.generate:
+	buf generate
+
+buf.lint:
+	buf lint
 
 order.wire:
 	cd app/order_api/di && wire
@@ -33,8 +38,5 @@ order.ent.atlas:
       --dev-url "sqlite://file?mode=memory&_fk=1" \
       -w
 
-buf.generate:
-	buf generate
-
-buf.lint:
-	buf lint
+kitchen.wire:
+	cd app/kitchen_api/di && wire

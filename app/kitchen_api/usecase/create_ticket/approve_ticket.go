@@ -5,7 +5,7 @@ import (
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/model"
 )
 
-func (s *s) ApproveTicket(ctx context.Context, orderID model.OrderID) error {
+func (s *CreatTicketService) ApproveTicket(ctx context.Context, orderID model.OrderID) error {
 	ticket, err := s.rep.TicketFindOneByOrderID(ctx, orderID)
 	if err != nil {
 		return err
