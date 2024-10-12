@@ -26,8 +26,8 @@ func (Order) Fields() []ent.Field {
 		field.Enum("status").
 			Values(
 				model.OrderStatus_ApprovalPending,
-				model.OrderStatus_OrderApproved,
-				model.OrderStatus_OrderRejected,
+				model.OrderStatus_Approved,
+				model.OrderStatus_Rejected,
 			),
 		field.Time("created_at").
 			Default(time.Now).

@@ -92,11 +92,11 @@ func toModelOrderItem(orderItem *ent.OrderItem) *model.OrderItem {
 func fromModelOrderStatus(status model.OrderStatus) e_order.Status {
 	switch status {
 	case model.OrderStatus_ApprovalPending:
-		return e_order.StatusApprovalPending
-	case model.OrderStatus_OrderApproved:
-		return e_order.StatusOrderApproved
-	case model.OrderStatus_OrderRejected:
-		return e_order.StatusOrderRejected
+		return e_order.StatusPending
+	case model.OrderStatus_Approved:
+		return e_order.StatusApproved
+	case model.OrderStatus_Rejected:
+		return e_order.StatusRejected
 	default:
 		panic("invalid status")
 	}
@@ -104,12 +104,12 @@ func fromModelOrderStatus(status model.OrderStatus) e_order.Status {
 
 func toModelOrderStatus(status e_order.Status) model.OrderStatus {
 	switch status {
-	case e_order.StatusApprovalPending:
+	case e_order.StatusPending:
 		return model.OrderStatus_ApprovalPending
-	case e_order.StatusOrderApproved:
-		return model.OrderStatus_OrderApproved
-	case e_order.StatusOrderRejected:
-		return model.OrderStatus_OrderRejected
+	case e_order.StatusApproved:
+		return model.OrderStatus_Approved
+	case e_order.StatusRejected:
+		return model.OrderStatus_Rejected
 	default:
 		panic("invalid status")
 	}

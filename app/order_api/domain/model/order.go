@@ -7,6 +7,14 @@ import (
 
 const APPOVAL_LIMIT = 10000
 
+type OrderStatus = string
+
+const (
+	OrderStatus_ApprovalPending OrderStatus = "Pending"
+	OrderStatus_Approved        OrderStatus = "Approved"
+	OrderStatus_Rejected        OrderStatus = "Rejected"
+)
+
 // 集約ルート
 type Order struct {
 	OrderID    OrderID
@@ -22,14 +30,6 @@ type OrderItem struct {
 	Price       int
 	Quantity    int
 }
-
-type OrderStatus = string
-
-const (
-	OrderStatus_ApprovalPending OrderStatus = "ApprovalPending"
-	OrderStatus_OrderApproved   OrderStatus = "OrderApproved"
-	OrderStatus_OrderRejected   OrderStatus = "OrderRejected"
-)
 
 type OrderItemRequest struct {
 	Item
@@ -69,7 +69,7 @@ func (o *Order) ApproveOrder() ([]event.Event, error) {
 		return nil, errors.New("order is not in approval pending status")
 	}
 
-	o.Status = OrderStatus_OrderApproved
+	o.Status = OrderStatus_Approved
 	return []event.Event{&OrderApprovedEvent{o.OrderID}}, nil
 }
 
@@ -78,7 +78,7 @@ func (o *Order) RejectOrder() ([]event.Event, error) {
 		return nil, errors.New("order is not in approval pending status")
 	}
 
-	o.Status = OrderStatus_OrderRejected
+	o.Status = OrderStatus_Rejected
 	return []event.Event{&OrderRejectedEvent{o.OrderID}}, nil
 }
 

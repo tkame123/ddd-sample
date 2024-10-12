@@ -36,7 +36,7 @@ type Event interface {
 	ToBody() (string, error)
 }
 
-// message変換用
+// message送受信用の構造体
 type RawEvent struct {
 	Type   string          `json:"type"`
 	ID     string          `json:"id"`
