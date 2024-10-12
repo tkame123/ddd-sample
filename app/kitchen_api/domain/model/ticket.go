@@ -3,6 +3,7 @@ package model
 import (
 	"errors"
 	"github.com/tkame123/ddd-sample/lib/event_helper"
+	"github.com/tkame123/ddd-sample/proto/message"
 )
 
 type TicketStatus = string
@@ -33,7 +34,7 @@ type TicketItemRequest struct {
 }
 
 // TODO: 重複オーダチェックの際に、TicketCreationFailedEventを発行する
-func NewTicket(orderID OrderID, items []*TicketItemRequest) (*Ticket, []event_helper.Event, error) {
+func NewTicket(orderID OrderID, items []*TicketItemRequest) (*Ticket, []*message.Message, error) {
 	ticketID := generateID()
 
 	ticketItems := make([]*TicketItem, 0, len(items))
@@ -51,23 +52,61 @@ func NewTicket(orderID OrderID, items []*TicketItemRequest) (*Ticket, []event_he
 		TicketItems: ticketItems,
 	}
 
-	return ticket, []event_helper.Event{&TicketCreatedEvent{TicketID: ticket.TicketID}}, nil
+	mes, err := event_helper.CreateMessage(
+		message.Type_TYPE_EVENT_TICKET_CREATED,
+		message.Service_SERVICE_KITCHEN,
+		&message.EventTicketCreated{
+			OrderId:  ticket.OrderID.String(),
+			TicketId: ticket.TicketID.String(),
+		},
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return ticket, []*message.Message{mes}, nil
 }
 
-func (t *Ticket) ApproveTicket() ([]event_helper.Event, error) {
+func (t *Ticket) ApproveTicket() ([]*message.Message, error) {
 	if t.Status != Tickettatus_ApprovalPending {
 		return nil, errors.New("ticket is not approval pending status")
 	}
 
 	t.Status = Tickettatus_Approved
-	return []event_helper.Event{&TicketApprovedEvent{TicketID: t.TicketID}}, nil
+
+	mes, err := event_helper.CreateMessage(
+		message.Type_TYPE_EVENT_ORDER_APPROVED,
+		message.Service_SERVICE_KITCHEN,
+		&message.EventTicketApproved{
+			OrderId:  t.OrderID.String(),
+			TicketId: t.TicketID.String(),
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return []*message.Message{mes}, nil
 }
 
-func (t *Ticket) RejectTicket() ([]event_helper.Event, error) {
+func (t *Ticket) RejectTicket() ([]*message.Message, error) {
 	if t.Status != Tickettatus_ApprovalPending {
 		return nil, errors.New("ticket is not approval pending status")
 	}
 
 	t.Status = TicketStatus_Rejected
-	return []event_helper.Event{&TicketRejectedEvent{TicketID: t.TicketID}}, nil
+
+	mes, err := event_helper.CreateMessage(
+		message.Type_TYPE_EVENT_ORDER_REJECTED,
+		message.Service_SERVICE_KITCHEN,
+		&message.EventTicketRejected{
+			OrderId:  t.OrderID.String(),
+			TicketId: t.TicketID.String(),
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return []*message.Message{mes}, nil
 }
