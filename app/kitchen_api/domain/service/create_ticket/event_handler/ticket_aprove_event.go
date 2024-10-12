@@ -2,11 +2,11 @@ package event_handler
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/model"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/port/domain_event"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/port/service"
-	ev "github.com/tkame123/ddd-sample/lib/event_helper"
+	"github.com/tkame123/ddd-sample/proto/message"
 )
 
 type TicketApproveWhenTicketApproveHandler struct {
@@ -18,9 +18,9 @@ func NewTicketApproveWhenTicketApproveHandler(orderID model.OrderID, svc service
 	return &TicketApproveWhenTicketApproveHandler{svc: svc, orderID: orderID}
 }
 
-func (h *TicketApproveWhenTicketApproveHandler) Handler(ctx context.Context, event ev.Event) error {
-	if event.Name() != ev.CommandName_TicketApprove {
-		return errors.New("invalid event")
+func (h *TicketApproveWhenTicketApproveHandler) Handler(ctx context.Context, mes *message.Message) error {
+	if mes.Subject.Type != message.Type_TYPE_COMMAND_TICKET_APPROVE {
+		return fmt.Errorf("invalid event type: %v", mes.Subject.Type)
 	}
 
 	if err := h.svc.ApproveTicket(ctx, h.orderID); err != nil {

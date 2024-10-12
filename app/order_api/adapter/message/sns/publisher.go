@@ -18,7 +18,6 @@ type Publisher struct {
 }
 
 func NewPublisher(envCfg *provider.EnvConfig, client *sns.Client) *Publisher {
-	// TODO: fix
 	topicMap := map[message.Type]topicArn{
 		message.Type_TYPE_EVENT_ORDER_CREATED:    envCfg.ArnTopicEventOrderOrderCreated,
 		message.Type_TYPE_EVENT_ORDER_APPROVED:   envCfg.ArnTopicEventOrderOrderApproved,
