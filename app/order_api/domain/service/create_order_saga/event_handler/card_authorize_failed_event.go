@@ -9,21 +9,18 @@ import (
 )
 
 type NextStepSagaWhenCardAuthorizeFailedHandler struct {
-	saga *servive.CreateOrderSaga
 }
 
-func NewNextStepSagaWhenCardAuthorizeFailedHandler(saga *servive.CreateOrderSaga) domain_event.EventHandler {
-	return &NextStepSagaWhenCardAuthorizeFailedHandler{
-		saga: saga,
-	}
+func NewNextStepSagaWhenCardAuthorizeFailedHandler() domain_event.CreateOrderSagaEventHandler {
+	return &NextStepSagaWhenCardAuthorizeFailedHandler{}
 }
 
-func (h *NextStepSagaWhenCardAuthorizeFailedHandler) Handler(ctx context.Context, mes *message.Message) error {
+func (h *NextStepSagaWhenCardAuthorizeFailedHandler) Handler(ctx context.Context, saga *servive.CreateOrderSaga, mes *message.Message) error {
 	if mes.Subject.Type != message.Type_TYPE_EVENT_CARD_AUTHORIZATION_FAILED {
 		return fmt.Errorf("invalid event type: %v", mes.Subject.Type)
 	}
 
-	if err := h.saga.Event(ctx, servive.CreateOrderSagaEvent_AuthorizeCardFailed); err != nil {
+	if err := saga.Event(ctx, servive.CreateOrderSagaEvent_AuthorizeCardFailed); err != nil {
 		return err
 	}
 

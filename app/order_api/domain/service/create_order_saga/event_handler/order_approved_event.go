@@ -8,22 +8,18 @@ import (
 	"github.com/tkame123/ddd-sample/proto/message"
 )
 
-type NextStepSagaWhenOrderApprovedHandler struct {
-	saga *servive.CreateOrderSaga
+type NextStepSagaWhenOrderApprovedHandler struct{}
+
+func NewNextStepSagaWhenOrderApprovedHandler() domain_event.CreateOrderSagaEventHandler {
+	return &NextStepSagaWhenOrderApprovedHandler{}
 }
 
-func NewNextStepSagaWhenOrderApprovedHandler(saga *servive.CreateOrderSaga) domain_event.EventHandler {
-	return &NextStepSagaWhenOrderApprovedHandler{
-		saga: saga,
-	}
-}
-
-func (h *NextStepSagaWhenOrderApprovedHandler) Handler(ctx context.Context, mes *message.Message) error {
+func (h *NextStepSagaWhenOrderApprovedHandler) Handler(ctx context.Context, saga *servive.CreateOrderSaga, mes *message.Message) error {
 	if mes.Subject.Type != message.Type_TYPE_EVENT_ORDER_APPROVED {
 		return fmt.Errorf("invalid event type: %v", mes.Subject.Type)
 	}
 
-	if err := h.saga.Event(ctx, servive.CreateOrderSagaEvent_OrderApprove); err != nil {
+	if err := saga.Event(ctx, servive.CreateOrderSagaEvent_OrderApprove); err != nil {
 		return err
 	}
 

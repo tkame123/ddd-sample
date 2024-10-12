@@ -127,11 +127,11 @@ func (e *EventConsumer) processEvent(ctx context.Context, mes domain_event.Messa
 		e.kitchenAPI,
 		e.billingAPI,
 	)
-	sagaHandler, err := NewCreateOrderSagaContext(mes.Raw(), saga)
+	sagaHandler, err := NewCreateOrderSagaContext(mes.Raw())
 	if err != nil {
 		return err
 	}
-	err = sagaHandler.Handler(ctx)
+	err = sagaHandler.Handler(ctx, saga)
 	if err != nil {
 		return err
 	}

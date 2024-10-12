@@ -54,8 +54,8 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 	mockBillingAPI.EXPECT().AuthorizeCard(gomock.Any(), gomock.Any()).AnyTimes()
 	mockOrderSVC.EXPECT().ApproveOrder(gomock.Any(), gomock.Any()).AnyTimes()
 
-	err = event_handler2.NewNextStepSagaWhenOrderCreatedHandler(saga).
-		Handler(ctx,
+	err = event_handler2.NewNextStepSagaWhenOrderCreatedHandler().
+		Handler(ctx, saga,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_ORDER_CREATED,
 				&message.EventOrderCreated{
@@ -66,8 +66,8 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	err = event_handler2.NewNextStepSagaWhenTicketCreatedHandler(saga).
-		Handler(ctx,
+	err = event_handler2.NewNextStepSagaWhenTicketCreatedHandler().
+		Handler(ctx, saga,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_TICKET_CREATED,
 				&message.EventTicketCreated{
@@ -78,8 +78,8 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	err = event_handler2.NewNextStepSagaWhenCardAuthorizedHandler(saga).
-		Handler(ctx,
+	err = event_handler2.NewNextStepSagaWhenCardAuthorizedHandler().
+		Handler(ctx, saga,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_CARD_AUTHORIZED,
 				&message.EventCardAuthorized{
@@ -90,8 +90,8 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	err = event_handler2.NewNextStepSagaWhenTicketApprovedHandler(saga).
-		Handler(ctx,
+	err = event_handler2.NewNextStepSagaWhenTicketApprovedHandler().
+		Handler(ctx, saga,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_TICKET_APPROVED,
 				&message.EventTicketApproved{
@@ -102,8 +102,8 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	err = event_handler2.NewNextStepSagaWhenOrderApprovedHandler(saga).
-		Handler(ctx,
+	err = event_handler2.NewNextStepSagaWhenOrderApprovedHandler().
+		Handler(ctx, saga,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_ORDER_APPROVED,
 				&message.EventOrderApproved{
@@ -149,8 +149,8 @@ func TestCreateOrderSaga_OrderRejectedDutToTicketCreationFailed(t *testing.T) {
 	mockRepo.EXPECT().CreateOrderSagaStateSave(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
 	mockKitchenAPI.EXPECT().CreateTicket(gomock.Any(), gomock.Any()).AnyTimes()
 
-	err = event_handler2.NewNextStepSagaWhenOrderCreatedHandler(saga).
-		Handler(ctx,
+	err = event_handler2.NewNextStepSagaWhenOrderCreatedHandler().
+		Handler(ctx, saga,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_ORDER_CREATED,
 				&message.EventOrderCreated{
@@ -161,8 +161,8 @@ func TestCreateOrderSaga_OrderRejectedDutToTicketCreationFailed(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	err = event_handler2.NewNextStepSagaWhenTicketCreationFailedHandler(saga).
-		Handler(ctx,
+	err = event_handler2.NewNextStepSagaWhenTicketCreationFailedHandler().
+		Handler(ctx, saga,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_TICKET_CREATION_FAILED,
 				&message.EventTicketCreationFailed{
@@ -211,8 +211,8 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 	mockBillingAPI.EXPECT().AuthorizeCard(gomock.Any(), gomock.Any()).AnyTimes()
 	mockOrderSVC.EXPECT().RejectOrder(gomock.Any(), gomock.Any()).AnyTimes()
 
-	err = event_handler2.NewNextStepSagaWhenOrderCreatedHandler(saga).
-		Handler(ctx,
+	err = event_handler2.NewNextStepSagaWhenOrderCreatedHandler().
+		Handler(ctx, saga,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_ORDER_CREATED,
 				&message.EventOrderCreated{
@@ -223,8 +223,8 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	err = event_handler2.NewNextStepSagaWhenTicketCreatedHandler(saga).
-		Handler(ctx,
+	err = event_handler2.NewNextStepSagaWhenTicketCreatedHandler().
+		Handler(ctx, saga,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_TICKET_CREATED,
 				&message.EventTicketCreated{
@@ -235,8 +235,8 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	err = event_handler2.NewNextStepSagaWhenCardAuthorizeFailedHandler(saga).
-		Handler(ctx,
+	err = event_handler2.NewNextStepSagaWhenCardAuthorizeFailedHandler().
+		Handler(ctx, saga,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_CARD_AUTHORIZATION_FAILED,
 				&message.EventCardAuthorizationFailed{
@@ -247,8 +247,8 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	err = event_handler2.NewNextStepSagaWhenTicketRejectedHandler(saga).
-		Handler(ctx,
+	err = event_handler2.NewNextStepSagaWhenTicketRejectedHandler().
+		Handler(ctx, saga,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_TICKET_REJECTED,
 				&message.EventTicketRejected{
@@ -259,8 +259,8 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	err = event_handler2.NewNextStepSagaWhenOrderRejectedHandler(saga).
-		Handler(ctx,
+	err = event_handler2.NewNextStepSagaWhenOrderRejectedHandler().
+		Handler(ctx, saga,
 			eventCreateHelper(
 				message.Type_TYPE_EVENT_ORDER_REJECTED,
 				&message.EventOrderRejected{

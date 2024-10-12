@@ -8,22 +8,18 @@ import (
 	"github.com/tkame123/ddd-sample/proto/message"
 )
 
-type NextStepSagaWhenCardAuthorizedHandler struct {
-	saga *servive.CreateOrderSaga
+type NextStepSagaWhenCardAuthorizedHandler struct{}
+
+func NewNextStepSagaWhenCardAuthorizedHandler() domain_event.CreateOrderSagaEventHandler {
+	return &NextStepSagaWhenCardAuthorizedHandler{}
 }
 
-func NewNextStepSagaWhenCardAuthorizedHandler(saga *servive.CreateOrderSaga) domain_event.EventHandler {
-	return &NextStepSagaWhenCardAuthorizedHandler{
-		saga: saga,
-	}
-}
-
-func (h *NextStepSagaWhenCardAuthorizedHandler) Handler(ctx context.Context, mes *message.Message) error {
+func (h *NextStepSagaWhenCardAuthorizedHandler) Handler(ctx context.Context, saga *servive.CreateOrderSaga, mes *message.Message) error {
 	if mes.Subject.Type != message.Type_TYPE_EVENT_CARD_AUTHORIZED {
 		return fmt.Errorf("invalid event type: %v", mes.Subject.Type)
 	}
 
-	if err := h.saga.Event(ctx, servive.CreateOrderSagaEvent_ApproveTicket); err != nil {
+	if err := saga.Event(ctx, servive.CreateOrderSagaEvent_ApproveTicket); err != nil {
 		return err
 	}
 

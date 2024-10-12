@@ -9,21 +9,18 @@ import (
 )
 
 type NextStepSagaWhenTicketRejectedHandler struct {
-	saga *servive.CreateOrderSaga
 }
 
-func NewNextStepSagaWhenTicketRejectedHandler(saga *servive.CreateOrderSaga) domain_event.EventHandler {
-	return &NextStepSagaWhenTicketRejectedHandler{
-		saga: saga,
-	}
+func NewNextStepSagaWhenTicketRejectedHandler() domain_event.CreateOrderSagaEventHandler {
+	return &NextStepSagaWhenTicketRejectedHandler{}
 }
 
-func (h *NextStepSagaWhenTicketRejectedHandler) Handler(ctx context.Context, mes *message.Message) error {
+func (h *NextStepSagaWhenTicketRejectedHandler) Handler(ctx context.Context, saga *servive.CreateOrderSaga, mes *message.Message) error {
 	if mes.Subject.Type != message.Type_TYPE_EVENT_TICKET_REJECTED {
 		return fmt.Errorf("invalid event type: %v", mes.Subject.Type)
 	}
 
-	if err := h.saga.Event(ctx, servive.CreateOrderSagaEvent_RejectOrder); err != nil {
+	if err := saga.Event(ctx, servive.CreateOrderSagaEvent_RejectOrder); err != nil {
 		return err
 	}
 
