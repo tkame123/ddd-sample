@@ -25,28 +25,31 @@ func NewKitchenAPI(
 }
 
 func (k *KitchenAPI) CreateTicket(ctx context.Context, orderID model.OrderID) {
-	order, err := k.rep.OrderFindOne(ctx, orderID)
-	if err != nil {
-		log.Printf("failed to find order: %v", err)
-		return
-	}
+	//	TODO: Implement this
+	log.Println("KitchenAPI ApproveTicket")
 
-	command := &TicketCreateCommand{
-		OrderID: orderID,
-	}
-
-	if len(order.OrderItems) > 0 {
-		items := make([]*TicketItemRequest, 0, len(order.OrderItems))
-		for _, item := range order.OrderItems {
-			items = append(items, &TicketItemRequest{
-				ItemID:   item.ItemID,
-				Quantity: item.Quantity,
-			})
-		}
-		command.Items = items
-	}
-
-	k.pub.PublishMessages(ctx, []event_helper.Event{command})
+	//order, err := k.rep.OrderFindOne(ctx, orderID)
+	//if err != nil {
+	//	log.Printf("failed to find order: %v", err)
+	//	return
+	//}
+	//
+	//command := &TicketCreateCommand{
+	//	OrderID: orderID,
+	//}
+	//
+	//if len(order.OrderItems) > 0 {
+	//	items := make([]*TicketItemRequest, 0, len(order.OrderItems))
+	//	for _, item := range order.OrderItems {
+	//		items = append(items, &TicketItemRequest{
+	//			ItemID:   item.ItemID,
+	//			Quantity: item.Quantity,
+	//		})
+	//	}
+	//	command.Items = items
+	//}
+	//
+	//k.pub.PublishMessages(ctx, []event_helper.Event{command})
 }
 
 func (k *KitchenAPI) ApproveTicket(ctx context.Context, orderID model.OrderID) {
