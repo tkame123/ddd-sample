@@ -13,7 +13,7 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga/event_handler"
 	"github.com/tkame123/ddd-sample/lib/event"
-	sqs_consumer2 "github.com/tkame123/ddd-sample/lib/sqs_consumer"
+	"github.com/tkame123/ddd-sample/lib/sqs_consumer"
 	"log"
 	"os"
 	"os/signal"
@@ -62,7 +62,7 @@ func (e *EventConsumer) Run() {
 	// SQS コンシューマを作成
 	wgPolling := new(sync.WaitGroup)
 	wgPolling.Add(1)
-	consumer := sqs_consumer2.NewSQSConsumer(e.sqsClient, e.queueUrl, wgPolling)
+	consumer := sqs_consumer.NewSQSConsumer(e.sqsClient, e.queueUrl, wgPolling)
 
 	// メッセージをやり取りするチャネルを作成
 	messagesChan := make(chan *types.Message, messageChan) // バッファ付きのチャネル
@@ -74,7 +74,7 @@ func (e *EventConsumer) Run() {
 	wgWorker := new(sync.WaitGroup)
 	for i := 0; i < maxWorkers; i++ {
 		wgWorker.Add(1)
-		worker := sqs_consumer2.NewWorker(i, wgWorker, e.workerHandler)
+		worker := sqs_consumer.NewWorker(i, wgWorker, e.workerHandler)
 		go worker.Start(ctxWorker, messagesChan)
 	}
 
