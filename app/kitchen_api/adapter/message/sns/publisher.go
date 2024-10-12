@@ -18,9 +18,6 @@ type Publisher struct {
 
 func NewPublisher(envCfg *provider.EnvConfig, client *sns.Client) *Publisher {
 	topicMap := map[event.Name]topicArn{
-		event.CommandName_TicketCreate:       envCfg.ArnTopicCommandKitchenTicketCreate,
-		event.CommandName_TicketApprove:      envCfg.ArnTopicCommandKitchenTicketApprove,
-		event.CommandName_TicketReject:       envCfg.ArnTopicCommandKitchenTicketReject,
 		event.EventName_TicketCreated:        envCfg.ArnTopicEventKitchenTicketCreated,
 		event.EventName_TicketCreationFailed: envCfg.ArnTopicEventKitchenTicketCreationFailed,
 		event.EventName_TicketApproved:       envCfg.ArnTopicEventKitchenTicketApproved,

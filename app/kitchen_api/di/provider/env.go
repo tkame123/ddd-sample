@@ -10,17 +10,12 @@ type EnvConfig struct {
 	DSN string `env:"KITCHEN_API_DSN"`
 
 	// SNS
-	ArnTopicCommandKitchenTicketCreate  string `env:"TOPIC_ARN_COMMAND_KITCHEN_TICKET_CREATE"`
-	ArnTopicCommandKitchenTicketApprove string `env:"TOPIC_ARN_COMMAND_KITCHEN_TICKET_APPROVE"`
-	ArnTopicCommandKitchenTicketReject  string `env:"TOPIC_ARN_COMMAND_KITCHEN_TICKET_REJECT"`
-
 	ArnTopicEventKitchenTicketCreated        string `env:"TOPIC_ARN_EVENT_KITCHEN_TICKET_CREATED"`
 	ArnTopicEventKitchenTicketCreationFailed string `env:"TOPIC_ARN_EVENT_KITCHEN_TICKET_CREATION_FAILED"`
 	ArnTopicEventKitchenTicketApproved       string `env:"TOPIC_ARN_EVENT_KITCHEN_TICKET_APPROVED"`
 	ArnTopicEventKitchenTicketRejected       string `env:"TOPIC_ARN_EVENT_KITCHEN_TICKET_REJECTED"`
 
 	// SQS
-	SqsUrlOrderReply    string `env:"SQS_URL_ORDER_REPLY"`
 	SqsUrlTicketCommand string `env:"SQS_URL_TICKET_COMMAND"`
 }
 

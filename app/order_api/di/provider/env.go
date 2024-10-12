@@ -22,6 +22,7 @@ type EnvConfig struct {
 
 	// SQS
 	SqsUrlOrderEvent string `env:"SQS_URL_ORDER_EVENT"`
+	SqsUrlOrderReply string `env:"SQS_URL_ORDER_REPLY"`
 }
 
 func NewENV() (*EnvConfig, error) {
