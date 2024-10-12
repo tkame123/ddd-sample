@@ -77,7 +77,7 @@ func InitializeEventConsumer() (*message.EventConsumer, func(), error) {
 	publisher := sns.NewPublisher(envConfig, snsClient)
 	domain_eventPublisher := message.NewEventPublisher(publisher)
 	createOrder := create_order.NewService(repository, domain_eventPublisher)
-	kitchenAPI := proxy.NewKitchenAPI()
+	kitchenAPI := proxy.NewKitchenAPI(repository, domain_eventPublisher)
 	billingAPI := proxy.NewBillingAPI()
 	eventConsumer := message.NewEventConsumer(envConfig, client, repository, createOrder, kitchenAPI, billingAPI)
 	return eventConsumer, func() {
