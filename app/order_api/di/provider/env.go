@@ -21,8 +21,9 @@ type EnvConfig struct {
 	ArnTopicCommandBillingCardAuthorize string `env:"TOPIC_ARN_COMMAND_BILLING_CARD_AUTHORIZE"`
 
 	// SQS
-	SqsUrlOrderEvent string `env:"SQS_URL_ORDER_EVENT"`
-	SqsUrlOrderReply string `env:"SQS_URL_ORDER_REPLY"`
+	SqsUrlOrderEvent   string `env:"SQS_URL_ORDER_EVENT"`
+	SqsUrlOrderCommand string `env:"SQS_URL_ORDER_Command"`
+	SqsUrlOrderReply   string `env:"SQS_URL_ORDER_REPLY"`
 }
 
 func NewENV() (*EnvConfig, error) {

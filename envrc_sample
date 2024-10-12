@@ -11,18 +11,30 @@ export AWS_ENDPOINT_URL=http://localhost:4566
 export TOPIC_ARN_EVENT_ORDER_ORDER_CREATED=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-order-order_created
 export TOPIC_ARN_EVENT_ORDER_ORDER_APPROVED=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-order-order_approved
 export TOPIC_ARN_EVENT_ORDER_ORDER_REJECTED=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-order-order_rejected
-export TOPIC_ARN_COMMAND_ORDER_ORDER_APPROVE=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-order-order_approve
-export TOPIC_ARN_COMMAND_ORDER_ORDER_REJECT=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-order-order_reject
-export TOPIC_ARN_COMMAND_KITCHEN_TICKET_CREATE=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-kitchen-ticket_create
-export TOPIC_ARN_COMMAND_KITCHEN_TICKET_APPROVE=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-kitchen-ticket_approve
-export TOPIC_ARN_COMMAND_KITCHEN_TICKET_REJECT=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-kitchen-ticket_reject
-export TOPIC_ARN_COMMAND_BILLING_CARD_AUTHORIZE=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-billing-card_authorize
+
 export TOPIC_ARN_EVENT_KITCHEN_TICKET_CREATED=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-kitchen-ticket_created
 export TOPIC_ARN_EVENT_KITCHEN_TICKET_CREATION_FAILED=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-kitchen-ticket_creation_failed
 export TOPIC_ARN_EVENT_KITCHEN_TICKET_APPROVED=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-kitchen-ticket_approved
 export TOPIC_ARN_EVENT_KITCHEN_TICKET_REJECTED=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-kitchen-ticket_rejected
 
+export TOPIC_ARN_COMMAND_ORDER_ORDER_APPROVE=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-order-order_approve
+export TOPIC_ARN_COMMAND_ORDER_ORDER_REJECT=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-order-order_reject
+
+export TOPIC_ARN_COMMAND_KITCHEN_TICKET_CREATE=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-kitchen-ticket_create
+export TOPIC_ARN_COMMAND_KITCHEN_TICKET_APPROVE=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-kitchen-ticket_approve
+export TOPIC_ARN_COMMAND_KITCHEN_TICKET_REJECT=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-kitchen-ticket_reject
+
+export TOPIC_ARN_COMMAND_BILLING_CARD_AUTHORIZE=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-billing-card_authorize
+
 # AWS SQS
 export SQS_URL_ORDER_EVENT=https://localhost.localstack.cloud:4566/000000000000/ddd-sample-order-event-queque
+export SQS_URL_ORDER_COMMAND=https://localhost.localstack.cloud:4566/000000000000/ddd-sample-order-command-queque
 export SQS_URL_ORDER_REPLY=https://localhost.localstack.cloud:4566/000000000000/ddd-sample-order-reply-queque
+
+export SQS_URL_TICKET_EVENT=https://localhost.localstack.cloud:4566/000000000000/ddd-sample-kitchen-event-queque
 export SQS_URL_TICKET_COMMAND=https://localhost.localstack.cloud:4566/000000000000/ddd-sample-kitchen-command-queque
+export SQS_URL_TICKET_REPLY=https://localhost.localstack.cloud:4566/000000000000/ddd-sample-kitchen-reply-queque
+
+export SQS_URL_BILLING_EVENT=https://localhost.localstack.cloud:4566/000000000000/ddd-sample-billing-event-queque
+export SQS_URL_BILLING_COMMAND=https://localhost.localstack.cloud:4566/000000000000/ddd-sample-billing-command-queque
+export SQS_URL_BILLING_REPLY=https://localhost.localstack.cloud:4566/000000000000/ddd-sample-billing-reply-queque
