@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	event "github.com/tkame123/ddd-sample/lib/event_helper"
+	message "github.com/tkame123/ddd-sample/proto/message"
 )
 
 // MockPublisher is a mock of Publisher interface.
@@ -36,7 +36,7 @@ func (m *MockPublisher) EXPECT() *MockPublisherMockRecorder {
 }
 
 // PublishMessages mocks base method.
-func (m *MockPublisher) PublishMessages(ctx context.Context, events []event.Event) {
+func (m *MockPublisher) PublishMessages(ctx context.Context, events []*message.Message) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "PublishMessages", ctx, events)
 }
