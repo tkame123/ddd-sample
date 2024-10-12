@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+// buf:lint:ignore PACKAGE_VERSION_SUFFIX
+package message;
+
+import "google/protobuf/any.proto";
+
+enum Type {
+  TYPE_UNSPECIFIED = 0;
+  TYPE_EVENT_ORDER_CREATED = 1;
+  TYPE_EVENT_ORDER_APPROVED = 2;
+  TYPE_EVENT_ORDER_REJECTED = 3;
+  TYPE_EVENT_TICKET_CREATED = 4;
+  TYPE_EVENT_TICKET_APPROVED = 5;
+  TYPE_EVENT_TICKET_REJECTED = 6;
+  TYPE_EVENT_TICKET_CREATION_FAILED = 7;
+  TYPE_EVENT_CARD_AUTHORIZED = 8;
+  TYPE_EVENT_CARD_AUTHORIZATION_FAILED = 9;
+
+  TYPE_COMMAND_TICKET_CREATE = 10;
+  TYPE_COMMAND_TICKET_APPROVE = 11;
+  TYPE_COMMAND_TICKET_REJECT = 12;
+  TYPE_COMMAND_CARD_AUTHORIZE = 13;
+}
+
+enum Service {
+  SERVICE_UNSPECIFIED = 0;
+  SERVICE_ORDER = 1;
+  SERVICE_KITCHEN = 2;
+  SERVICE_BILLING = 3;
+}
+
+// すべてのMessageに付与する識別情報
+message Subject {
+  Type type = 1;
+  Service source = 2;
+  // MEMO:　冪等キー等もおそらくここに追加する
+}
+
+// 送信されるMessage
+message Message {
+  Subject subject = 1;
+  google.protobuf.Any envelope = 2;
+}
+
+// 以下envelopeされるEventやCommandのMessageたち
+
+message EventOrderCreated {
+  string order_id = 1;
+}
+
+message EventOrderApproved {
+  string order_id = 1;
+}
+
+message EventOrderRejected {
+  string order_id = 1;
+  string reason = 2;
+}
+
+message EventTicketCreated {
+  string order_id = 1;
+  string ticket_id = 2;
+}
+
+message EventTicketApproved {
+  string order_id = 1;
+  string ticket_id = 2;
+}
+
+message EventTicketRejected {
+  string order_id = 1;
+  string ticket_id = 2;
+  string reason = 3;
+}
+
+message EventTicketCreationFailed {
+  string order_id = 1;
+  string reason = 2;
+}
+
+message EventCardAuthorized {
+  string order_id = 1;
+}
+
+message EventCardAuthorizationFailed {
+  string order_id = 1;
+  string reason = 2;
+}
+
+message CommandTicketCreate {
+  message Item {
+    string name = 1;
+    int32 price = 2;
+    int32 quantity = 3;
+  }
+
+  string order_id = 1;
+  repeated Item items = 2;
+}
+
+message CommandTicketApprove {
+  string order_id = 1;
+  string ticket_id = 2;
+}
+
+message CommandTicketReject {
+  string order_id = 1;
+  string ticket_id = 2;
+  string reason = 3;
+}
+
+message CommandCardAuthorize {
+  string order_id = 1;
+//  string card_number = 2;
+//  string card_holder = 3;
+//  string expiration = 4;
+//  string cvc = 5;
+//  int32 amount = 6;
+}
+
