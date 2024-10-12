@@ -15,21 +15,21 @@ const (
 
 // 集約ルート
 type Ticket struct {
-	TicketID    TicketID
-	OrderID     OrderID
-	TicketItems []*TicketItem
-	Status      TicketStatus
+	TicketID    TicketID      `json:"ticket_id"`
+	OrderID     OrderID       `json:"order_id"`
+	TicketItems []*TicketItem `json:"items"`
+	Status      TicketStatus  `json:"status"`
 }
 
 type TicketItem struct {
-	TicketID TicketID
-	ItemID   ItemID
-	Quantity int
+	TicketID TicketID `json:"ticket_id"`
+	ItemID   ItemID   `json:"item_id"`
+	Quantity int      `json:"quantity"`
 }
 
 type TicketItemRequest struct {
-	ItemID   ItemID
-	Quantity int
+	ItemID   ItemID `json:"item_id"`
+	Quantity int    `json:"quantity"`
 }
 
 // TODO: 重複オーダチェックの際に、TicketCreationFailedEventを発行する

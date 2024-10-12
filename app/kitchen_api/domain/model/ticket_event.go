@@ -2,8 +2,38 @@ package model
 
 import (
 	"encoding/json"
+	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/lib/event"
 )
+
+type TicketCreateCommand struct {
+	OrderID OrderID              `json:"order_id"`
+	Items   []*TicketItemRequest `json:"items"`
+}
+
+func (e *TicketCreateCommand) Name() string {
+	return event.CommandName_TicketCreate
+}
+
+func (e *TicketCreateCommand) ID() TicketID {
+	return uuid.Nil
+}
+
+func (e *TicketCreateCommand) ToBody() (string, error) {
+	var raw event.RawEvent
+	raw.Type = e.Name()
+	raw.ID = e.ID().String()
+	originByte, err := json.Marshal(e)
+	if err != nil {
+		return "", err
+	}
+	raw.Origin = originByte
+	body, err := json.Marshal(raw)
+	if err != nil {
+		return "", err
+	}
+	return string(body), nil
+}
 
 type TicketCreatedEvent struct {
 	TicketID TicketID
