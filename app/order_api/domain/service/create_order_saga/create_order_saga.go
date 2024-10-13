@@ -146,6 +146,7 @@ func (c *CreateOrderSaga) Event(ctx context.Context, causeEvent CreateOrderSagaE
 	if err := c.rep.CreateOrderSagaStateSave(ctx, model.NewCreateOrderSagaState(c.orderID, c.fsm.Current())); err != nil {
 		return err
 	}
+	log.Printf("CreateOrderSaga steped: OrderID: %s, CurrentStep: %s", c.orderID, c.fsm.Current())
 	return nil
 }
 
