@@ -2,7 +2,6 @@ package model
 
 import (
 	"errors"
-	"github.com/tkame123/ddd-sample/lib/event_helper"
 	"github.com/tkame123/ddd-sample/proto/message"
 )
 
@@ -52,9 +51,7 @@ func NewTicket(orderID OrderID, items []*TicketItemRequest) (*Ticket, []*message
 		TicketItems: ticketItems,
 	}
 
-	mes, err := event_helper.CreateMessage(
-		message.Type_TYPE_EVENT_TICKET_CREATED,
-		message.Service_SERVICE_KITCHEN,
+	mes, err := CreateMessage(
 		&message.EventTicketCreated{
 			OrderId:  ticket.OrderID.String(),
 			TicketId: ticket.TicketID.String(),
@@ -74,9 +71,7 @@ func (t *Ticket) ApproveTicket() ([]*message.Message, error) {
 
 	t.Status = Tickettatus_Approved
 
-	mes, err := event_helper.CreateMessage(
-		message.Type_TYPE_EVENT_ORDER_APPROVED,
-		message.Service_SERVICE_KITCHEN,
+	mes, err := CreateMessage(
 		&message.EventTicketApproved{
 			OrderId:  t.OrderID.String(),
 			TicketId: t.TicketID.String(),
@@ -96,9 +91,7 @@ func (t *Ticket) RejectTicket() ([]*message.Message, error) {
 
 	t.Status = TicketStatus_Rejected
 
-	mes, err := event_helper.CreateMessage(
-		message.Type_TYPE_EVENT_ORDER_REJECTED,
-		message.Service_SERVICE_KITCHEN,
+	mes, err := CreateMessage(
 		&message.EventTicketRejected{
 			OrderId:  t.OrderID.String(),
 			TicketId: t.TicketID.String(),

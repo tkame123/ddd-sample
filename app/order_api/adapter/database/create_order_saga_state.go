@@ -23,7 +23,8 @@ func (r *repo) CreateOrderSagaStateSave(ctx context.Context, state *model.Create
 		SetID(state.OrderID).
 		SetCurrent(fromModelCurrentState(state.Current)).
 		OnConflictColumns("id").
-		UpdateNewValues().
+		UpdateCurrent().
+		UpdateUpdatedAt().
 		Exec(ctx)
 	if err != nil {
 		return err

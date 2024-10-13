@@ -26,7 +26,8 @@ func (r *repo) OrderSave(ctx context.Context, order *model.Order) error {
 			SetID(order.OrderID).
 			SetStatus(fromModelOrderStatus(order.Status)).
 			OnConflictColumns("id").
-			UpdateNewValues().
+			UpdateStatus().
+			UpdateUpdatedAt().
 			Exec(ctx)
 		if err != nil {
 			return err

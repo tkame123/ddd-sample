@@ -6,7 +6,6 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/domain_event"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
-	"github.com/tkame123/ddd-sample/lib/event_helper"
 	"github.com/tkame123/ddd-sample/proto/message"
 	"log"
 )
@@ -38,14 +37,15 @@ func (k *KitchenAPI) CreateTicket(ctx context.Context, orderID model.OrderID) {
 		})
 	}
 
-	command, err := event_helper.CreateMessage(
-		message.Type_TYPE_COMMAND_TICKET_CREATE,
-		message.Service_SERVICE_ORDER,
+	command, err := model.CreateMessage(
 		&message.CommandTicketCreate{
 			OrderId: order.OrderID.String(),
 			Items:   items,
 		},
 	)
+	if err != nil {
+		log.Fatalf("failed to create message: %v\n", err)
+	}
 
 	k.pub.PublishMessages(ctx, []*message.Message{command})
 }

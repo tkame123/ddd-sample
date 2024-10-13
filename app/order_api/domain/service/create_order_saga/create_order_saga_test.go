@@ -11,14 +11,13 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
 	servive "github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga"
 	event_handler2 "github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga/event_handler"
-	"github.com/tkame123/ddd-sample/lib/event_helper"
 	"github.com/tkame123/ddd-sample/proto/message"
 	pb "google.golang.org/protobuf/proto"
 	"testing"
 )
 
-func eventCreateHelper(t message.Type, envelop pb.Message) *message.Message {
-	ev, _ := event_helper.CreateMessage(t, message.Service_SERVICE_ORDER, envelop)
+func eventCreateHelper(envelop pb.Message) *message.Message {
+	ev, _ := model.CreateMessage(envelop)
 	return ev
 }
 
@@ -62,7 +61,6 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 	err = event_handler2.NewNextStepSagaWhenOrderCreatedHandler(mockRepo).
 		Handler(ctx, sagaFactory,
 			eventCreateHelper(
-				message.Type_TYPE_EVENT_ORDER_CREATED,
 				&message.EventOrderCreated{
 					OrderId: orderID.String(),
 				},
@@ -74,7 +72,6 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 	err = event_handler2.NewNextStepSagaWhenTicketCreatedHandler(mockRepo).
 		Handler(ctx, sagaFactory,
 			eventCreateHelper(
-				message.Type_TYPE_EVENT_TICKET_CREATED,
 				&message.EventTicketCreated{
 					OrderId: orderID.String(),
 				},
@@ -86,7 +83,6 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 	err = event_handler2.NewNextStepSagaWhenCardAuthorizedHandler(mockRepo).
 		Handler(ctx, sagaFactory,
 			eventCreateHelper(
-				message.Type_TYPE_EVENT_CARD_AUTHORIZED,
 				&message.EventCardAuthorized{
 					OrderId: orderID.String(),
 				},
@@ -98,7 +94,6 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 	err = event_handler2.NewNextStepSagaWhenTicketApprovedHandler(mockRepo).
 		Handler(ctx, sagaFactory,
 			eventCreateHelper(
-				message.Type_TYPE_EVENT_TICKET_APPROVED,
 				&message.EventTicketApproved{
 					OrderId: orderID.String(),
 				},
@@ -110,7 +105,6 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 	err = event_handler2.NewNextStepSagaWhenOrderApprovedHandler(mockRepo).
 		Handler(ctx, sagaFactory,
 			eventCreateHelper(
-				message.Type_TYPE_EVENT_ORDER_APPROVED,
 				&message.EventOrderApproved{
 					OrderId: orderID.String(),
 				},
@@ -161,7 +155,6 @@ func TestCreateOrderSaga_OrderRejectedDutToTicketCreationFailed(t *testing.T) {
 	err = event_handler2.NewNextStepSagaWhenOrderCreatedHandler(mockRepo).
 		Handler(ctx, sagaFactory,
 			eventCreateHelper(
-				message.Type_TYPE_EVENT_ORDER_CREATED,
 				&message.EventOrderCreated{
 					OrderId: orderID.String(),
 				},
@@ -173,7 +166,6 @@ func TestCreateOrderSaga_OrderRejectedDutToTicketCreationFailed(t *testing.T) {
 	err = event_handler2.NewNextStepSagaWhenTicketCreationFailedHandler(mockRepo).
 		Handler(ctx, sagaFactory,
 			eventCreateHelper(
-				message.Type_TYPE_EVENT_TICKET_CREATION_FAILED,
 				&message.EventTicketCreationFailed{
 					OrderId: orderID.String(),
 				},
@@ -227,7 +219,6 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 	err = event_handler2.NewNextStepSagaWhenOrderCreatedHandler(mockRepo).
 		Handler(ctx, sagaFactory,
 			eventCreateHelper(
-				message.Type_TYPE_EVENT_ORDER_CREATED,
 				&message.EventOrderCreated{
 					OrderId: orderID.String(),
 				},
@@ -239,7 +230,6 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 	err = event_handler2.NewNextStepSagaWhenTicketCreatedHandler(mockRepo).
 		Handler(ctx, sagaFactory,
 			eventCreateHelper(
-				message.Type_TYPE_EVENT_TICKET_CREATED,
 				&message.EventTicketCreated{
 					OrderId: orderID.String(),
 				},
@@ -251,7 +241,6 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 	err = event_handler2.NewNextStepSagaWhenCardAuthorizeFailedHandler(mockRepo).
 		Handler(ctx, sagaFactory,
 			eventCreateHelper(
-				message.Type_TYPE_EVENT_CARD_AUTHORIZATION_FAILED,
 				&message.EventCardAuthorizationFailed{
 					OrderId: orderID.String(),
 				},
@@ -263,7 +252,6 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 	err = event_handler2.NewNextStepSagaWhenTicketRejectedHandler(mockRepo).
 		Handler(ctx, sagaFactory,
 			eventCreateHelper(
-				message.Type_TYPE_EVENT_TICKET_REJECTED,
 				&message.EventTicketRejected{
 					OrderId: orderID.String(),
 				},
@@ -275,7 +263,6 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 	err = event_handler2.NewNextStepSagaWhenOrderRejectedHandler(mockRepo).
 		Handler(ctx, sagaFactory,
 			eventCreateHelper(
-				message.Type_TYPE_EVENT_ORDER_REJECTED,
 				&message.EventOrderRejected{
 					OrderId: orderID.String(),
 				},

@@ -2,7 +2,6 @@ package model
 
 import (
 	"errors"
-	"github.com/tkame123/ddd-sample/lib/event_helper"
 	"github.com/tkame123/ddd-sample/proto/message"
 )
 
@@ -62,9 +61,7 @@ func NewOrder(items []*OrderItemRequest) (*Order, []*message.Message, error) {
 		return nil, nil, errors.New("approval limit over")
 	}
 
-	mes, err := event_helper.CreateMessage(
-		message.Type_TYPE_EVENT_ORDER_CREATED,
-		message.Service_SERVICE_ORDER,
+	mes, err := CreateMessage(
 		&message.EventOrderCreated{
 			OrderId: order.OrderID.String(),
 			// TODO: 詳細のアイテム対応
@@ -84,9 +81,7 @@ func (o *Order) ApproveOrder() ([]*message.Message, error) {
 
 	o.Status = OrderStatus_Approved
 
-	mes, err := event_helper.CreateMessage(
-		message.Type_TYPE_EVENT_ORDER_APPROVED,
-		message.Service_SERVICE_ORDER,
+	mes, err := CreateMessage(
 		&message.EventOrderApproved{
 			OrderId: o.OrderID.String(),
 		},
@@ -105,9 +100,7 @@ func (o *Order) RejectOrder() ([]*message.Message, error) {
 
 	o.Status = OrderStatus_Rejected
 
-	mes, err := event_helper.CreateMessage(
-		message.Type_TYPE_EVENT_ORDER_REJECTED,
-		message.Service_SERVICE_ORDER,
+	mes, err := CreateMessage(
 		&message.EventOrderRejected{
 			OrderId: o.OrderID.String(),
 		},
