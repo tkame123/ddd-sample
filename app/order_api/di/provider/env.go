@@ -22,7 +22,7 @@ type EnvConfig struct {
 
 	// SQS
 	SqsUrlOrderEvent   string `env:"SQS_URL_ORDER_EVENT"`
-	SqsUrlOrderCommand string `env:"SQS_URL_ORDER_Command"`
+	SqsUrlOrderCommand string `env:"SQS_URL_ORDER_COMMAND"`
 	SqsUrlOrderReply   string `env:"SQS_URL_ORDER_REPLY"`
 }
 

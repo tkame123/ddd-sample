@@ -28,6 +28,15 @@ var providerServerSet = wire.NewSet(
 
 var providerEventConsumerSet = wire.NewSet(
 	message.NewEventConsumer,
+	providerConsumerSet,
+)
+
+var providerCommandConsumerSet = wire.NewSet(
+	message.NewCommandConsumer,
+	providerConsumerSet,
+)
+
+var providerConsumerSet = wire.NewSet(
 	message.NewEventPublisher,
 	database.NewRepository,
 	create_order.NewService,
@@ -49,5 +58,10 @@ func InitializeAPIServer() (connect.Server, func(), error) {
 
 func InitializeEventConsumer() (*message.EventConsumer, func(), error) {
 	wire.Build(providerEventConsumerSet)
+	return nil, nil, nil
+}
+
+func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
+	wire.Build(providerCommandConsumerSet)
 	return nil, nil, nil
 }

@@ -83,8 +83,46 @@ func InitializeEventConsumer() (*message.EventConsumer, func(), error) {
 	}, nil
 }
 
+func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
+	consumerConfig := provider.NewConsumerConfig()
+	envConfig, err := provider.NewENV()
+	if err != nil {
+		return nil, nil, err
+	}
+	config, err := provider.NewAWSConfig()
+	if err != nil {
+		return nil, nil, err
+	}
+	client, err := provider.NewSQSClient(config)
+	if err != nil {
+		return nil, nil, err
+	}
+	entClient, cleanup, err := provider.NewOrderApiDB(envConfig)
+	if err != nil {
+		return nil, nil, err
+	}
+	repository := database.NewRepository(entClient)
+	snsClient, err := provider.NewSNSClient(config)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	publisher := message.NewEventPublisher(envConfig, snsClient)
+	createOrder := create_order.NewService(repository, publisher)
+	kitchenAPI := proxy.NewKitchenAPI(repository, publisher)
+	billingAPI := proxy.NewBillingAPI()
+	commandConsumer := message.NewCommandConsumer(consumerConfig, envConfig, client, repository, createOrder, kitchenAPI, billingAPI)
+	return commandConsumer, func() {
+		cleanup()
+	}, nil
+}
+
 // wire.go:
 
 var providerServerSet = wire.NewSet(connect.NewServer, database.NewRepository, message.NewEventPublisher, provider.NewENV, provider.NewAWSConfig, provider.NewOrderApiDB, provider.NewSNSClient)
 
-var providerEventConsumerSet = wire.NewSet(message.NewEventConsumer, message.NewEventPublisher, database.NewRepository, create_order.NewService, proxy.NewBillingAPI, proxy.NewKitchenAPI, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewOrderApiDB, provider.NewSQSClient, provider.NewSNSClient)
+var providerEventConsumerSet = wire.NewSet(message.NewEventConsumer, providerConsumerSet)
+
+var providerCommandConsumerSet = wire.NewSet(message.NewCommandConsumer, providerConsumerSet)
+
+var providerConsumerSet = wire.NewSet(message.NewEventPublisher, database.NewRepository, create_order.NewService, proxy.NewBillingAPI, proxy.NewKitchenAPI, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewOrderApiDB, provider.NewSQSClient, provider.NewSNSClient)
