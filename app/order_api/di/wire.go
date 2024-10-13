@@ -36,6 +36,11 @@ var providerCommandConsumerSet = wire.NewSet(
 	providerConsumerSet,
 )
 
+var providerReplyConsumerSet = wire.NewSet(
+	message.NewReplyConsumer,
+	providerConsumerSet,
+)
+
 var providerConsumerSet = wire.NewSet(
 	message.NewEventPublisher,
 	database.NewRepository,
@@ -63,5 +68,10 @@ func InitializeEventConsumer() (*message.EventConsumer, func(), error) {
 
 func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
 	wire.Build(providerCommandConsumerSet)
+	return nil, nil, nil
+}
+
+func InitializeReplyConsumer() (*message.ReplyConsumer, func(), error) {
+	wire.Build(providerReplyConsumerSet)
 	return nil, nil, nil
 }
