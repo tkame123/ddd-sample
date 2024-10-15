@@ -2,17 +2,14 @@ package message
 
 import (
 	"context"
-	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
-	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga"
-	"github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga/event_handler"
 	"github.com/tkame123/ddd-sample/lib/event_helper"
 	"github.com/tkame123/ddd-sample/lib/sqs_consumer"
 	"github.com/tkame123/ddd-sample/proto/message"
@@ -119,27 +116,12 @@ func (e *EventConsumer) workerHandler(ctx context.Context, msg *types.Message) e
 }
 
 func (e *EventConsumer) processEvent(ctx context.Context, mes *message.Message) error {
-	if !event_handler.IsCreateOrderSagaEvent(mes.Subject.Type) {
-		return fmt.Errorf("invalid event type: %s", mes.Subject.Type)
-	}
-
-	sagaFactory := func(ctx context.Context, rep repository.Repository, id model.OrderID) (*create_order_saga.CreateOrderSaga, error) {
-		state, err := e.rep.CreateOrderSagaStateFindOne(ctx, id)
-		if err != nil {
-			return nil, err
-		}
-		saga := create_order_saga.NewCreateOrderSaga(
-			state,
-			e.rep,
-			e.orderSVC,
-			e.kitchenAPI,
-			e.billingAPI,
-		)
-
-		return saga, nil
-	}
-
-	err := event_handler.EventMap[mes.Subject.Type](e.rep).Handler(ctx, sagaFactory, mes)
+	err := create_order_saga.NewEventHandler(
+		e.rep,
+		e.orderSVC,
+		e.kitchenAPI,
+		e.billingAPI).
+		Handler(ctx, mes)
 	if err != nil {
 		return err
 	}
