@@ -109,6 +109,8 @@ awslocal sqs create-queue --queue-name ddd-sample-kitchen-command-queque
 
 awslocal sqs create-queue --queue-name ddd-sample-kitchen-reply-queque
 
+awslocal sqs create-queue --queue-name ddd-sample-kitchen-dead-letter-queque
+
 awslocal sqs set-queue-attributes \
 --queue-url http://sqs.ap-northeast-1.localhost.localstack.cloud:4566/000000000000/ddd-sample-kitchen-event-queque \
 --attributes '{
@@ -145,6 +147,8 @@ awslocal sqs create-queue --queue-name ddd-sample-billing-command-queque
 
 awslocal sqs create-queue --queue-name ddd-sample-billing-reply-queque
 
+awslocal sqs create-queue --queue-name ddd-sample-billing-dead-letter-queque
+
 awslocal sqs set-queue-attributes \
 --queue-url http://sqs.ap-northeast-1.localhost.localstack.cloud:4566/000000000000/ddd-sample-billing-event-queque \
 --attributes '{
@@ -165,4 +169,4 @@ awslocal sqs set-queue-attributes \
 
 echo "BillingAPI SubScribe Creating..."
 
-awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-billing-card_authorize" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:queue-name ddd-sample-billing-command-queque"
+awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-billing-card_authorize" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-billing-command-queque"

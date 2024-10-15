@@ -76,7 +76,7 @@ func InitializeEventConsumer() (*message.EventConsumer, func(), error) {
 	publisher := message.NewEventPublisher(envConfig, snsClient)
 	createOrder := create_order.NewService(repository, publisher)
 	kitchenAPI := proxy.NewKitchenAPI(repository, publisher)
-	billingAPI := proxy.NewBillingAPI()
+	billingAPI := proxy.NewBillingAPI(publisher)
 	eventConsumer := message.NewEventConsumer(consumerConfig, envConfig, client, repository, createOrder, kitchenAPI, billingAPI)
 	return eventConsumer, func() {
 		cleanup()
@@ -110,7 +110,7 @@ func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
 	publisher := message.NewEventPublisher(envConfig, snsClient)
 	createOrder := create_order.NewService(repository, publisher)
 	kitchenAPI := proxy.NewKitchenAPI(repository, publisher)
-	billingAPI := proxy.NewBillingAPI()
+	billingAPI := proxy.NewBillingAPI(publisher)
 	commandConsumer := message.NewCommandConsumer(consumerConfig, envConfig, client, repository, createOrder, kitchenAPI, billingAPI)
 	return commandConsumer, func() {
 		cleanup()
@@ -144,7 +144,7 @@ func InitializeReplyConsumer() (*message.ReplyConsumer, func(), error) {
 	publisher := message.NewEventPublisher(envConfig, snsClient)
 	createOrder := create_order.NewService(repository, publisher)
 	kitchenAPI := proxy.NewKitchenAPI(repository, publisher)
-	billingAPI := proxy.NewBillingAPI()
+	billingAPI := proxy.NewBillingAPI(publisher)
 	replyConsumer := message.NewReplyConsumer(consumerConfig, envConfig, client, repository, createOrder, kitchenAPI, billingAPI)
 	return replyConsumer, func() {
 		cleanup()
