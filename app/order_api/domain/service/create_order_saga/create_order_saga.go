@@ -11,8 +11,6 @@ import (
 	"log"
 )
 
-// TODO: Exportをいれる
-
 type CreateOrderSaga struct {
 	fsm        *fsm.FSM
 	orderSVC   service.CreateOrder

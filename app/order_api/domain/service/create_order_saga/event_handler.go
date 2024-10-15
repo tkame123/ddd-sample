@@ -159,5 +159,11 @@ func (h *eventHandler) Handler(ctx context.Context, m *message.Message) error {
 		return err
 	}
 
+	newState := saga.ExportState()
+	err = h.rep.CreateOrderSagaStateSave(ctx, newState)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
