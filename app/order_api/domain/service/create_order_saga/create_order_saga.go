@@ -2,6 +2,7 @@ package create_order_saga
 
 import (
 	"context"
+	"fmt"
 	"github.com/looplab/fsm"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
@@ -139,6 +140,7 @@ func (c *CreateOrderSaga) Event(ctx context.Context, causeEvent *message.Message
 }
 
 func (c *CreateOrderSaga) createTicket(ctx context.Context) error {
+	// TODO: TicketIDの保存
 	c.kitchenAPI.CreateTicket(ctx, c.currentState.OrderID)
 	return nil
 }
@@ -154,6 +156,7 @@ func (c *CreateOrderSaga) rejectTicket(ctx context.Context) error {
 }
 
 func (c *CreateOrderSaga) authorizeCard(ctx context.Context) error {
+	// TODO: BIllIDの保存
 	c.billingAPI.AuthorizeCard(ctx, c.currentState.OrderID)
 	return nil
 }
@@ -162,8 +165,7 @@ func (c *CreateOrderSaga) approveOrder(ctx context.Context) error {
 	_, err := c.orderSVC.ApproveOrder(ctx, c.currentState.OrderID)
 
 	if err != nil {
-		// TODO: 原則再実行で成功が保証されているはずなので、通知だけ行う
-		panic("approve order failed")
+		return fmt.Errorf("approve order failed: %w", err)
 	}
 
 	return nil
@@ -173,8 +175,7 @@ func (c *CreateOrderSaga) rejectOrder(ctx context.Context) error {
 	_, err := c.orderSVC.RejectOrder(ctx, c.currentState.OrderID)
 
 	if err != nil {
-		// TODO: 原則再実行で成功が保証されているはずなので、通知だけ行う
-		panic("reject order failed")
+		return fmt.Errorf("reject order failed: %w", err)
 	}
 
 	return nil
