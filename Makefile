@@ -1,3 +1,10 @@
+
+localstack.start:
+	DOCKER_FLAGS='-v $(CURDIR)/dev/locakstack-init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh' localstack start -d
+
+localstack.stop:
+	localstack stop
+
 buf.generate:
 	buf generate
 
