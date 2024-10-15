@@ -35,7 +35,7 @@ func NewCommandConsumer(
 	return &CommandConsumer{
 		cfg:       cfg,
 		sqsClient: sqsClient,
-		queueUrl:  envCfg.SqsUrlTicketCommand,
+		queueUrl:  envCfg.SqsUrlKitchenCommand,
 		svc:       svc,
 	}
 }

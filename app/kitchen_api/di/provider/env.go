@@ -16,9 +16,9 @@ type EnvConfig struct {
 	ArnTopicEventKitchenTicketRejected       string `env:"TOPIC_ARN_EVENT_KITCHEN_TICKET_REJECTED"`
 
 	// SQS
-	SqsUrlTicketEvent   string `env:"SQS_URL_TICKET_EVENT"`
-	SqsUrlTicketCommand string `env:"SQS_URL_TICKET_COMMAND"`
-	SqsUrlTicketReply   string `env:"SQS_URL_TICKET_REPLY"`
+	SqsUrlKitchenEvent   string `env:"SQS_URL_KITCHEN_EVENT"`
+	SqsUrlKitchenCommand string `env:"SQS_URL_KITCHEN_COMMAND"`
+	SqsUrlKitchenReply   string `env:"SQS_URL_KITCHEN_REPLY"`
 }
 
 func NewENV() (*EnvConfig, error) {
