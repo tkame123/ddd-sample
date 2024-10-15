@@ -20,14 +20,3 @@ const (
 	CreateOrderSagaStep_RejectingOrder  CreateOrderSagaStep = "RejectingOrder"
 	CreateOrderSagaStep_OrderRejected   CreateOrderSagaStep = "OrderRejected"
 )
-
-func NewCreateOrderSagaState(orderID OrderID, currentStep CreateOrderSagaStep) *CreateOrderSagaState {
-	return &CreateOrderSagaState{
-		OrderID: orderID,
-		Current: currentStep,
-	}
-}
-
-func (s *CreateOrderSagaState) ApplyStep(step CreateOrderSagaStep) {
-	s.Current = step
-}

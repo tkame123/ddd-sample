@@ -14,7 +14,8 @@ func NewBillingAPI() external_service.BillingAPI {
 	return &BillingAPI{}
 }
 
-func (k *BillingAPI) AuthorizeCard(ctx context.Context, orderID model.OrderID) {
+func (k *BillingAPI) AuthorizeCard(ctx context.Context, orderID model.OrderID) error {
 	//	TODO: Implement this
 	log.Println("BillingAPI AuthorizeCard")
+	return nil
 }

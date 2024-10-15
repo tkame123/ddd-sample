@@ -6,34 +6,40 @@ import (
 	"github.com/looplab/fsm"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
-	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/service"
 	"github.com/tkame123/ddd-sample/proto/message"
 	"log"
 )
 
+// TODO: Exportをいれる
+
 type CreateOrderSaga struct {
-	currentState *model.CreateOrderSagaState
-	fsm          *fsm.FSM
-	rep          repository.Repository
-	orderSVC     service.CreateOrder
-	kitchenAPI   external_service.KitchenAPI
-	billingAPI   external_service.BillingAPI
+	fsm        *fsm.FSM
+	orderSVC   service.CreateOrder
+	kitchenAPI external_service.KitchenAPI
+	billingAPI external_service.BillingAPI
+
+	orderID  model.OrderID
+	ticketID model.TicketID
 }
 
 func NewCreateOrderSaga(
 	currentState *model.CreateOrderSagaState,
-	rep repository.Repository,
 	orderSVC service.CreateOrder,
 	kitchenAPI external_service.KitchenAPI,
 	billingAPI external_service.BillingAPI,
-) *CreateOrderSaga {
+) (*CreateOrderSaga, error) {
+	if currentState == nil {
+		return nil, fmt.Errorf("current state is nil")
+	}
+
 	c := &CreateOrderSaga{
-		currentState: currentState,
-		rep:          rep,
-		orderSVC:     orderSVC,
-		kitchenAPI:   kitchenAPI,
-		billingAPI:   billingAPI,
+		orderSVC:   orderSVC,
+		kitchenAPI: kitchenAPI,
+		billingAPI: billingAPI,
+
+		orderID:  currentState.OrderID,
+		ticketID: currentState.TicketID,
 	}
 
 	ms := fsm.NewFSM(
@@ -136,7 +142,7 @@ func NewCreateOrderSaga(
 
 	log.Println("CreateOrderSaga initialized and available transitions are:", c.fsm.AvailableTransitions())
 
-	return c
+	return c, nil
 }
 
 func (c *CreateOrderSaga) GetFSMVisualize() (string, error) {
@@ -147,50 +153,44 @@ func (c *CreateOrderSaga) CurrentStep() string {
 	return c.fsm.Current()
 }
 
-func (c *CreateOrderSaga) TicketID() model.TicketID {
-	return c.currentState.TicketID
-}
-
 func (c *CreateOrderSaga) Event(ctx context.Context, causeEvent *message.Message) error {
 	if err := c.fsm.Event(ctx, causeEvent.Subject.Type.String(), causeEvent); err != nil {
 		return err
 	}
-	c.currentState.ApplyStep(c.fsm.Current())
-	if err := c.rep.CreateOrderSagaStateSave(ctx, c.currentState); err != nil {
-		return err
-	}
-	log.Printf("CreateOrderSaga steped: OrderID: %s, CurrentStep: %s", c.currentState.OrderID, c.fsm.Current())
 	return nil
+}
+
+func (c *CreateOrderSaga) ExportState() *model.CreateOrderSagaState {
+	return &model.CreateOrderSagaState{
+		Current:  c.fsm.Current(),
+		OrderID:  c.orderID,
+		TicketID: c.ticketID,
+	}
 }
 
 func (c *CreateOrderSaga) createTicket(ctx context.Context) error {
-	c.kitchenAPI.CreateTicket(ctx, c.currentState.OrderID)
-	return nil
+	return c.kitchenAPI.CreateTicket(ctx, c.orderID)
 }
 
 func (c *CreateOrderSaga) approveTicket(ctx context.Context) error {
-	c.kitchenAPI.ApproveTicket(ctx, c.currentState.OrderID)
-	return nil
+	return c.kitchenAPI.ApproveTicket(ctx, c.orderID, c.ticketID)
 }
 
 func (c *CreateOrderSaga) rejectTicket(ctx context.Context) error {
-	c.kitchenAPI.RejectTicket(ctx, c.currentState.OrderID)
-	return nil
+	return c.kitchenAPI.RejectTicket(ctx, c.orderID, c.ticketID)
 }
 
 func (c *CreateOrderSaga) storeTicketID(ctx context.Context, ticketID model.TicketID) error {
-	c.currentState.TicketID = ticketID
+	c.ticketID = ticketID
 	return nil
 }
 
 func (c *CreateOrderSaga) authorizeCard(ctx context.Context) error {
-	c.billingAPI.AuthorizeCard(ctx, c.currentState.OrderID)
-	return nil
+	return c.billingAPI.AuthorizeCard(ctx, c.orderID)
 }
 
 func (c *CreateOrderSaga) approveOrder(ctx context.Context) error {
-	_, err := c.orderSVC.ApproveOrder(ctx, c.currentState.OrderID)
-
+	_, err := c.orderSVC.ApproveOrder(ctx, c.orderID)
 	if err != nil {
 		return fmt.Errorf("approve order failed: %w", err)
 	}
@@ -199,8 +199,7 @@ func (c *CreateOrderSaga) approveOrder(ctx context.Context) error {
 }
 
 func (c *CreateOrderSaga) rejectOrder(ctx context.Context) error {
-	_, err := c.orderSVC.RejectOrder(ctx, c.currentState.OrderID)
-
+	_, err := c.orderSVC.RejectOrder(ctx, c.orderID)
 	if err != nil {
 		return fmt.Errorf("reject order failed: %w", err)
 	}

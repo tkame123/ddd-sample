@@ -6,5 +6,5 @@ import (
 )
 
 type BillingAPI interface {
-	AuthorizeCard(ctx context.Context, orderID model.OrderID)
+	AuthorizeCard(ctx context.Context, orderID model.OrderID) error
 }

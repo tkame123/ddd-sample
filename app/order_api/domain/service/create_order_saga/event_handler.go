@@ -144,13 +144,15 @@ func (h *eventHandler) Handler(ctx context.Context, m *message.Message) error {
 	if err != nil {
 		return err
 	}
-	saga := NewCreateOrderSaga(
+	saga, err := NewCreateOrderSaga(
 		state,
-		h.rep,
 		h.orderSVC,
 		h.kitchenAPI,
 		h.billingAPI,
 	)
+	if err != nil {
+		return err
+	}
 
 	err = saga.Event(ctx, m)
 	if err != nil {

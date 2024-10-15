@@ -6,7 +6,7 @@ import (
 )
 
 type KitchenAPI interface {
-	CreateTicket(ctx context.Context, orderID model.OrderID)
-	ApproveTicket(ctx context.Context, orderID model.OrderID)
-	RejectTicket(ctx context.Context, orderID model.OrderID)
+	CreateTicket(ctx context.Context, orderID model.OrderID) error
+	ApproveTicket(ctx context.Context, orderID model.OrderID, ticketID model.TicketID) error
+	RejectTicket(ctx context.Context, orderID model.OrderID, ticketID model.TicketID) error
 }

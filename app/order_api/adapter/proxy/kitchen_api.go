@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"context"
+	"fmt"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/domain_event"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
@@ -22,11 +23,10 @@ func NewKitchenAPI(
 	return &KitchenAPI{rep: rep, pub: pub}
 }
 
-func (k *KitchenAPI) CreateTicket(ctx context.Context, orderID model.OrderID) {
+func (k *KitchenAPI) CreateTicket(ctx context.Context, orderID model.OrderID) error {
 	order, err := k.rep.OrderFindOne(ctx, orderID)
 	if err != nil {
-		log.Printf("failed to find order: %v", err)
-		return
+		return fmt.Errorf("failed to find order: %w", err)
 	}
 
 	items := make([]*message.CommandTicketCreate_Item, 0, len(order.OrderItems))
@@ -44,18 +44,22 @@ func (k *KitchenAPI) CreateTicket(ctx context.Context, orderID model.OrderID) {
 		},
 	)
 	if err != nil {
-		log.Fatalf("failed to create message: %v\n", err)
+		return fmt.Errorf("failed to create message: %w", err)
 	}
 
 	k.pub.PublishMessages(ctx, []*message.Message{command})
+
+	return nil
 }
 
-func (k *KitchenAPI) ApproveTicket(ctx context.Context, orderID model.OrderID) {
+func (k *KitchenAPI) ApproveTicket(ctx context.Context, orderID model.OrderID, ticketID model.TicketID) error {
 	//	TODO: Implement this
 	log.Println("KitchenAPI ApproveTicket")
+	return nil
 }
 
-func (k *KitchenAPI) RejectTicket(ctx context.Context, orderID model.OrderID) {
+func (k *KitchenAPI) RejectTicket(ctx context.Context, orderID model.OrderID, ticketID model.TicketID) error {
 	//	TODO: Implement this
 	log.Println("KitchenAPI RejectTicket")
+	return nil
 }
