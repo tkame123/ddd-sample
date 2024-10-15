@@ -1,4 +1,4 @@
-package create_order_saga
+package message
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/service"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga"
 	"github.com/tkame123/ddd-sample/proto/message"
 )
 
@@ -144,7 +145,7 @@ func (h *eventHandler) Handler(ctx context.Context, m *message.Message) error {
 	if err != nil {
 		return err
 	}
-	saga, err := NewCreateOrderSaga(
+	saga, err := create_order_saga.NewCreateOrderSaga(
 		state,
 		h.orderSVC,
 		h.kitchenAPI,

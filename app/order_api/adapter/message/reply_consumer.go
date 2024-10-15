@@ -9,7 +9,6 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/service"
-	"github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga"
 	"github.com/tkame123/ddd-sample/lib/event_helper"
 	"github.com/tkame123/ddd-sample/lib/sqs_consumer"
 	"github.com/tkame123/ddd-sample/proto/message"
@@ -116,7 +115,7 @@ func (e *ReplyConsumer) workerHandler(ctx context.Context, msg *types.Message) e
 }
 
 func (e *ReplyConsumer) processEvent(ctx context.Context, mes *message.Message) error {
-	err := create_order_saga.NewEventHandler(
+	err := NewEventHandler(
 		e.rep,
 		e.orderSVC,
 		e.kitchenAPI,
