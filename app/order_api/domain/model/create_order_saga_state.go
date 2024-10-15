@@ -1,8 +1,9 @@
 package model
 
 type CreateOrderSagaState struct {
-	OrderID OrderID
-	Current CreateOrderSagaStep
+	OrderID  OrderID
+	Current  CreateOrderSagaStep
+	TicketID TicketID
 }
 
 type CreateOrderSagaStep = string
@@ -25,4 +26,8 @@ func NewCreateOrderSagaState(orderID OrderID, currentStep CreateOrderSagaStep) *
 		OrderID: orderID,
 		Current: currentStep,
 	}
+}
+
+func (s *CreateOrderSagaState) ApplyStep(step CreateOrderSagaStep) {
+	s.Current = step
 }

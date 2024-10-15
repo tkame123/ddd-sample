@@ -6,7 +6,6 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/domain_event"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
-	servive "github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga"
 	"github.com/tkame123/ddd-sample/proto/message"
 )
 
@@ -38,7 +37,7 @@ func (h *NextStepSagaWhenCardAuthorizeFailedHandler) Handler(ctx context.Context
 		return err
 	}
 
-	if err := saga.Event(ctx, servive.CreateOrderSagaEvent_AuthorizeCardFailed); err != nil {
+	if err := saga.Event(ctx, mes); err != nil {
 		return err
 	}
 

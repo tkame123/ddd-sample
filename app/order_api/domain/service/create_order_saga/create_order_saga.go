@@ -7,31 +7,18 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/service"
+	"github.com/tkame123/ddd-sample/proto/message"
 	"log"
 )
 
 type CreateOrderSaga struct {
-	orderID    model.OrderID
-	fsm        *fsm.FSM
-	rep        repository.Repository
-	orderSVC   service.CreateOrder
-	kitchenAPI external_service.KitchenAPI
-	billingAPI external_service.BillingAPI
+	currentState *model.CreateOrderSagaState
+	fsm          *fsm.FSM
+	rep          repository.Repository
+	orderSVC     service.CreateOrder
+	kitchenAPI   external_service.KitchenAPI
+	billingAPI   external_service.BillingAPI
 }
-
-type CreateOrderSagaEvent = string
-
-const (
-	CreateOrderSagaEvent_CreteTicket          CreateOrderSagaEvent = "CreteTicket"
-	CreateOrderSagaEvent_AuthorizeCard        CreateOrderSagaEvent = "AuthorizeCard"
-	CreateOrderSagaEvent_ApproveTicket        CreateOrderSagaEvent = "ApproveTicket"
-	CreateOrderSagaEvent_ApproveOrder         CreateOrderSagaEvent = "ApproveOrder"
-	CreateOrderSagaEvent_OrderApprove         CreateOrderSagaEvent = "OrderApprove"
-	CreateOrderSagaEvent_TicketCreationFailed CreateOrderSagaEvent = "TicketCreationFailed"
-	CreateOrderSagaEvent_AuthorizeCardFailed  CreateOrderSagaEvent = "AuthorizeCardFailed"
-	CreateOrderSagaEvent_RejectOrder          CreateOrderSagaEvent = "RejectOrder"
-	CreateOrderSagaEvent_RejectedOrder        CreateOrderSagaEvent = "RejectedOrder"
-)
 
 func NewCreateOrderSaga(
 	currentState *model.CreateOrderSagaState,
@@ -41,84 +28,84 @@ func NewCreateOrderSaga(
 	billingAPI external_service.BillingAPI,
 ) *CreateOrderSaga {
 	c := &CreateOrderSaga{
-		orderID:    currentState.OrderID,
-		rep:        rep,
-		orderSVC:   orderSVC,
-		kitchenAPI: kitchenAPI,
-		billingAPI: billingAPI,
+		currentState: currentState,
+		rep:          rep,
+		orderSVC:     orderSVC,
+		kitchenAPI:   kitchenAPI,
+		billingAPI:   billingAPI,
 	}
 
 	ms := fsm.NewFSM(
 		model.CreateOrderSagaStep_ApprovalPending,
 		fsm.Events{
 			{
-				Name: CreateOrderSagaEvent_CreteTicket,
+				Name: message.Type_TYPE_EVENT_ORDER_CREATED.String(),
 				Src:  []string{model.CreateOrderSagaStep_ApprovalPending},
 				Dst:  model.CreateOrderSagaStep_CreatingTicket,
 			},
 			{
-				Name: CreateOrderSagaEvent_AuthorizeCard,
+				Name: message.Type_TYPE_EVENT_TICKET_CREATED.String(),
 				Src:  []string{model.CreateOrderSagaStep_CreatingTicket},
 				Dst:  model.CreateOrderSagaStep_AuthorizingCard,
 			},
 			{
-				Name: CreateOrderSagaEvent_ApproveTicket,
+				Name: message.Type_TYPE_EVENT_CARD_AUTHORIZED.String(),
 				Src:  []string{model.CreateOrderSagaStep_AuthorizingCard},
 				Dst:  model.CreateOrderSagaStep_ApprovingTicket,
 			},
 			{
-				Name: CreateOrderSagaEvent_ApproveOrder,
+				Name: message.Type_TYPE_EVENT_TICKET_APPROVED.String(),
 				Src:  []string{model.CreateOrderSagaStep_ApprovingTicket},
 				Dst:  model.CreateOrderSagaStep_ApprovingOrder,
 			},
 			{
-				Name: CreateOrderSagaEvent_OrderApprove,
+				Name: message.Type_TYPE_EVENT_ORDER_APPROVED.String(),
 				Src:  []string{model.CreateOrderSagaStep_ApprovingOrder},
 				Dst:  model.CreateOrderSagaStep_OrderApproved,
 			},
 
 			// Ticketの作成が失敗した場合
 			{
-				Name: CreateOrderSagaEvent_TicketCreationFailed,
+				Name: message.Type_TYPE_EVENT_TICKET_CREATION_FAILED.String(),
 				Src:  []string{model.CreateOrderSagaStep_CreatingTicket},
 				Dst:  model.CreateOrderSagaStep_OrderRejected,
 			},
 
 			// オーソリ（仮売上）が失敗した場合
 			{
-				Name: CreateOrderSagaEvent_AuthorizeCardFailed,
+				Name: message.Type_TYPE_EVENT_CARD_AUTHORIZATION_FAILED.String(),
 				Src:  []string{model.CreateOrderSagaStep_AuthorizingCard},
 				Dst:  model.CreateOrderSagaStep_RejectingTicket,
 			},
 			{
-				Name: CreateOrderSagaEvent_RejectOrder,
+				Name: message.Type_TYPE_EVENT_TICKET_REJECTED.String(),
 				Src:  []string{model.CreateOrderSagaStep_RejectingTicket},
 				Dst:  model.CreateOrderSagaStep_RejectingOrder,
 			},
 			{
-				Name: CreateOrderSagaEvent_RejectedOrder,
+				Name: message.Type_TYPE_EVENT_ORDER_REJECTED.String(),
 				Src:  []string{model.CreateOrderSagaStep_RejectingOrder},
 				Dst:  model.CreateOrderSagaStep_OrderRejected,
 			},
 		},
 		fsm.Callbacks{
 			"enter_CreatingTicket": func(ctx context.Context, e *fsm.Event) {
-				c.createTicket(ctx)
+				e.Err = c.createTicket(ctx)
 			},
 			"enter_ApprovingTicket": func(ctx context.Context, e *fsm.Event) {
-				c.approveTicket(ctx)
+				e.Err = c.approveTicket(ctx)
 			},
 			"enter_AuthorizingCard": func(ctx context.Context, e *fsm.Event) {
-				c.authorizeCard(ctx)
+				e.Err = c.authorizeCard(ctx)
 			},
 			"enter_ApprovingOrder": func(ctx context.Context, e *fsm.Event) {
-				c.approveOrder(ctx)
+				e.Err = c.approveOrder(ctx)
 			},
 			"enter_RejectingTicket": func(ctx context.Context, e *fsm.Event) {
-				c.rejectTicket(ctx)
+				e.Err = c.rejectTicket(ctx)
 			},
 			"enter_RejectingOrder": func(ctx context.Context, e *fsm.Event) {
-				c.rejectOrder(ctx)
+				e.Err = c.rejectOrder(ctx)
 			},
 		},
 	)
@@ -139,47 +126,56 @@ func (c *CreateOrderSaga) CurrentStep() string {
 	return c.fsm.Current()
 }
 
-func (c *CreateOrderSaga) Event(ctx context.Context, causeEvent CreateOrderSagaEvent) error {
-	if err := c.fsm.Event(ctx, causeEvent); err != nil {
+func (c *CreateOrderSaga) Event(ctx context.Context, causeEvent *message.Message) error {
+	if err := c.fsm.Event(ctx, causeEvent.Subject.Type.String()); err != nil {
 		return err
 	}
-	if err := c.rep.CreateOrderSagaStateSave(ctx, model.NewCreateOrderSagaState(c.orderID, c.fsm.Current())); err != nil {
+	c.currentState.ApplyStep(c.fsm.Current())
+	if err := c.rep.CreateOrderSagaStateSave(ctx, c.currentState); err != nil {
 		return err
 	}
-	log.Printf("CreateOrderSaga steped: OrderID: %s, CurrentStep: %s", c.orderID, c.fsm.Current())
+	log.Printf("CreateOrderSaga steped: OrderID: %s, CurrentStep: %s", c.currentState.OrderID, c.fsm.Current())
 	return nil
 }
 
-func (c *CreateOrderSaga) createTicket(ctx context.Context) {
-	c.kitchenAPI.CreateTicket(ctx, c.orderID)
+func (c *CreateOrderSaga) createTicket(ctx context.Context) error {
+	c.kitchenAPI.CreateTicket(ctx, c.currentState.OrderID)
+	return nil
 }
 
-func (c *CreateOrderSaga) approveTicket(ctx context.Context) {
-	c.kitchenAPI.ApproveTicket(ctx, c.orderID)
+func (c *CreateOrderSaga) approveTicket(ctx context.Context) error {
+	c.kitchenAPI.ApproveTicket(ctx, c.currentState.OrderID)
+	return nil
 }
 
-func (c *CreateOrderSaga) rejectTicket(ctx context.Context) {
-	c.kitchenAPI.RejectTicket(ctx, c.orderID)
+func (c *CreateOrderSaga) rejectTicket(ctx context.Context) error {
+	c.kitchenAPI.RejectTicket(ctx, c.currentState.OrderID)
+	return nil
 }
 
-func (c *CreateOrderSaga) authorizeCard(ctx context.Context) {
-	c.billingAPI.AuthorizeCard(ctx, c.orderID)
+func (c *CreateOrderSaga) authorizeCard(ctx context.Context) error {
+	c.billingAPI.AuthorizeCard(ctx, c.currentState.OrderID)
+	return nil
 }
 
-func (c *CreateOrderSaga) approveOrder(ctx context.Context) {
-	_, err := c.orderSVC.ApproveOrder(ctx, c.orderID)
+func (c *CreateOrderSaga) approveOrder(ctx context.Context) error {
+	_, err := c.orderSVC.ApproveOrder(ctx, c.currentState.OrderID)
 
 	if err != nil {
 		// TODO: 原則再実行で成功が保証されているはずなので、通知だけ行う
 		panic("approve order failed")
 	}
+
+	return nil
 }
 
-func (c *CreateOrderSaga) rejectOrder(ctx context.Context) {
-	_, err := c.orderSVC.RejectOrder(ctx, c.orderID)
+func (c *CreateOrderSaga) rejectOrder(ctx context.Context) error {
+	_, err := c.orderSVC.RejectOrder(ctx, c.currentState.OrderID)
 
 	if err != nil {
 		// TODO: 原則再実行で成功が保証されているはずなので、通知だけ行う
 		panic("reject order failed")
 	}
+
+	return nil
 }
