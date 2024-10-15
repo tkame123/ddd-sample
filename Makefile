@@ -1,4 +1,11 @@
 
+tool.install:
+	go install github.com/golang/mock/mockgen
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+	go install entgo.io/contrib/entproto/cmd/protoc-gen-entgrpc@master
+	go install github.com/air-verse/air@latest
+
 localstack.start:
 	DOCKER_FLAGS='-v $(CURDIR)/dev/locakstack-init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh' localstack start
 	#DOCKER_FLAGS='-v $(CURDIR)/dev/locakstack-init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh' localstack start -d
@@ -14,12 +21,6 @@ buf.lint:
 
 order.wire:
 	cd app/order_api/di && wire
-
-order.install:
-	go install github.com/golang/mock/mockgen
-	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-	go install entgo.io/contrib/entproto/cmd/protoc-gen-entgrpc@master
 
 order.test.mock:
 	mockgen -source=app/order_api/domain/port/domain_event/publisher.go -destination=app/order_api/domain/port/mock/domain_event/publisher.go -package=mock

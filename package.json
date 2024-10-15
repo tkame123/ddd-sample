@@ -1,0 +1,18 @@
+{
+  "name": "ddd-sample",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "dev:order": "concurrently  --names \"order_api,order_event_consumer,order_command_consumer,order_reply_consumer\" \"air -c dev/.air_order_api.toml\" \"air -c dev/.air_order_event_consumer.toml\" \"air -c dev/.air_order_command_consumer.toml\" \"air -c dev/.air_order_reply_consumer.toml\" "
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}
