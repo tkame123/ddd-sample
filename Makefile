@@ -47,3 +47,6 @@ order.ent.atlas:
 
 kitchen.wire:
 	cd app/kitchen_api/di && wire
+
+billing.wire:
+	cd app/billilng_api/di && wire
