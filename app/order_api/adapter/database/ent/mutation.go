@@ -39,6 +39,7 @@ type CreateOrderSagaStateMutation struct {
 	typ           string
 	id            *uuid.UUID
 	current       *createordersagastate.Current
+	ticket_id     *uuid.UUID
 	created_at    *time.Time
 	updated_at    *time.Time
 	clearedFields map[string]struct{}
@@ -187,6 +188,55 @@ func (m *CreateOrderSagaStateMutation) ResetCurrent() {
 	m.current = nil
 }
 
+// SetTicketID sets the "ticket_id" field.
+func (m *CreateOrderSagaStateMutation) SetTicketID(u uuid.UUID) {
+	m.ticket_id = &u
+}
+
+// TicketID returns the value of the "ticket_id" field in the mutation.
+func (m *CreateOrderSagaStateMutation) TicketID() (r uuid.UUID, exists bool) {
+	v := m.ticket_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTicketID returns the old "ticket_id" field's value of the CreateOrderSagaState entity.
+// If the CreateOrderSagaState object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CreateOrderSagaStateMutation) OldTicketID(ctx context.Context) (v *uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTicketID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTicketID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTicketID: %w", err)
+	}
+	return oldValue.TicketID, nil
+}
+
+// ClearTicketID clears the value of the "ticket_id" field.
+func (m *CreateOrderSagaStateMutation) ClearTicketID() {
+	m.ticket_id = nil
+	m.clearedFields[createordersagastate.FieldTicketID] = struct{}{}
+}
+
+// TicketIDCleared returns if the "ticket_id" field was cleared in this mutation.
+func (m *CreateOrderSagaStateMutation) TicketIDCleared() bool {
+	_, ok := m.clearedFields[createordersagastate.FieldTicketID]
+	return ok
+}
+
+// ResetTicketID resets all changes to the "ticket_id" field.
+func (m *CreateOrderSagaStateMutation) ResetTicketID() {
+	m.ticket_id = nil
+	delete(m.clearedFields, createordersagastate.FieldTicketID)
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *CreateOrderSagaStateMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -293,9 +343,12 @@ func (m *CreateOrderSagaStateMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CreateOrderSagaStateMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.current != nil {
 		fields = append(fields, createordersagastate.FieldCurrent)
+	}
+	if m.ticket_id != nil {
+		fields = append(fields, createordersagastate.FieldTicketID)
 	}
 	if m.created_at != nil {
 		fields = append(fields, createordersagastate.FieldCreatedAt)
@@ -313,6 +366,8 @@ func (m *CreateOrderSagaStateMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case createordersagastate.FieldCurrent:
 		return m.Current()
+	case createordersagastate.FieldTicketID:
+		return m.TicketID()
 	case createordersagastate.FieldCreatedAt:
 		return m.CreatedAt()
 	case createordersagastate.FieldUpdatedAt:
@@ -328,6 +383,8 @@ func (m *CreateOrderSagaStateMutation) OldField(ctx context.Context, name string
 	switch name {
 	case createordersagastate.FieldCurrent:
 		return m.OldCurrent(ctx)
+	case createordersagastate.FieldTicketID:
+		return m.OldTicketID(ctx)
 	case createordersagastate.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case createordersagastate.FieldUpdatedAt:
@@ -347,6 +404,13 @@ func (m *CreateOrderSagaStateMutation) SetField(name string, value ent.Value) er
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCurrent(v)
+		return nil
+	case createordersagastate.FieldTicketID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTicketID(v)
 		return nil
 	case createordersagastate.FieldCreatedAt:
 		v, ok := value.(time.Time)
@@ -391,7 +455,11 @@ func (m *CreateOrderSagaStateMutation) AddField(name string, value ent.Value) er
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *CreateOrderSagaStateMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(createordersagastate.FieldTicketID) {
+		fields = append(fields, createordersagastate.FieldTicketID)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -404,6 +472,11 @@ func (m *CreateOrderSagaStateMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *CreateOrderSagaStateMutation) ClearField(name string) error {
+	switch name {
+	case createordersagastate.FieldTicketID:
+		m.ClearTicketID()
+		return nil
+	}
 	return fmt.Errorf("unknown CreateOrderSagaState nullable field %s", name)
 }
 
@@ -413,6 +486,9 @@ func (m *CreateOrderSagaStateMutation) ResetField(name string) error {
 	switch name {
 	case createordersagastate.FieldCurrent:
 		m.ResetCurrent()
+		return nil
+	case createordersagastate.FieldTicketID:
+		m.ResetTicketID()
 		return nil
 	case createordersagastate.FieldCreatedAt:
 		m.ResetCreatedAt()

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
 	mockAPI "github.com/tkame123/ddd-sample/app/order_api/domain/port/mock/external_service"
 	mockRp "github.com/tkame123/ddd-sample/app/order_api/domain/port/mock/repository"
@@ -33,6 +34,7 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 	orderID := o.OrderID
+	ticketID := uuid.New()
 	initialStep := model.NewCreateOrderSagaState(orderID, model.CreateOrderSagaStep_ApprovalPending)
 	saga := servive.NewCreateOrderSaga(
 		initialStep,
@@ -65,11 +67,19 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 	err = saga.Event(ctx,
 		eventCreateHelper(
 			&message.EventTicketCreated{
-				OrderId: orderID.String(),
+				OrderId:  orderID.String(),
+				TicketId: ticketID.String(),
 			},
 		))
 	if err != nil {
 		t.Errorf("err: %v\n", err)
+	}
+
+	if saga.TicketID().Valid != true {
+		t.Errorf("ticketID is not valid")
+	}
+	if saga.TicketID().UUID != ticketID {
+		t.Errorf("ticketID is not equal")
 	}
 
 	err = saga.Event(ctx,

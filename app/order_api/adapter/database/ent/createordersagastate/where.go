@@ -55,6 +55,11 @@ func IDLTE(id uuid.UUID) predicate.CreateOrderSagaState {
 	return predicate.CreateOrderSagaState(sql.FieldLTE(FieldID, id))
 }
 
+// TicketID applies equality check predicate on the "ticket_id" field. It's identical to TicketIDEQ.
+func TicketID(v uuid.UUID) predicate.CreateOrderSagaState {
+	return predicate.CreateOrderSagaState(sql.FieldEQ(FieldTicketID, v))
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.CreateOrderSagaState {
 	return predicate.CreateOrderSagaState(sql.FieldEQ(FieldCreatedAt, v))
@@ -83,6 +88,56 @@ func CurrentIn(vs ...Current) predicate.CreateOrderSagaState {
 // CurrentNotIn applies the NotIn predicate on the "current" field.
 func CurrentNotIn(vs ...Current) predicate.CreateOrderSagaState {
 	return predicate.CreateOrderSagaState(sql.FieldNotIn(FieldCurrent, vs...))
+}
+
+// TicketIDEQ applies the EQ predicate on the "ticket_id" field.
+func TicketIDEQ(v uuid.UUID) predicate.CreateOrderSagaState {
+	return predicate.CreateOrderSagaState(sql.FieldEQ(FieldTicketID, v))
+}
+
+// TicketIDNEQ applies the NEQ predicate on the "ticket_id" field.
+func TicketIDNEQ(v uuid.UUID) predicate.CreateOrderSagaState {
+	return predicate.CreateOrderSagaState(sql.FieldNEQ(FieldTicketID, v))
+}
+
+// TicketIDIn applies the In predicate on the "ticket_id" field.
+func TicketIDIn(vs ...uuid.UUID) predicate.CreateOrderSagaState {
+	return predicate.CreateOrderSagaState(sql.FieldIn(FieldTicketID, vs...))
+}
+
+// TicketIDNotIn applies the NotIn predicate on the "ticket_id" field.
+func TicketIDNotIn(vs ...uuid.UUID) predicate.CreateOrderSagaState {
+	return predicate.CreateOrderSagaState(sql.FieldNotIn(FieldTicketID, vs...))
+}
+
+// TicketIDGT applies the GT predicate on the "ticket_id" field.
+func TicketIDGT(v uuid.UUID) predicate.CreateOrderSagaState {
+	return predicate.CreateOrderSagaState(sql.FieldGT(FieldTicketID, v))
+}
+
+// TicketIDGTE applies the GTE predicate on the "ticket_id" field.
+func TicketIDGTE(v uuid.UUID) predicate.CreateOrderSagaState {
+	return predicate.CreateOrderSagaState(sql.FieldGTE(FieldTicketID, v))
+}
+
+// TicketIDLT applies the LT predicate on the "ticket_id" field.
+func TicketIDLT(v uuid.UUID) predicate.CreateOrderSagaState {
+	return predicate.CreateOrderSagaState(sql.FieldLT(FieldTicketID, v))
+}
+
+// TicketIDLTE applies the LTE predicate on the "ticket_id" field.
+func TicketIDLTE(v uuid.UUID) predicate.CreateOrderSagaState {
+	return predicate.CreateOrderSagaState(sql.FieldLTE(FieldTicketID, v))
+}
+
+// TicketIDIsNil applies the IsNil predicate on the "ticket_id" field.
+func TicketIDIsNil() predicate.CreateOrderSagaState {
+	return predicate.CreateOrderSagaState(sql.FieldIsNull(FieldTicketID))
+}
+
+// TicketIDNotNil applies the NotNil predicate on the "ticket_id" field.
+func TicketIDNotNil() predicate.CreateOrderSagaState {
+	return predicate.CreateOrderSagaState(sql.FieldNotNull(FieldTicketID))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

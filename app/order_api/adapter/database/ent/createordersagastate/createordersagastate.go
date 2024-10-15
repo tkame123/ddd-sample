@@ -16,6 +16,8 @@ const (
 	FieldID = "id"
 	// FieldCurrent holds the string denoting the current field in the database.
 	FieldCurrent = "current"
+	// FieldTicketID holds the string denoting the ticket_id field in the database.
+	FieldTicketID = "ticket_id"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -28,6 +30,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldCurrent,
+	FieldTicketID,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }
@@ -92,6 +95,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByCurrent orders the results by the current field.
 func ByCurrent(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCurrent, opts...).ToFunc()
+}
+
+// ByTicketID orders the results by the ticket_id field.
+func ByTicketID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTicketID, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.

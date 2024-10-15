@@ -30,6 +30,20 @@ func (cossc *CreateOrderSagaStateCreate) SetCurrent(c createordersagastate.Curre
 	return cossc
 }
 
+// SetTicketID sets the "ticket_id" field.
+func (cossc *CreateOrderSagaStateCreate) SetTicketID(u uuid.UUID) *CreateOrderSagaStateCreate {
+	cossc.mutation.SetTicketID(u)
+	return cossc
+}
+
+// SetNillableTicketID sets the "ticket_id" field if the given value is not nil.
+func (cossc *CreateOrderSagaStateCreate) SetNillableTicketID(u *uuid.UUID) *CreateOrderSagaStateCreate {
+	if u != nil {
+		cossc.SetTicketID(*u)
+	}
+	return cossc
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (cossc *CreateOrderSagaStateCreate) SetCreatedAt(t time.Time) *CreateOrderSagaStateCreate {
 	cossc.mutation.SetCreatedAt(t)
@@ -165,6 +179,10 @@ func (cossc *CreateOrderSagaStateCreate) createSpec() (*CreateOrderSagaState, *s
 		_spec.SetField(createordersagastate.FieldCurrent, field.TypeEnum, value)
 		_node.Current = value
 	}
+	if value, ok := cossc.mutation.TicketID(); ok {
+		_spec.SetField(createordersagastate.FieldTicketID, field.TypeUUID, value)
+		_node.TicketID = &value
+	}
 	if value, ok := cossc.mutation.CreatedAt(); ok {
 		_spec.SetField(createordersagastate.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
@@ -234,6 +252,24 @@ func (u *CreateOrderSagaStateUpsert) SetCurrent(v createordersagastate.Current) 
 // UpdateCurrent sets the "current" field to the value that was provided on create.
 func (u *CreateOrderSagaStateUpsert) UpdateCurrent() *CreateOrderSagaStateUpsert {
 	u.SetExcluded(createordersagastate.FieldCurrent)
+	return u
+}
+
+// SetTicketID sets the "ticket_id" field.
+func (u *CreateOrderSagaStateUpsert) SetTicketID(v uuid.UUID) *CreateOrderSagaStateUpsert {
+	u.Set(createordersagastate.FieldTicketID, v)
+	return u
+}
+
+// UpdateTicketID sets the "ticket_id" field to the value that was provided on create.
+func (u *CreateOrderSagaStateUpsert) UpdateTicketID() *CreateOrderSagaStateUpsert {
+	u.SetExcluded(createordersagastate.FieldTicketID)
+	return u
+}
+
+// ClearTicketID clears the value of the "ticket_id" field.
+func (u *CreateOrderSagaStateUpsert) ClearTicketID() *CreateOrderSagaStateUpsert {
+	u.SetNull(createordersagastate.FieldTicketID)
 	return u
 }
 
@@ -320,6 +356,27 @@ func (u *CreateOrderSagaStateUpsertOne) SetCurrent(v createordersagastate.Curren
 func (u *CreateOrderSagaStateUpsertOne) UpdateCurrent() *CreateOrderSagaStateUpsertOne {
 	return u.Update(func(s *CreateOrderSagaStateUpsert) {
 		s.UpdateCurrent()
+	})
+}
+
+// SetTicketID sets the "ticket_id" field.
+func (u *CreateOrderSagaStateUpsertOne) SetTicketID(v uuid.UUID) *CreateOrderSagaStateUpsertOne {
+	return u.Update(func(s *CreateOrderSagaStateUpsert) {
+		s.SetTicketID(v)
+	})
+}
+
+// UpdateTicketID sets the "ticket_id" field to the value that was provided on create.
+func (u *CreateOrderSagaStateUpsertOne) UpdateTicketID() *CreateOrderSagaStateUpsertOne {
+	return u.Update(func(s *CreateOrderSagaStateUpsert) {
+		s.UpdateTicketID()
+	})
+}
+
+// ClearTicketID clears the value of the "ticket_id" field.
+func (u *CreateOrderSagaStateUpsertOne) ClearTicketID() *CreateOrderSagaStateUpsertOne {
+	return u.Update(func(s *CreateOrderSagaStateUpsert) {
+		s.ClearTicketID()
 	})
 }
 
@@ -577,6 +634,27 @@ func (u *CreateOrderSagaStateUpsertBulk) SetCurrent(v createordersagastate.Curre
 func (u *CreateOrderSagaStateUpsertBulk) UpdateCurrent() *CreateOrderSagaStateUpsertBulk {
 	return u.Update(func(s *CreateOrderSagaStateUpsert) {
 		s.UpdateCurrent()
+	})
+}
+
+// SetTicketID sets the "ticket_id" field.
+func (u *CreateOrderSagaStateUpsertBulk) SetTicketID(v uuid.UUID) *CreateOrderSagaStateUpsertBulk {
+	return u.Update(func(s *CreateOrderSagaStateUpsert) {
+		s.SetTicketID(v)
+	})
+}
+
+// UpdateTicketID sets the "ticket_id" field to the value that was provided on create.
+func (u *CreateOrderSagaStateUpsertBulk) UpdateTicketID() *CreateOrderSagaStateUpsertBulk {
+	return u.Update(func(s *CreateOrderSagaStateUpsert) {
+		s.UpdateTicketID()
+	})
+}
+
+// ClearTicketID clears the value of the "ticket_id" field.
+func (u *CreateOrderSagaStateUpsertBulk) ClearTicketID() *CreateOrderSagaStateUpsertBulk {
+	return u.Update(func(s *CreateOrderSagaStateUpsert) {
+		s.ClearTicketID()
 	})
 }
 

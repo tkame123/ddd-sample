@@ -18,11 +18,11 @@ func init() {
 	createordersagastateFields := schema.CreateOrderSagaState{}.Fields()
 	_ = createordersagastateFields
 	// createordersagastateDescCreatedAt is the schema descriptor for created_at field.
-	createordersagastateDescCreatedAt := createordersagastateFields[2].Descriptor()
+	createordersagastateDescCreatedAt := createordersagastateFields[3].Descriptor()
 	// createordersagastate.DefaultCreatedAt holds the default value on creation for the created_at field.
 	createordersagastate.DefaultCreatedAt = createordersagastateDescCreatedAt.Default.(func() time.Time)
 	// createordersagastateDescUpdatedAt is the schema descriptor for updated_at field.
-	createordersagastateDescUpdatedAt := createordersagastateFields[3].Descriptor()
+	createordersagastateDescUpdatedAt := createordersagastateFields[4].Descriptor()
 	// createordersagastate.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	createordersagastate.DefaultUpdatedAt = createordersagastateDescUpdatedAt.Default.(func() time.Time)
 	// createordersagastate.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

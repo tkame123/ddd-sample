@@ -12,6 +12,7 @@ var (
 	CreateOrderSagaStatesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "current", Type: field.TypeEnum, Enums: []string{"ApprovalPending", "CreatingTicket", "AuthorizingCard", "ApprovingTicket", "ApprovingOrder", "OrderApproved", "RejectingTicket", "RejectingOrder", "OrderRejected"}},
+		{Name: "ticket_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "datetime"}},
 		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "datetime"}},
 	}

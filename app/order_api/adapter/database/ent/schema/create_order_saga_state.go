@@ -32,6 +32,9 @@ func (CreateOrderSagaState) Fields() []ent.Field {
 				model.CreateOrderSagaStep_RejectingOrder,
 				model.CreateOrderSagaStep_OrderRejected,
 			),
+		field.UUID("ticket_id", uuid.UUID{}).
+			Optional().
+			Nillable(),
 		field.Time("created_at").
 			Default(time.Now).
 			SchemaType(map[string]string{

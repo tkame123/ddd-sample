@@ -21,6 +21,8 @@ type CreateOrderSagaState struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// Current holds the value of the "current" field.
 	Current createordersagastate.Current `json:"current,omitempty"`
+	// TicketID holds the value of the "ticket_id" field.
+	TicketID *uuid.UUID `json:"ticket_id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -33,6 +35,8 @@ func (*CreateOrderSagaState) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case createordersagastate.FieldTicketID:
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case createordersagastate.FieldCurrent:
 			values[i] = new(sql.NullString)
 		case createordersagastate.FieldCreatedAt, createordersagastate.FieldUpdatedAt:
@@ -65,6 +69,13 @@ func (coss *CreateOrderSagaState) assignValues(columns []string, values []any) e
 				return fmt.Errorf("unexpected type %T for field current", values[i])
 			} else if value.Valid {
 				coss.Current = createordersagastate.Current(value.String)
+			}
+		case createordersagastate.FieldTicketID:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field ticket_id", values[i])
+			} else if value.Valid {
+				coss.TicketID = new(uuid.UUID)
+				*coss.TicketID = *value.S.(*uuid.UUID)
 			}
 		case createordersagastate.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -116,6 +127,11 @@ func (coss *CreateOrderSagaState) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", coss.ID))
 	builder.WriteString("current=")
 	builder.WriteString(fmt.Sprintf("%v", coss.Current))
+	builder.WriteString(", ")
+	if v := coss.TicketID; v != nil {
+		builder.WriteString("ticket_id=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(coss.CreatedAt.Format(time.ANSIC))

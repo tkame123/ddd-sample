@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/createordersagastate"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/predicate"
 )
@@ -39,6 +40,26 @@ func (cossu *CreateOrderSagaStateUpdate) SetNillableCurrent(c *createordersagast
 	if c != nil {
 		cossu.SetCurrent(*c)
 	}
+	return cossu
+}
+
+// SetTicketID sets the "ticket_id" field.
+func (cossu *CreateOrderSagaStateUpdate) SetTicketID(u uuid.UUID) *CreateOrderSagaStateUpdate {
+	cossu.mutation.SetTicketID(u)
+	return cossu
+}
+
+// SetNillableTicketID sets the "ticket_id" field if the given value is not nil.
+func (cossu *CreateOrderSagaStateUpdate) SetNillableTicketID(u *uuid.UUID) *CreateOrderSagaStateUpdate {
+	if u != nil {
+		cossu.SetTicketID(*u)
+	}
+	return cossu
+}
+
+// ClearTicketID clears the value of the "ticket_id" field.
+func (cossu *CreateOrderSagaStateUpdate) ClearTicketID() *CreateOrderSagaStateUpdate {
+	cossu.mutation.ClearTicketID()
 	return cossu
 }
 
@@ -128,6 +149,12 @@ func (cossu *CreateOrderSagaStateUpdate) sqlSave(ctx context.Context) (n int, er
 	if value, ok := cossu.mutation.Current(); ok {
 		_spec.SetField(createordersagastate.FieldCurrent, field.TypeEnum, value)
 	}
+	if value, ok := cossu.mutation.TicketID(); ok {
+		_spec.SetField(createordersagastate.FieldTicketID, field.TypeUUID, value)
+	}
+	if cossu.mutation.TicketIDCleared() {
+		_spec.ClearField(createordersagastate.FieldTicketID, field.TypeUUID)
+	}
 	if value, ok := cossu.mutation.CreatedAt(); ok {
 		_spec.SetField(createordersagastate.FieldCreatedAt, field.TypeTime, value)
 	}
@@ -165,6 +192,26 @@ func (cossuo *CreateOrderSagaStateUpdateOne) SetNillableCurrent(c *createordersa
 	if c != nil {
 		cossuo.SetCurrent(*c)
 	}
+	return cossuo
+}
+
+// SetTicketID sets the "ticket_id" field.
+func (cossuo *CreateOrderSagaStateUpdateOne) SetTicketID(u uuid.UUID) *CreateOrderSagaStateUpdateOne {
+	cossuo.mutation.SetTicketID(u)
+	return cossuo
+}
+
+// SetNillableTicketID sets the "ticket_id" field if the given value is not nil.
+func (cossuo *CreateOrderSagaStateUpdateOne) SetNillableTicketID(u *uuid.UUID) *CreateOrderSagaStateUpdateOne {
+	if u != nil {
+		cossuo.SetTicketID(*u)
+	}
+	return cossuo
+}
+
+// ClearTicketID clears the value of the "ticket_id" field.
+func (cossuo *CreateOrderSagaStateUpdateOne) ClearTicketID() *CreateOrderSagaStateUpdateOne {
+	cossuo.mutation.ClearTicketID()
 	return cossuo
 }
 
@@ -283,6 +330,12 @@ func (cossuo *CreateOrderSagaStateUpdateOne) sqlSave(ctx context.Context) (_node
 	}
 	if value, ok := cossuo.mutation.Current(); ok {
 		_spec.SetField(createordersagastate.FieldCurrent, field.TypeEnum, value)
+	}
+	if value, ok := cossuo.mutation.TicketID(); ok {
+		_spec.SetField(createordersagastate.FieldTicketID, field.TypeUUID, value)
+	}
+	if cossuo.mutation.TicketIDCleared() {
+		_spec.ClearField(createordersagastate.FieldTicketID, field.TypeUUID)
 	}
 	if value, ok := cossuo.mutation.CreatedAt(); ok {
 		_spec.SetField(createordersagastate.FieldCreatedAt, field.TypeTime, value)

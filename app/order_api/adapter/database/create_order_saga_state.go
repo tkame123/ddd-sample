@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/createordersagastate"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
@@ -22,7 +23,9 @@ func (r *repo) CreateOrderSagaStateSave(ctx context.Context, state *model.Create
 	err := r.db.CreateOrderSagaState.Create().
 		SetID(state.OrderID).
 		SetCurrent(fromModelCurrentState(state.Current)).
+		SetNillableTicketID(fromModelTicketID(state.TicketID)).
 		OnConflictColumns("id").
+		UpdateTicketID().
 		UpdateCurrent().
 		UpdateUpdatedAt().
 		Exec(ctx)
@@ -30,6 +33,13 @@ func (r *repo) CreateOrderSagaStateSave(ctx context.Context, state *model.Create
 		return err
 	}
 
+	return nil
+}
+
+func fromModelTicketID(ticketID uuid.NullUUID) *uuid.UUID {
+	if ticketID.Valid {
+		return &ticketID.UUID
+	}
 	return nil
 }
 
@@ -85,9 +95,20 @@ func toModelCurrentState(state createordersagastate.Current) model.CreateOrderSa
 	}
 }
 
+func toModelTicketID(ticketID *uuid.UUID) uuid.NullUUID {
+	if ticketID == nil {
+		return uuid.NullUUID{Valid: false}
+	}
+	return uuid.NullUUID{
+		UUID:  *ticketID,
+		Valid: true,
+	}
+}
+
 func toModelOrderSagaState(state *ent.CreateOrderSagaState) *model.CreateOrderSagaState {
 	return &model.CreateOrderSagaState{
-		OrderID: state.ID,
-		Current: toModelCurrentState(state.Current),
+		OrderID:  state.ID,
+		Current:  toModelCurrentState(state.Current),
+		TicketID: toModelTicketID(state.TicketID),
 	}
 }

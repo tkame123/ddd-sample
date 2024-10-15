@@ -9,7 +9,7 @@ type OrderID = uuid.UUID
 type OrderItemID = uuid.UUID
 type ItemID = uuid.UUID
 
-type TicketID = uuid.UUID
+type TicketID = uuid.NullUUID
 
 func generateID() uuid.UUID {
 	id := uuid.New()
@@ -50,5 +50,5 @@ func TicketIdParse(id string) (*TicketID, error) {
 		return nil, err
 	}
 
-	return &parsedId, nil
+	return &uuid.NullUUID{Valid: true, UUID: parsedId}, nil
 }

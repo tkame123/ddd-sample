@@ -96,6 +96,26 @@ func NewCreateOrderSaga(
 			"enter_ApprovingTicket": func(ctx context.Context, e *fsm.Event) {
 				e.Err = c.approveTicket(ctx)
 			},
+			fmt.Sprintf("before_%s", message.Type_TYPE_EVENT_TICKET_CREATED.String()): func(ctx context.Context, e *fsm.Event) {
+				log.Println("before_AuthorizingCard")
+				m, ok := e.Args[0].(*message.Message)
+				if !ok {
+					e.Err = fmt.Errorf("invalid message type")
+					return
+				}
+				var v message.EventTicketCreated
+				if err := m.Envelope.UnmarshalTo(&v); err != nil {
+					e.Err = fmt.Errorf("unmarshal failed: %w", err)
+					return
+				}
+				id, err := model.TicketIdParse(v.TicketId)
+				if err != nil {
+					e.Err = fmt.Errorf("parse ticket id failed: %w", err)
+					return
+				}
+
+				e.Err = c.storeTicketID(ctx, *id)
+			},
 			"enter_AuthorizingCard": func(ctx context.Context, e *fsm.Event) {
 				e.Err = c.authorizeCard(ctx)
 			},
@@ -127,8 +147,12 @@ func (c *CreateOrderSaga) CurrentStep() string {
 	return c.fsm.Current()
 }
 
+func (c *CreateOrderSaga) TicketID() model.TicketID {
+	return c.currentState.TicketID
+}
+
 func (c *CreateOrderSaga) Event(ctx context.Context, causeEvent *message.Message) error {
-	if err := c.fsm.Event(ctx, causeEvent.Subject.Type.String()); err != nil {
+	if err := c.fsm.Event(ctx, causeEvent.Subject.Type.String(), causeEvent); err != nil {
 		return err
 	}
 	c.currentState.ApplyStep(c.fsm.Current())
@@ -140,7 +164,6 @@ func (c *CreateOrderSaga) Event(ctx context.Context, causeEvent *message.Message
 }
 
 func (c *CreateOrderSaga) createTicket(ctx context.Context) error {
-	// TODO: TicketIDの保存
 	c.kitchenAPI.CreateTicket(ctx, c.currentState.OrderID)
 	return nil
 }
@@ -155,8 +178,12 @@ func (c *CreateOrderSaga) rejectTicket(ctx context.Context) error {
 	return nil
 }
 
+func (c *CreateOrderSaga) storeTicketID(ctx context.Context, ticketID model.TicketID) error {
+	c.currentState.TicketID = ticketID
+	return nil
+}
+
 func (c *CreateOrderSaga) authorizeCard(ctx context.Context) error {
-	// TODO: BIllIDの保存
 	c.billingAPI.AuthorizeCard(ctx, c.currentState.OrderID)
 	return nil
 }
