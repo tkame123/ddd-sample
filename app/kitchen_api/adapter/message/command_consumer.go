@@ -6,9 +6,9 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
+	event_handler2 "github.com/tkame123/ddd-sample/app/kitchen_api/adapter/message/event_handler"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/di/provider"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/port/service"
-	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/service/create_ticket/event_handler"
 	"github.com/tkame123/ddd-sample/lib/event_helper"
 	"github.com/tkame123/ddd-sample/lib/sqs_consumer"
 	"github.com/tkame123/ddd-sample/proto/message"
@@ -106,10 +106,10 @@ func (e *CommandConsumer) workerHandler(ctx context.Context, msg *types.Message)
 }
 
 func (e *CommandConsumer) processEvent(ctx context.Context, mes *message.Message) error {
-	if !event_handler.IsCreateTicketEvent(mes.Subject.Type) {
+	if !event_handler2.IsCreateTicketEvent(mes.Subject.Type) {
 		return fmt.Errorf("invalid event: %s", mes.Subject.Type)
 	}
-	err := event_handler.EventMap[mes.Subject.Type](e.svc).Handler(ctx, mes)
+	err := event_handler2.EventMap[mes.Subject.Type](e.svc).Handler(ctx, mes)
 	if err != nil {
 		return err
 	}
