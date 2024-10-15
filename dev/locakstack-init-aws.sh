@@ -11,6 +11,8 @@ export AWS_SECRET_ACCESS_KEY=dummy
 export AWS_DEFAULT_REGION=ap-northeast-1
 export AWS_ENDPOINT_URL=http://localhost:4566
 
+echo "SNS topic Creating..."
+
 awslocal sns create-topic --name ddd-sample-event-order-order_created
 
 awslocal sns create-topic --name ddd-sample-event-order-order_approved
@@ -51,6 +53,26 @@ awslocal sqs create-queue --queue-name ddd-sample-order-command-queque
 
 awslocal sqs create-queue --queue-name ddd-sample-order-reply-queque
 
+awslocal sqs create-queue --queue-name ddd-sample-order-dead-letter-queque
+
+awslocal sqs set-queue-attributes \
+--queue-url http://sqs.ap-northeast-1.localhost.localstack.cloud:4566/000000000000/ddd-sample-order-event-queque \
+--attributes '{
+    "RedrivePolicy": "{\"deadLetterTargetArn\":\"arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-dead-letter-queque\",\"maxReceiveCount\":\"3\"}"
+}'
+
+awslocal sqs set-queue-attributes \
+--queue-url http://sqs.ap-northeast-1.localhost.localstack.cloud:4566/000000000000/ddd-sample-order-command-queque \
+--attributes '{
+    "RedrivePolicy": "{\"deadLetterTargetArn\":\"arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-dead-letter-queque\",\"maxReceiveCount\":\"3\"}"
+}'
+
+awslocal sqs set-queue-attributes \
+--queue-url http://sqs.ap-northeast-1.localhost.localstack.cloud:4566/000000000000/ddd-sample-order-reply-queque \
+--attributes '{
+    "RedrivePolicy": "{\"deadLetterTargetArn\":\"arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-dead-letter-queque\",\"maxReceiveCount\":\"3\"}"
+}'
+
 # Topic SubScribe
 
 echo "OrderAPI SubScribe Creating..."
@@ -87,6 +109,24 @@ awslocal sqs create-queue --queue-name ddd-sample-kitchen-command-queque
 
 awslocal sqs create-queue --queue-name ddd-sample-kitchen-reply-queque
 
+awslocal sqs set-queue-attributes \
+--queue-url http://sqs.ap-northeast-1.localhost.localstack.cloud:4566/000000000000/ddd-sample-kitchen-event-queque \
+--attributes '{
+    "RedrivePolicy": "{\"deadLetterTargetArn\":\"arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-kitchen-dead-letter-queque\",\"maxReceiveCount\":\"3\"}"
+}'
+
+awslocal sqs set-queue-attributes \
+--queue-url http://sqs.ap-northeast-1.localhost.localstack.cloud:4566/000000000000/ddd-sample-kitchen-command-queque \
+--attributes '{
+    "RedrivePolicy": "{\"deadLetterTargetArn\":\"arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-kitchen-dead-letter-queque\",\"maxReceiveCount\":\"3\"}"
+}'
+
+awslocal sqs set-queue-attributes \
+--queue-url http://sqs.ap-northeast-1.localhost.localstack.cloud:4566/000000000000/ddd-sample-kitchen-reply-queque \
+--attributes '{
+    "RedrivePolicy": "{\"deadLetterTargetArn\":\"arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-kitchen-dead-letter-queque\",\"maxReceiveCount\":\"3\"}"
+}'
+
 echo "KitchenAPI SubScribe Creating..."
 
 awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-kitchen-ticket_create" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-kitchen-command-queque"
@@ -104,6 +144,24 @@ awslocal sqs create-queue --queue-name ddd-sample-billing-event-queque
 awslocal sqs create-queue --queue-name ddd-sample-billing-command-queque
 
 awslocal sqs create-queue --queue-name ddd-sample-billing-reply-queque
+
+awslocal sqs set-queue-attributes \
+--queue-url http://sqs.ap-northeast-1.localhost.localstack.cloud:4566/000000000000/ddd-sample-billing-event-queque \
+--attributes '{
+    "RedrivePolicy": "{\"deadLetterTargetArn\":\"arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-billing-dead-letter-queque\",\"maxReceiveCount\":\"3\"}"
+}'
+
+awslocal sqs set-queue-attributes \
+--queue-url http://sqs.ap-northeast-1.localhost.localstack.cloud:4566/000000000000/ddd-sample-billing-command-queque \
+--attributes '{
+    "RedrivePolicy": "{\"deadLetterTargetArn\":\"arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-billing-dead-letter-queque\",\"maxReceiveCount\":\"3\"}"
+}'
+
+awslocal sqs set-queue-attributes \
+--queue-url http://sqs.ap-northeast-1.localhost.localstack.cloud:4566/000000000000/ddd-sample-billing-reply-queque \
+--attributes '{
+    "RedrivePolicy": "{\"deadLetterTargetArn\":\"arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-billing-dead-letter-queque\",\"maxReceiveCount\":\"3\"}"
+}'
 
 echo "BillingAPI SubScribe Creating..."
 
