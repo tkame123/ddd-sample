@@ -31,7 +31,6 @@ type ReplyConsumer struct {
 
 func NewReplyConsumer(
 	cfg *provider.ConsumerConfig,
-	envCfg *provider.EnvConfig,
 	sqsClient *sqs.Client,
 	rep repository.Repository,
 	orderSVC service.CreateOrder,
@@ -41,7 +40,7 @@ func NewReplyConsumer(
 	return &ReplyConsumer{
 		cfg:        cfg,
 		sqsClient:  sqsClient,
-		queueUrl:   envCfg.SqsUrlOrderReply,
+		queueUrl:   cfg.Reply.QueueUrl,
 		rep:        rep,
 		orderSVC:   orderSVC,
 		kitchenAPI: kitchenAPI,

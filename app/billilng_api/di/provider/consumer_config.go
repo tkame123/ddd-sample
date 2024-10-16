@@ -15,6 +15,7 @@ type ConsumerConfig struct {
 }
 
 type consumerConfig struct {
+	QueueUrl                string
 	MaxMessages             int
 	MaxWorkers              int
 	MessageChan             int
@@ -22,9 +23,10 @@ type consumerConfig struct {
 	VisibilityTimeoutSecond int
 }
 
-func NewConsumerConfig() *ConsumerConfig {
+func NewConsumerConfig(envCfg *EnvConfig) *ConsumerConfig {
 	return &ConsumerConfig{
 		Event: consumerConfig{
+			QueueUrl:                envCfg.SqsUrlBillingEvent,
 			MaxMessages:             maxMessages,
 			MaxWorkers:              maxWorkers,
 			MessageChan:             messageChan,
@@ -32,6 +34,7 @@ func NewConsumerConfig() *ConsumerConfig {
 			VisibilityTimeoutSecond: VisibilityTimeoutSecond,
 		},
 		Command: consumerConfig{
+			QueueUrl:                envCfg.SqsUrlBillingCommand,
 			MaxMessages:             maxMessages,
 			MaxWorkers:              maxWorkers,
 			MessageChan:             messageChan,
@@ -39,6 +42,7 @@ func NewConsumerConfig() *ConsumerConfig {
 			VisibilityTimeoutSecond: VisibilityTimeoutSecond,
 		},
 		Reply: consumerConfig{
+			QueueUrl:                envCfg.SqsUrlBillingReply,
 			MaxMessages:             maxMessages,
 			MaxWorkers:              maxWorkers,
 			MessageChan:             messageChan,

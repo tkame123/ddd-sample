@@ -31,7 +31,6 @@ type EventConsumer struct {
 
 func NewEventConsumer(
 	cfg *provider.ConsumerConfig,
-	envCfg *provider.EnvConfig,
 	sqsClient *sqs.Client,
 	rep repository.Repository,
 	orderSVC service.CreateOrder,
@@ -41,7 +40,7 @@ func NewEventConsumer(
 	return &EventConsumer{
 		cfg:        cfg,
 		sqsClient:  sqsClient,
-		queueUrl:   envCfg.SqsUrlOrderEvent,
+		queueUrl:   cfg.Event.QueueUrl,
 		rep:        rep,
 		orderSVC:   orderSVC,
 		kitchenAPI: kitchenAPI,

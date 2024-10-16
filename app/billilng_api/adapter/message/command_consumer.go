@@ -28,14 +28,13 @@ type CommandConsumer struct {
 
 func NewCommandConsumer(
 	cfg *provider.ConsumerConfig,
-	envCfg *provider.EnvConfig,
 	sqsClient *sqs.Client,
 	svc service.CreateBill,
 ) *CommandConsumer {
 	return &CommandConsumer{
 		cfg:       cfg,
 		sqsClient: sqsClient,
-		queueUrl:  envCfg.SqsUrlBillingCommand,
+		queueUrl:  cfg.Command.QueueUrl,
 		svc:       svc,
 	}
 }

@@ -17,11 +17,11 @@ import (
 // Injectors from wire.go:
 
 func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
-	consumerConfig := provider.NewConsumerConfig()
 	envConfig, err := provider.NewENV()
 	if err != nil {
 		return nil, nil, err
 	}
+	consumerConfig := provider.NewConsumerConfig(envConfig)
 	config, err := provider.NewAWSConfig()
 	if err != nil {
 		return nil, nil, err
@@ -37,7 +37,7 @@ func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
 	}
 	publisher := message.NewEventPublisher(envConfig, snsClient)
 	createTicket := create_ticket.NewService(repository, publisher)
-	commandConsumer := message.NewCommandConsumer(consumerConfig, envConfig, client, createTicket)
+	commandConsumer := message.NewCommandConsumer(consumerConfig, client, createTicket)
 	return commandConsumer, func() {
 	}, nil
 }

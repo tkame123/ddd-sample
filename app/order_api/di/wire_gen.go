@@ -50,11 +50,11 @@ func InitializeAPIServer() (connect.Server, func(), error) {
 }
 
 func InitializeEventConsumer() (*message.EventConsumer, func(), error) {
-	consumerConfig := provider.NewConsumerConfig()
 	envConfig, err := provider.NewENV()
 	if err != nil {
 		return nil, nil, err
 	}
+	consumerConfig := provider.NewConsumerConfig(envConfig)
 	config, err := provider.NewAWSConfig()
 	if err != nil {
 		return nil, nil, err
@@ -77,18 +77,18 @@ func InitializeEventConsumer() (*message.EventConsumer, func(), error) {
 	createOrder := create_order.NewService(repository, publisher)
 	kitchenAPI := proxy.NewKitchenAPI(repository, publisher)
 	billingAPI := proxy.NewBillingAPI(publisher)
-	eventConsumer := message.NewEventConsumer(consumerConfig, envConfig, client, repository, createOrder, kitchenAPI, billingAPI)
+	eventConsumer := message.NewEventConsumer(consumerConfig, client, repository, createOrder, kitchenAPI, billingAPI)
 	return eventConsumer, func() {
 		cleanup()
 	}, nil
 }
 
 func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
-	consumerConfig := provider.NewConsumerConfig()
 	envConfig, err := provider.NewENV()
 	if err != nil {
 		return nil, nil, err
 	}
+	consumerConfig := provider.NewConsumerConfig(envConfig)
 	config, err := provider.NewAWSConfig()
 	if err != nil {
 		return nil, nil, err
@@ -111,18 +111,18 @@ func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
 	createOrder := create_order.NewService(repository, publisher)
 	kitchenAPI := proxy.NewKitchenAPI(repository, publisher)
 	billingAPI := proxy.NewBillingAPI(publisher)
-	commandConsumer := message.NewCommandConsumer(consumerConfig, envConfig, client, repository, createOrder, kitchenAPI, billingAPI)
+	commandConsumer := message.NewCommandConsumer(consumerConfig, client, repository, createOrder, kitchenAPI, billingAPI)
 	return commandConsumer, func() {
 		cleanup()
 	}, nil
 }
 
 func InitializeReplyConsumer() (*message.ReplyConsumer, func(), error) {
-	consumerConfig := provider.NewConsumerConfig()
 	envConfig, err := provider.NewENV()
 	if err != nil {
 		return nil, nil, err
 	}
+	consumerConfig := provider.NewConsumerConfig(envConfig)
 	config, err := provider.NewAWSConfig()
 	if err != nil {
 		return nil, nil, err
@@ -145,7 +145,7 @@ func InitializeReplyConsumer() (*message.ReplyConsumer, func(), error) {
 	createOrder := create_order.NewService(repository, publisher)
 	kitchenAPI := proxy.NewKitchenAPI(repository, publisher)
 	billingAPI := proxy.NewBillingAPI(publisher)
-	replyConsumer := message.NewReplyConsumer(consumerConfig, envConfig, client, repository, createOrder, kitchenAPI, billingAPI)
+	replyConsumer := message.NewReplyConsumer(consumerConfig, client, repository, createOrder, kitchenAPI, billingAPI)
 	return replyConsumer, func() {
 		cleanup()
 	}, nil
