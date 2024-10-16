@@ -1,4 +1,4 @@
-package create_bill
+package usecase
 
 import (
 	"context"

@@ -10,7 +10,7 @@ import (
 	"github.com/google/wire"
 	"github.com/tkame123/ddd-sample/app/billilng_api/adapter/message"
 	"github.com/tkame123/ddd-sample/app/billilng_api/di/provider"
-	"github.com/tkame123/ddd-sample/app/billilng_api/domain/service/create_bill"
+	"github.com/tkame123/ddd-sample/app/billilng_api/usecase"
 )
 
 // Injectors from wire.go:
@@ -34,7 +34,7 @@ func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
 		return nil, nil, err
 	}
 	publisher := message.NewEventPublisher(envConfig, snsClient)
-	createBill := create_bill.NewService(publisher)
+	createBill := usecase.NewService(publisher)
 	commandConsumer := message.NewCommandConsumer(consumerConfig, envConfig, client, createBill)
 	return commandConsumer, func() {
 	}, nil
@@ -42,4 +42,4 @@ func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
 
 // wire.go:
 
-var providerCommandConsumerSet = wire.NewSet(message.NewCommandConsumer, message.NewEventPublisher, create_bill.NewService, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewSQSClient, provider.NewSNSClient)
+var providerCommandConsumerSet = wire.NewSet(message.NewCommandConsumer, message.NewEventPublisher, usecase.NewService, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewSQSClient, provider.NewSNSClient)
