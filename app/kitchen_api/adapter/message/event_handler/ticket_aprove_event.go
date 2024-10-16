@@ -33,7 +33,12 @@ func (h *TicketApproveWhenTicketApproveHandler) Handler(ctx context.Context, mes
 		return fmt.Errorf("failed to parse order id: %w", err)
 	}
 
-	if err := h.svc.ApproveTicket(ctx, *id); err != nil {
+	ticketId, err := model.TicketIdParse(v.TicketId)
+	if err != nil {
+		return fmt.Errorf("failed to parse order id: %w", err)
+	}
+
+	if err := h.svc.ApproveTicket(ctx, *id, *ticketId); err != nil {
 		return err
 	}
 

@@ -3,9 +3,9 @@ package event_handler
 import (
 	"context"
 	"fmt"
+	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/model"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/port/domain_event"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/port/service"
-	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
 	"github.com/tkame123/ddd-sample/proto/message"
 )
 
@@ -32,8 +32,12 @@ func (h *TicketRejectWhenTicketRejectHandler) Handler(ctx context.Context, mes *
 	if err != nil {
 		return fmt.Errorf("failed to parse order id: %w", err)
 	}
+	ticketId, err := model.TicketIdParse(v.TicketId)
+	if err != nil {
+		return fmt.Errorf("failed to parse order id: %w", err)
+	}
 
-	if err := h.svc.RejectTicket(ctx, *id); err != nil {
+	if err := h.svc.RejectTicket(ctx, *id, *ticketId); err != nil {
 		return err
 	}
 

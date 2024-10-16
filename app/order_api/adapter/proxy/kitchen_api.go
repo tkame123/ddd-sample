@@ -53,8 +53,21 @@ func (k *KitchenAPI) CreateTicket(ctx context.Context, orderID model.OrderID) er
 }
 
 func (k *KitchenAPI) ApproveTicket(ctx context.Context, orderID model.OrderID, ticketID model.TicketID) error {
-	//	TODO: Implement this
+	//	TODO: Implement this（仮置き）
 	log.Println("KitchenAPI ApproveTicket")
+
+	command, err := model.CreateMessage(
+		&message.CommandTicketApprove{
+			OrderId:  orderID.String(),
+			TicketId: ticketID.UUID.String(),
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create message: %w", err)
+	}
+
+	k.pub.PublishMessages(ctx, []*message.Message{command})
+
 	return nil
 }
 
