@@ -17,6 +17,10 @@ func (s *s) RejectOrder(ctx context.Context, orderID model.OrderID) (model.Order
 		return uuid.Nil, err
 	}
 
+	if err := s.rep.OrderSave(ctx, order); err != nil {
+		return uuid.Nil, err
+	}
+
 	s.pub.PublishMessages(ctx, events)
 
 	return order.OrderID, nil
