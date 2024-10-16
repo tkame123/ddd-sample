@@ -63,20 +63,35 @@ func (e *CommandConsumer) Run() {
 	messagesChan := make(chan *types.Message, e.cfg.Event.MessageChan) // バッファ付きのチャネル
 
 	// Poller を起動
-	go consumer.PollMessages(
-		ctxPolling,
-		messagesChan,
-		e.cfg.Event.MaxMessages,
-		e.cfg.Event.PollingWaitTimeSecond,
-		e.cfg.Event.VisibilityTimeoutSecond,
-	)
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Println("Recovered from panic:", r)
+			}
+		}()
+
+		consumer.PollMessages(
+			ctxPolling,
+			messagesChan,
+			e.cfg.Event.MaxMessages,
+			e.cfg.Event.PollingWaitTimeSecond,
+			e.cfg.Event.VisibilityTimeoutSecond,
+		)
+	}()
 
 	// ワーカーを並列に起動
 	wgWorker := new(sync.WaitGroup)
 	for i := 0; i < e.cfg.Event.MaxWorkers; i++ {
 		wgWorker.Add(1)
 		worker := sqs_consumer.NewWorker(i, wgWorker, e.workerHandler)
-		go worker.Start(ctxWorker, messagesChan)
+		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					log.Println("Recovered from panic:", r)
+				}
+			}()
+			worker.Start(ctxWorker, messagesChan)
+		}()
 	}
 
 	// SIGINT (Ctrl+C) で停止
