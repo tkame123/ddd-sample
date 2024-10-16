@@ -12,22 +12,15 @@ import (
 	"log"
 )
 
-type topicArn = string
-
 type EventPublisher struct {
 	Client   *sns.Client
-	topicMap map[message.Type]topicArn
+	topicMap map[message.Type]provider.TopicArn
 }
 
-func NewEventPublisher(envCfg *provider.EnvConfig, client *sns.Client) domain_event.Publisher {
-	topicMap := map[message.Type]topicArn{
-		message.Type_TYPE_EVENT_CARD_AUTHORIZED:           envCfg.ArnTopicEventBillingCardAuthorized,
-		message.Type_TYPE_EVENT_CARD_AUTHORIZATION_FAILED: envCfg.ArnTopicEventBillingCardAuthorizeFailed,
-	}
-
+func NewEventPublisher(cfg *provider.PublisherConfig, client *sns.Client) domain_event.Publisher {
 	return &EventPublisher{
 		Client:   client,
-		topicMap: topicMap,
+		topicMap: cfg.TopicMap,
 	}
 }
 

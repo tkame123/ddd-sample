@@ -31,11 +31,12 @@ func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
 		return nil, nil, err
 	}
 	repository := database.NewRepository()
+	publisherConfig := provider.NewPublisherConfig(envConfig)
 	snsClient, err := provider.NewSNSClient(config)
 	if err != nil {
 		return nil, nil, err
 	}
-	publisher := message.NewEventPublisher(envConfig, snsClient)
+	publisher := message.NewEventPublisher(publisherConfig, snsClient)
 	createTicket := create_ticket.NewService(repository, publisher)
 	commandConsumer := message.NewCommandConsumer(consumerConfig, client, createTicket)
 	return commandConsumer, func() {
@@ -44,4 +45,4 @@ func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
 
 // wire.go:
 
-var providerCommandConsumerSet = wire.NewSet(message.NewCommandConsumer, create_ticket.NewService, message.NewEventPublisher, database.NewRepository, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewSQSClient, provider.NewSNSClient)
+var providerCommandConsumerSet = wire.NewSet(message.NewCommandConsumer, create_ticket.NewService, message.NewEventPublisher, database.NewRepository, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewPublisherConfig, provider.NewSQSClient, provider.NewSNSClient)

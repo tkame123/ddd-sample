@@ -16,20 +16,13 @@ type topicArn = string
 
 type EventPublisher struct {
 	Client   *sns.Client
-	topicMap map[message.Type]topicArn
+	topicMap map[message.Type]provider.TopicArn
 }
 
-func NewEventPublisher(envCfg *provider.EnvConfig, client *sns.Client) domain_event.Publisher {
-	topicMap := map[message.Type]topicArn{
-		message.Type_TYPE_EVENT_TICKET_CREATED:         envCfg.ArnTopicEventKitchenTicketCreated,
-		message.Type_TYPE_EVENT_TICKET_CREATION_FAILED: envCfg.ArnTopicEventKitchenTicketCreationFailed,
-		message.Type_TYPE_EVENT_TICKET_APPROVED:        envCfg.ArnTopicEventKitchenTicketApproved,
-		message.Type_TYPE_EVENT_TICKET_REJECTED:        envCfg.ArnTopicEventKitchenTicketRejected,
-	}
-
+func NewEventPublisher(cfg *provider.PublisherConfig, client *sns.Client) domain_event.Publisher {
 	return &EventPublisher{
 		Client:   client,
-		topicMap: topicMap,
+		topicMap: cfg.TopicMap,
 	}
 }
 

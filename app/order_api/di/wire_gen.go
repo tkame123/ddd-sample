@@ -32,6 +32,7 @@ func InitializeAPIServer() (connect.Server, func(), error) {
 		return connect.Server{}, nil, err
 	}
 	repository := database.NewRepository(client)
+	publisherConfig := provider.NewPublisherConfig(envConfig)
 	config, err := provider.NewAWSConfig()
 	if err != nil {
 		cleanup()
@@ -42,7 +43,7 @@ func InitializeAPIServer() (connect.Server, func(), error) {
 		cleanup()
 		return connect.Server{}, nil, err
 	}
-	publisher := message.NewEventPublisher(envConfig, snsClient)
+	publisher := message.NewEventPublisher(publisherConfig, snsClient)
 	server := connect.NewServer(repository, publisher)
 	return server, func() {
 		cleanup()
@@ -68,12 +69,13 @@ func InitializeEventConsumer() (*message.EventConsumer, func(), error) {
 		return nil, nil, err
 	}
 	repository := database.NewRepository(entClient)
+	publisherConfig := provider.NewPublisherConfig(envConfig)
 	snsClient, err := provider.NewSNSClient(config)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	publisher := message.NewEventPublisher(envConfig, snsClient)
+	publisher := message.NewEventPublisher(publisherConfig, snsClient)
 	createOrder := create_order.NewService(repository, publisher)
 	kitchenAPI := proxy.NewKitchenAPI(repository, publisher)
 	billingAPI := proxy.NewBillingAPI(publisher)
@@ -102,12 +104,13 @@ func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
 		return nil, nil, err
 	}
 	repository := database.NewRepository(entClient)
+	publisherConfig := provider.NewPublisherConfig(envConfig)
 	snsClient, err := provider.NewSNSClient(config)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	publisher := message.NewEventPublisher(envConfig, snsClient)
+	publisher := message.NewEventPublisher(publisherConfig, snsClient)
 	createOrder := create_order.NewService(repository, publisher)
 	kitchenAPI := proxy.NewKitchenAPI(repository, publisher)
 	billingAPI := proxy.NewBillingAPI(publisher)
@@ -136,12 +139,13 @@ func InitializeReplyConsumer() (*message.ReplyConsumer, func(), error) {
 		return nil, nil, err
 	}
 	repository := database.NewRepository(entClient)
+	publisherConfig := provider.NewPublisherConfig(envConfig)
 	snsClient, err := provider.NewSNSClient(config)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	publisher := message.NewEventPublisher(envConfig, snsClient)
+	publisher := message.NewEventPublisher(publisherConfig, snsClient)
 	createOrder := create_order.NewService(repository, publisher)
 	kitchenAPI := proxy.NewKitchenAPI(repository, publisher)
 	billingAPI := proxy.NewBillingAPI(publisher)
@@ -153,7 +157,7 @@ func InitializeReplyConsumer() (*message.ReplyConsumer, func(), error) {
 
 // wire.go:
 
-var providerServerSet = wire.NewSet(connect.NewServer, database.NewRepository, message.NewEventPublisher, provider.NewENV, provider.NewAWSConfig, provider.NewOrderApiDB, provider.NewSNSClient)
+var providerServerSet = wire.NewSet(connect.NewServer, database.NewRepository, message.NewEventPublisher, provider.NewENV, provider.NewAWSConfig, provider.NewPublisherConfig, provider.NewOrderApiDB, provider.NewSNSClient)
 
 var providerEventConsumerSet = wire.NewSet(message.NewEventConsumer, providerConsumerSet)
 
@@ -161,4 +165,4 @@ var providerCommandConsumerSet = wire.NewSet(message.NewCommandConsumer, provide
 
 var providerReplyConsumerSet = wire.NewSet(message.NewReplyConsumer, providerConsumerSet)
 
-var providerConsumerSet = wire.NewSet(message.NewEventPublisher, database.NewRepository, create_order.NewService, proxy.NewBillingAPI, proxy.NewKitchenAPI, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewOrderApiDB, provider.NewSQSClient, provider.NewSNSClient)
+var providerConsumerSet = wire.NewSet(message.NewEventPublisher, database.NewRepository, create_order.NewService, proxy.NewBillingAPI, proxy.NewKitchenAPI, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewPublisherConfig, provider.NewOrderApiDB, provider.NewSQSClient, provider.NewSNSClient)

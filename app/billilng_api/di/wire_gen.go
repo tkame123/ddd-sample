@@ -29,11 +29,12 @@ func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
+	publisherConfig := provider.NewPublisherConfig(envConfig)
 	snsClient, err := provider.NewSNSClient(config)
 	if err != nil {
 		return nil, nil, err
 	}
-	publisher := message.NewEventPublisher(envConfig, snsClient)
+	publisher := message.NewEventPublisher(publisherConfig, snsClient)
 	createBill := usecase.NewService(publisher)
 	commandConsumer := message.NewCommandConsumer(consumerConfig, client, createBill)
 	return commandConsumer, func() {
@@ -42,4 +43,4 @@ func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
 
 // wire.go:
 
-var providerCommandConsumerSet = wire.NewSet(message.NewCommandConsumer, message.NewEventPublisher, usecase.NewService, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewSQSClient, provider.NewSNSClient)
+var providerCommandConsumerSet = wire.NewSet(message.NewCommandConsumer, message.NewEventPublisher, usecase.NewService, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewPublisherConfig, provider.NewSQSClient, provider.NewSNSClient)

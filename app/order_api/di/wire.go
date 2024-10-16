@@ -22,6 +22,7 @@ var providerServerSet = wire.NewSet(
 
 	provider.NewENV,
 	provider.NewAWSConfig,
+	provider.NewPublisherConfig,
 	provider.NewOrderApiDB,
 	provider.NewSNSClient,
 )
@@ -51,6 +52,7 @@ var providerConsumerSet = wire.NewSet(
 	provider.NewENV,
 	provider.NewAWSConfig,
 	provider.NewConsumerConfig,
+	provider.NewPublisherConfig,
 	provider.NewOrderApiDB,
 	provider.NewSQSClient,
 	provider.NewSNSClient,
