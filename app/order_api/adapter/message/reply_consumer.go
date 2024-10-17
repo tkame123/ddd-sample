@@ -2,6 +2,7 @@ package message
 
 import (
 	"context"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
@@ -109,6 +110,14 @@ func (e *ReplyConsumer) Run() {
 }
 
 func (e *ReplyConsumer) workerHandler(ctx context.Context, msg *types.Message) error {
+	exists, err := e.rep.ProcessedMessageExists(ctx, *msg.MessageId)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return fmt.Errorf("message already processed: %s", *msg.MessageId)
+	}
+
 	mes, err := event_helper.ParseMessageFromSQS(msg)
 	if err != nil {
 		return err
@@ -119,10 +128,14 @@ func (e *ReplyConsumer) workerHandler(ctx context.Context, msg *types.Message) e
 		return err
 	}
 
+	err = e.rep.ProcessedMessageSave(ctx, *msg.MessageId)
+	if err != nil {
+		return fmt.Errorf("failed to save processed message: %w", err)
+	}
+
 	err = e.deleteMessage(ctx, msg)
 	if err != nil {
-		// TODO Transactional Outbox Patternの導入までは通知して手動対応ってなるのだろうか。。。
-		log.Printf("failed to delete message %v", err)
+		return fmt.Errorf("failed to delete message: %w", err)
 	}
 
 	return nil

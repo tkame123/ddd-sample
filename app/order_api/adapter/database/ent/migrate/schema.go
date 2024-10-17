@@ -61,11 +61,24 @@ var (
 			},
 		},
 	}
+	// ProcessedMessagesColumns holds the columns for the "processed_messages" table.
+	ProcessedMessagesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "message_id", Type: field.TypeString, Unique: true},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "datetime"}},
+	}
+	// ProcessedMessagesTable holds the schema information for the "processed_messages" table.
+	ProcessedMessagesTable = &schema.Table{
+		Name:       "processed_messages",
+		Columns:    ProcessedMessagesColumns,
+		PrimaryKey: []*schema.Column{ProcessedMessagesColumns[0]},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		CreateOrderSagaStatesTable,
 		OrdersTable,
 		OrderItemsTable,
+		ProcessedMessagesTable,
 	}
 )
 

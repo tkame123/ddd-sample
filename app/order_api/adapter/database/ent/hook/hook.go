@@ -45,6 +45,18 @@ func (f OrderItemFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OrderItemMutation", m)
 }
 
+// The ProcessedMessageFunc type is an adapter to allow the use of ordinary
+// function as ProcessedMessage mutator.
+type ProcessedMessageFunc func(context.Context, *ent.ProcessedMessageMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProcessedMessageFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ProcessedMessageMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProcessedMessageMutation", m)
+}
+
 // Condition is a hook condition function.
 type Condition func(context.Context, ent.Mutation) bool
 

@@ -19,6 +19,7 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/createordersagastate"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/orderitem"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/processedmessage"
 )
 
 // Client is the client that holds all ent builders.
@@ -32,6 +33,8 @@ type Client struct {
 	Order *OrderClient
 	// OrderItem is the client for interacting with the OrderItem builders.
 	OrderItem *OrderItemClient
+	// ProcessedMessage is the client for interacting with the ProcessedMessage builders.
+	ProcessedMessage *ProcessedMessageClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -46,6 +49,7 @@ func (c *Client) init() {
 	c.CreateOrderSagaState = NewCreateOrderSagaStateClient(c.config)
 	c.Order = NewOrderClient(c.config)
 	c.OrderItem = NewOrderItemClient(c.config)
+	c.ProcessedMessage = NewProcessedMessageClient(c.config)
 }
 
 type (
@@ -141,6 +145,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		CreateOrderSagaState: NewCreateOrderSagaStateClient(cfg),
 		Order:                NewOrderClient(cfg),
 		OrderItem:            NewOrderItemClient(cfg),
+		ProcessedMessage:     NewProcessedMessageClient(cfg),
 	}, nil
 }
 
@@ -163,6 +168,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		CreateOrderSagaState: NewCreateOrderSagaStateClient(cfg),
 		Order:                NewOrderClient(cfg),
 		OrderItem:            NewOrderItemClient(cfg),
+		ProcessedMessage:     NewProcessedMessageClient(cfg),
 	}, nil
 }
 
@@ -194,6 +200,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.CreateOrderSagaState.Use(hooks...)
 	c.Order.Use(hooks...)
 	c.OrderItem.Use(hooks...)
+	c.ProcessedMessage.Use(hooks...)
 }
 
 // Intercept adds the query interceptors to all the entity clients.
@@ -202,6 +209,7 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.CreateOrderSagaState.Intercept(interceptors...)
 	c.Order.Intercept(interceptors...)
 	c.OrderItem.Intercept(interceptors...)
+	c.ProcessedMessage.Intercept(interceptors...)
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -213,6 +221,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Order.mutate(ctx, m)
 	case *OrderItemMutation:
 		return c.OrderItem.mutate(ctx, m)
+	case *ProcessedMessageMutation:
+		return c.ProcessedMessage.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -649,12 +659,145 @@ func (c *OrderItemClient) mutate(ctx context.Context, m *OrderItemMutation) (Val
 	}
 }
 
+// ProcessedMessageClient is a client for the ProcessedMessage schema.
+type ProcessedMessageClient struct {
+	config
+}
+
+// NewProcessedMessageClient returns a client for the ProcessedMessage from the given config.
+func NewProcessedMessageClient(c config) *ProcessedMessageClient {
+	return &ProcessedMessageClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `processedmessage.Hooks(f(g(h())))`.
+func (c *ProcessedMessageClient) Use(hooks ...Hook) {
+	c.hooks.ProcessedMessage = append(c.hooks.ProcessedMessage, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `processedmessage.Intercept(f(g(h())))`.
+func (c *ProcessedMessageClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ProcessedMessage = append(c.inters.ProcessedMessage, interceptors...)
+}
+
+// Create returns a builder for creating a ProcessedMessage entity.
+func (c *ProcessedMessageClient) Create() *ProcessedMessageCreate {
+	mutation := newProcessedMessageMutation(c.config, OpCreate)
+	return &ProcessedMessageCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ProcessedMessage entities.
+func (c *ProcessedMessageClient) CreateBulk(builders ...*ProcessedMessageCreate) *ProcessedMessageCreateBulk {
+	return &ProcessedMessageCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ProcessedMessageClient) MapCreateBulk(slice any, setFunc func(*ProcessedMessageCreate, int)) *ProcessedMessageCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ProcessedMessageCreateBulk{err: fmt.Errorf("calling to ProcessedMessageClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ProcessedMessageCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ProcessedMessageCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ProcessedMessage.
+func (c *ProcessedMessageClient) Update() *ProcessedMessageUpdate {
+	mutation := newProcessedMessageMutation(c.config, OpUpdate)
+	return &ProcessedMessageUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProcessedMessageClient) UpdateOne(pm *ProcessedMessage) *ProcessedMessageUpdateOne {
+	mutation := newProcessedMessageMutation(c.config, OpUpdateOne, withProcessedMessage(pm))
+	return &ProcessedMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProcessedMessageClient) UpdateOneID(id int) *ProcessedMessageUpdateOne {
+	mutation := newProcessedMessageMutation(c.config, OpUpdateOne, withProcessedMessageID(id))
+	return &ProcessedMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ProcessedMessage.
+func (c *ProcessedMessageClient) Delete() *ProcessedMessageDelete {
+	mutation := newProcessedMessageMutation(c.config, OpDelete)
+	return &ProcessedMessageDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ProcessedMessageClient) DeleteOne(pm *ProcessedMessage) *ProcessedMessageDeleteOne {
+	return c.DeleteOneID(pm.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ProcessedMessageClient) DeleteOneID(id int) *ProcessedMessageDeleteOne {
+	builder := c.Delete().Where(processedmessage.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProcessedMessageDeleteOne{builder}
+}
+
+// Query returns a query builder for ProcessedMessage.
+func (c *ProcessedMessageClient) Query() *ProcessedMessageQuery {
+	return &ProcessedMessageQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeProcessedMessage},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a ProcessedMessage entity by its id.
+func (c *ProcessedMessageClient) Get(ctx context.Context, id int) (*ProcessedMessage, error) {
+	return c.Query().Where(processedmessage.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProcessedMessageClient) GetX(ctx context.Context, id int) *ProcessedMessage {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ProcessedMessageClient) Hooks() []Hook {
+	return c.hooks.ProcessedMessage
+}
+
+// Interceptors returns the client interceptors.
+func (c *ProcessedMessageClient) Interceptors() []Interceptor {
+	return c.inters.ProcessedMessage
+}
+
+func (c *ProcessedMessageClient) mutate(ctx context.Context, m *ProcessedMessageMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ProcessedMessageCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ProcessedMessageUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ProcessedMessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ProcessedMessageDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ProcessedMessage mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		CreateOrderSagaState, Order, OrderItem []ent.Hook
+		CreateOrderSagaState, Order, OrderItem, ProcessedMessage []ent.Hook
 	}
 	inters struct {
-		CreateOrderSagaState, Order, OrderItem []ent.Interceptor
+		CreateOrderSagaState, Order, OrderItem, ProcessedMessage []ent.Interceptor
 	}
 )

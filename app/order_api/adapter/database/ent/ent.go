@@ -15,6 +15,7 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/createordersagastate"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/orderitem"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/processedmessage"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -78,6 +79,7 @@ func checkColumn(table, column string) error {
 			createordersagastate.Table: createordersagastate.ValidColumn,
 			order.Table:                order.ValidColumn,
 			orderitem.Table:            orderitem.ValidColumn,
+			processedmessage.Table:     processedmessage.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

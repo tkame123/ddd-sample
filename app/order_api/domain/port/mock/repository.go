@@ -94,6 +94,35 @@ func (mr *MockRepositoryMockRecorder) OrderSave(arg0, arg1 interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OrderSave", reflect.TypeOf((*MockRepository)(nil).OrderSave), arg0, arg1)
 }
 
+// ProcessedMessageExists mocks base method.
+func (m *MockRepository) ProcessedMessageExists(arg0 context.Context, arg1 string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ProcessedMessageExists", arg0, arg1)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ProcessedMessageExists indicates an expected call of ProcessedMessageExists.
+func (mr *MockRepositoryMockRecorder) ProcessedMessageExists(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProcessedMessageExists", reflect.TypeOf((*MockRepository)(nil).ProcessedMessageExists), arg0, arg1)
+}
+
+// ProcessedMessageSave mocks base method.
+func (m *MockRepository) ProcessedMessageSave(arg0 context.Context, arg1 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ProcessedMessageSave", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ProcessedMessageSave indicates an expected call of ProcessedMessageSave.
+func (mr *MockRepositoryMockRecorder) ProcessedMessageSave(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProcessedMessageSave", reflect.TypeOf((*MockRepository)(nil).ProcessedMessageSave), arg0, arg1)
+}
+
 // MockCreateOrderSagaState is a mock of CreateOrderSagaState interface.
 type MockCreateOrderSagaState struct {
 	ctrl     *gomock.Controller
