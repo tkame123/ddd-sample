@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	event_handler2 "github.com/tkame123/ddd-sample/app/kitchen_api/adapter/message/event_handler"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/di/provider"
+	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/port/repository"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/domain/port/service"
 	"github.com/tkame123/ddd-sample/lib/event_helper"
 	"github.com/tkame123/ddd-sample/lib/sqs_consumer"
@@ -23,17 +24,20 @@ type CommandConsumer struct {
 	cfg       *provider.ConsumerConfig
 	sqsClient *sqs.Client
 	queueUrl  string
+	rep       repository.Repository
 	svc       service.CreateTicket
 }
 
 func NewCommandConsumer(
 	cfg *provider.ConsumerConfig,
 	sqsClient *sqs.Client,
+	rep repository.Repository,
 	svc service.CreateTicket,
 ) *CommandConsumer {
 	return &CommandConsumer{
 		cfg:       cfg,
 		sqsClient: sqsClient,
+		rep:       rep,
 		queueUrl:  cfg.Command.QueueUrl,
 		svc:       svc,
 	}
@@ -100,6 +104,14 @@ func (e *CommandConsumer) Run() {
 }
 
 func (e *CommandConsumer) workerHandler(ctx context.Context, msg *types.Message) error {
+	exists, err := e.rep.ProcessedMessageExists(ctx, *msg.MessageId)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return fmt.Errorf("message already processed: %s", *msg.MessageId)
+	}
+
 	ev, err := event_helper.ParseMessageFromSQS(msg)
 	if err != nil {
 		return err
@@ -110,10 +122,14 @@ func (e *CommandConsumer) workerHandler(ctx context.Context, msg *types.Message)
 		return err
 	}
 
+	err = e.rep.ProcessedMessageSave(ctx, *msg.MessageId)
+	if err != nil {
+		return fmt.Errorf("failed to save processed message: %w", err)
+	}
+
 	err = e.deleteMessage(ctx, msg)
 	if err != nil {
-		// TODO Transactional Outbox Patternの導入までは通知して手動対応ってなるのだろうか。。。
-		log.Printf("failed to delete message %v", err)
+		return fmt.Errorf("failed to delete message: %w", err)
 	}
 
 	return nil

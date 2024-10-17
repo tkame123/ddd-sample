@@ -8,6 +8,7 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/createordersagastate"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/orderitem"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/processedmessage"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/schema"
 )
 
@@ -63,4 +64,10 @@ func init() {
 	orderitem.DefaultUpdatedAt = orderitemDescUpdatedAt.Default.(func() time.Time)
 	// orderitem.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	orderitem.UpdateDefaultUpdatedAt = orderitemDescUpdatedAt.UpdateDefault.(func() time.Time)
+	processedmessageFields := schema.ProcessedMessage{}.Fields()
+	_ = processedmessageFields
+	// processedmessageDescCreatedAt is the schema descriptor for created_at field.
+	processedmessageDescCreatedAt := processedmessageFields[1].Descriptor()
+	// processedmessage.DefaultCreatedAt holds the default value on creation for the created_at field.
+	processedmessage.DefaultCreatedAt = processedmessageDescCreatedAt.Default.(func() time.Time)
 }

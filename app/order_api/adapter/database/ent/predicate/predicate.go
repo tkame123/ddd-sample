@@ -14,3 +14,6 @@ type Order func(*sql.Selector)
 
 // OrderItem is the predicate function for orderitem builders.
 type OrderItem func(*sql.Selector)
+
+// ProcessedMessage is the predicate function for processedmessage builders.
+type ProcessedMessage func(*sql.Selector)

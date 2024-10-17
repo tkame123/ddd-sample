@@ -18,6 +18,8 @@ type Tx struct {
 	Order *OrderClient
 	// OrderItem is the client for interacting with the OrderItem builders.
 	OrderItem *OrderItemClient
+	// ProcessedMessage is the client for interacting with the ProcessedMessage builders.
+	ProcessedMessage *ProcessedMessageClient
 
 	// lazily loaded.
 	client     *Client
@@ -152,6 +154,7 @@ func (tx *Tx) init() {
 	tx.CreateOrderSagaState = NewCreateOrderSagaStateClient(tx.config)
 	tx.Order = NewOrderClient(tx.config)
 	tx.OrderItem = NewOrderItemClient(tx.config)
+	tx.ProcessedMessage = NewProcessedMessageClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
