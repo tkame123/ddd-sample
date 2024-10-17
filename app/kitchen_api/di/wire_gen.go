@@ -38,7 +38,7 @@ func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
 	}
 	publisher := message.NewEventPublisher(publisherConfig, snsClient)
 	createTicket := create_ticket.NewService(repository, publisher)
-	commandConsumer := message.NewCommandConsumer(consumerConfig, client, createTicket)
+	commandConsumer := message.NewCommandConsumer(consumerConfig, client, repository, createTicket)
 	return commandConsumer, func() {
 	}, nil
 }
