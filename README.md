@@ -49,7 +49,7 @@ Any を使用: 動的なメッセージタイプを扱い、受信時に適切�
 
 ## OrderAPI
 
-### ORM: Ent
+### ORM: ent.
 
 https://entgo.io/ja/
 
