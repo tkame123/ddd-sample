@@ -22,7 +22,7 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 	ctx := context.Background()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockRepo := mock.NewMockRepository(mockCtrl)
+
 	mockKitchenAPI := mock.NewMockKitchenAPI(mockCtrl)
 	mockBillingAPI := mock.NewMockBillingAPI(mockCtrl)
 	mockOrderSVC := mock.NewMockCreateOrder(mockCtrl)
@@ -45,11 +45,10 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 	// http://www.webgraphviz.com/
 	fmt.Println(saga.GetFSMVisualize())
 
-	mockRepo.EXPECT().CreateOrderSagaStateSave(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
-	mockKitchenAPI.EXPECT().CreateTicket(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
-	mockKitchenAPI.EXPECT().ApproveTicket(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
-	mockBillingAPI.EXPECT().AuthorizeCard(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
-	mockOrderSVC.EXPECT().ApproveOrder(gomock.Any(), gomock.Any()).AnyTimes()
+	mockKitchenAPI.EXPECT().CreateTicket(gomock.Any(), gomock.Any()).MinTimes(1).Return(nil)
+	mockKitchenAPI.EXPECT().ApproveTicket(gomock.Any(), gomock.Any(), gomock.Any()).MinTimes(1).Return(nil)
+	mockBillingAPI.EXPECT().AuthorizeCard(gomock.Any(), gomock.Any()).MinTimes(1).Return(nil)
+	mockOrderSVC.EXPECT().ApproveOrder(gomock.Any(), gomock.Any()).MinTimes(1)
 
 	err = saga.Event(ctx,
 		eventCreateHelper(
@@ -119,7 +118,7 @@ func TestCreateOrderSaga_OrderRejectedDutToTicketCreationFailed(t *testing.T) {
 	ctx := context.Background()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockRepo := mock.NewMockRepository(mockCtrl)
+
 	mockKitchenAPI := mock.NewMockKitchenAPI(mockCtrl)
 	mockBillingAPI := mock.NewMockBillingAPI(mockCtrl)
 	mockOrderSVC := mock.NewMockCreateOrder(mockCtrl)
@@ -141,8 +140,7 @@ func TestCreateOrderSaga_OrderRejectedDutToTicketCreationFailed(t *testing.T) {
 	// http://www.webgraphviz.com/
 	fmt.Println(saga.GetFSMVisualize())
 
-	mockRepo.EXPECT().CreateOrderSagaStateSave(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
-	mockKitchenAPI.EXPECT().CreateTicket(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
+	mockKitchenAPI.EXPECT().CreateTicket(gomock.Any(), gomock.Any()).MinTimes(1).Return(nil)
 
 	err = saga.Event(ctx,
 		eventCreateHelper(
@@ -171,7 +169,7 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 	ctx := context.Background()
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
-	mockRepo := mock.NewMockRepository(mockCtrl)
+
 	mockKitchenAPI := mock.NewMockKitchenAPI(mockCtrl)
 	mockBillingAPI := mock.NewMockBillingAPI(mockCtrl)
 	mockOrderSVC := mock.NewMockCreateOrder(mockCtrl)
@@ -193,11 +191,10 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 	// http://www.webgraphviz.com/
 	fmt.Println(saga.GetFSMVisualize())
 
-	mockRepo.EXPECT().CreateOrderSagaStateSave(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
-	mockKitchenAPI.EXPECT().CreateTicket(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
-	mockKitchenAPI.EXPECT().RejectTicket(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
-	mockBillingAPI.EXPECT().AuthorizeCard(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
-	mockOrderSVC.EXPECT().RejectOrder(gomock.Any(), gomock.Any()).AnyTimes()
+	mockKitchenAPI.EXPECT().CreateTicket(gomock.Any(), gomock.Any()).MinTimes(1).Return(nil)
+	mockKitchenAPI.EXPECT().RejectTicket(gomock.Any(), gomock.Any(), gomock.Any()).MinTimes(1).Return(nil)
+	mockBillingAPI.EXPECT().AuthorizeCard(gomock.Any(), gomock.Any()).MinTimes(1).Return(nil)
+	mockOrderSVC.EXPECT().RejectOrder(gomock.Any(), gomock.Any()).MinTimes(1)
 
 	err = saga.Event(ctx,
 		eventCreateHelper(
