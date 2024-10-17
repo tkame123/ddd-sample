@@ -8,6 +8,7 @@ package di
 
 import (
 	"github.com/google/wire"
+	"github.com/tkame123/ddd-sample/app/billilng_api/adapter/database"
 	"github.com/tkame123/ddd-sample/app/billilng_api/adapter/message"
 	"github.com/tkame123/ddd-sample/app/billilng_api/di/provider"
 	"github.com/tkame123/ddd-sample/app/billilng_api/usecase"
@@ -29,6 +30,7 @@ func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
+	repository := database.NewRepository()
 	publisherConfig := provider.NewPublisherConfig(envConfig)
 	snsClient, err := provider.NewSNSClient(config)
 	if err != nil {
@@ -36,11 +38,11 @@ func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
 	}
 	publisher := message.NewEventPublisher(publisherConfig, snsClient)
 	createBill := usecase.NewService(publisher)
-	commandConsumer := message.NewCommandConsumer(consumerConfig, client, createBill)
+	commandConsumer := message.NewCommandConsumer(consumerConfig, client, repository, createBill)
 	return commandConsumer, func() {
 	}, nil
 }
 
 // wire.go:
 
-var providerCommandConsumerSet = wire.NewSet(message.NewCommandConsumer, message.NewEventPublisher, usecase.NewService, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewPublisherConfig, provider.NewSQSClient, provider.NewSNSClient)
+var providerCommandConsumerSet = wire.NewSet(message.NewCommandConsumer, message.NewEventPublisher, usecase.NewService, database.NewRepository, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewPublisherConfig, provider.NewSQSClient, provider.NewSNSClient)
