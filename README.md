@@ -61,6 +61,13 @@ gRPCとgrpc gateewayを自分で対応するより全然便利。。。
 
 https://connectrpc.com/
 
+### FSM: looplab/fsm
+
+https://github.com/looplab/fsm
+
+sagaの状態管理につかってみたけど、機能が方法で使いやすい
+
+
 ## KitchenAPI
 
 ### ORM: 未定
