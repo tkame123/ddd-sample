@@ -44,6 +44,27 @@ func (ou *OrderUpdate) SetNillableStatus(o *order.Status) *OrderUpdate {
 	return ou
 }
 
+// SetVersion sets the "version" field.
+func (ou *OrderUpdate) SetVersion(i int64) *OrderUpdate {
+	ou.mutation.ResetVersion()
+	ou.mutation.SetVersion(i)
+	return ou
+}
+
+// SetNillableVersion sets the "version" field if the given value is not nil.
+func (ou *OrderUpdate) SetNillableVersion(i *int64) *OrderUpdate {
+	if i != nil {
+		ou.SetVersion(*i)
+	}
+	return ou
+}
+
+// AddVersion adds i to the "version" field.
+func (ou *OrderUpdate) AddVersion(i int64) *OrderUpdate {
+	ou.mutation.AddVersion(i)
+	return ou
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (ou *OrderUpdate) SetCreatedAt(t time.Time) *OrderUpdate {
 	ou.mutation.SetCreatedAt(t)
@@ -166,6 +187,12 @@ func (ou *OrderUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := ou.mutation.Status(); ok {
 		_spec.SetField(order.FieldStatus, field.TypeEnum, value)
 	}
+	if value, ok := ou.mutation.Version(); ok {
+		_spec.SetField(order.FieldVersion, field.TypeInt64, value)
+	}
+	if value, ok := ou.mutation.AddedVersion(); ok {
+		_spec.AddField(order.FieldVersion, field.TypeInt64, value)
+	}
 	if value, ok := ou.mutation.CreatedAt(); ok {
 		_spec.SetField(order.FieldCreatedAt, field.TypeTime, value)
 	}
@@ -248,6 +275,27 @@ func (ouo *OrderUpdateOne) SetNillableStatus(o *order.Status) *OrderUpdateOne {
 	if o != nil {
 		ouo.SetStatus(*o)
 	}
+	return ouo
+}
+
+// SetVersion sets the "version" field.
+func (ouo *OrderUpdateOne) SetVersion(i int64) *OrderUpdateOne {
+	ouo.mutation.ResetVersion()
+	ouo.mutation.SetVersion(i)
+	return ouo
+}
+
+// SetNillableVersion sets the "version" field if the given value is not nil.
+func (ouo *OrderUpdateOne) SetNillableVersion(i *int64) *OrderUpdateOne {
+	if i != nil {
+		ouo.SetVersion(*i)
+	}
+	return ouo
+}
+
+// AddVersion adds i to the "version" field.
+func (ouo *OrderUpdateOne) AddVersion(i int64) *OrderUpdateOne {
+	ouo.mutation.AddVersion(i)
 	return ouo
 }
 
@@ -402,6 +450,12 @@ func (ouo *OrderUpdateOne) sqlSave(ctx context.Context) (_node *Order, err error
 	}
 	if value, ok := ouo.mutation.Status(); ok {
 		_spec.SetField(order.FieldStatus, field.TypeEnum, value)
+	}
+	if value, ok := ouo.mutation.Version(); ok {
+		_spec.SetField(order.FieldVersion, field.TypeInt64, value)
+	}
+	if value, ok := ouo.mutation.AddedVersion(); ok {
+		_spec.AddField(order.FieldVersion, field.TypeInt64, value)
 	}
 	if value, ok := ouo.mutation.CreatedAt(); ok {
 		_spec.SetField(order.FieldCreatedAt, field.TypeTime, value)

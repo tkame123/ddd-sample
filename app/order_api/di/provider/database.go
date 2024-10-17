@@ -18,5 +18,9 @@ func NewOrderApiDB(env *EnvConfig) (*ent.Client, func(), error) {
 		}
 	}
 
+	if env.DbDebug {
+		client = client.Debug()
+	}
+
 	return client, cleanup, nil
 }

@@ -7,7 +7,8 @@ import (
 
 type EnvConfig struct {
 	// DB
-	DSN string `env:"ORDER_API_DSN"`
+	DbDebug bool   `env:"DB_DEBUG" envDefault:"false"`
+	DSN     string `env:"ORDER_API_DSN"`
 
 	// SNS
 	ArnTopicEventOrderOrderCreated      string `env:"TOPIC_ARN_EVENT_ORDER_ORDER_CREATED"`
