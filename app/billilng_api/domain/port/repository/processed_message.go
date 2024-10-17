@@ -5,6 +5,6 @@ import (
 )
 
 type ProcessedMessage interface {
-	ProcessedMessageExists(ctx context.Context, messageID string) (bool, error)
 	ProcessedMessageSave(ctx context.Context, messageID string) error
+	ProcessedMessageDelete(ctx context.Context, messageID string) error
 }

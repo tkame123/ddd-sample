@@ -2,6 +2,7 @@ package message
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
@@ -104,32 +105,38 @@ func (e *CommandConsumer) Run() {
 }
 
 func (e *CommandConsumer) workerHandler(ctx context.Context, msg *types.Message) error {
-	exists, err := e.rep.ProcessedMessageExists(ctx, *msg.MessageId)
-	if err != nil {
-		return err
-	}
-	if exists {
-		return fmt.Errorf("message already processed: %s", *msg.MessageId)
-	}
-
-	ev, err := event_helper.ParseMessageFromSQS(msg)
-	if err != nil {
-		return err
+	rollback := func(ctx context.Context, MessageId string, cause error) error {
+		err := e.rep.ProcessedMessageDelete(ctx, MessageId)
+		if err != nil {
+			return fmt.Errorf("failed to rollback: %w", errors.Join(cause, err))
+		}
+		return nil
 	}
 
-	err = e.processEvent(ctx, ev)
+	err := e.rep.ProcessedMessageSave(ctx, *msg.MessageId)
 	if err != nil {
-		return err
+		// TODO: Databaseの実装が確定したらExistsをエラーハンドリングをする
+		return fmt.Errorf("failed to save processed message: %w", err)
+	}
+
+	mes, err := event_helper.ParseMessageFromSQS(msg)
+	if err != nil {
+		return rollback(ctx, *msg.MessageId, err)
+	}
+
+	err = e.processEvent(ctx, mes)
+	if err != nil {
+		return rollback(ctx, *msg.MessageId, err)
 	}
 
 	err = e.rep.ProcessedMessageSave(ctx, *msg.MessageId)
 	if err != nil {
-		return fmt.Errorf("failed to save processed message: %w", err)
+		return rollback(ctx, *msg.MessageId, fmt.Errorf("failed to save processed message: %w", err))
 	}
 
 	err = e.deleteMessage(ctx, msg)
 	if err != nil {
-		return fmt.Errorf("failed to delete message: %w", err)
+		return rollback(ctx, *msg.MessageId, fmt.Errorf("failed to delete message: %w", err))
 	}
 
 	return nil

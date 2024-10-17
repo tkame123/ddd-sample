@@ -2,10 +2,12 @@ package message
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent"
 	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
@@ -110,32 +112,39 @@ func (e *EventConsumer) Run() {
 }
 
 func (e *EventConsumer) workerHandler(ctx context.Context, msg *types.Message) error {
-	exists, err := e.rep.ProcessedMessageExists(ctx, *msg.MessageId)
-	if err != nil {
-		return err
+	rollback := func(ctx context.Context, MessageId string, cause error) error {
+		err := e.rep.ProcessedMessageDelete(ctx, MessageId)
+		if err != nil {
+			return fmt.Errorf("failed to rollback: %w", errors.Join(cause, err))
+		}
+		return nil
 	}
-	if exists {
+
+	err := e.rep.ProcessedMessageSave(ctx, *msg.MessageId)
+	if ent.IsConstraintError(err) {
 		return fmt.Errorf("message already processed: %s", *msg.MessageId)
+	} else if err != nil {
+		return fmt.Errorf("failed to save processed message: %w", err)
 	}
 
 	mes, err := event_helper.ParseMessageFromSQS(msg)
 	if err != nil {
-		return err
+		return rollback(ctx, *msg.MessageId, err)
 	}
 
 	err = e.processEvent(ctx, mes)
 	if err != nil {
-		return err
+		return rollback(ctx, *msg.MessageId, err)
 	}
 
 	err = e.rep.ProcessedMessageSave(ctx, *msg.MessageId)
 	if err != nil {
-		return fmt.Errorf("failed to save processed message: %w", err)
+		return rollback(ctx, *msg.MessageId, fmt.Errorf("failed to save processed message: %w", err))
 	}
 
 	err = e.deleteMessage(ctx, msg)
 	if err != nil {
-		return fmt.Errorf("failed to delete message: %w", err)
+		return rollback(ctx, *msg.MessageId, fmt.Errorf("failed to delete message: %w", err))
 	}
 
 	return nil

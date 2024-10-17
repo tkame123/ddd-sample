@@ -94,19 +94,18 @@ func (mr *MockRepositoryMockRecorder) OrderSave(arg0, arg1 interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OrderSave", reflect.TypeOf((*MockRepository)(nil).OrderSave), arg0, arg1)
 }
 
-// ProcessedMessageExists mocks base method.
-func (m *MockRepository) ProcessedMessageExists(arg0 context.Context, arg1 string) (bool, error) {
+// ProcessedMessageDelete mocks base method.
+func (m *MockRepository) ProcessedMessageDelete(arg0 context.Context, arg1 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ProcessedMessageExists", arg0, arg1)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "ProcessedMessageDelete", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
-// ProcessedMessageExists indicates an expected call of ProcessedMessageExists.
-func (mr *MockRepositoryMockRecorder) ProcessedMessageExists(arg0, arg1 interface{}) *gomock.Call {
+// ProcessedMessageDelete indicates an expected call of ProcessedMessageDelete.
+func (mr *MockRepositoryMockRecorder) ProcessedMessageDelete(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProcessedMessageExists", reflect.TypeOf((*MockRepository)(nil).ProcessedMessageExists), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProcessedMessageDelete", reflect.TypeOf((*MockRepository)(nil).ProcessedMessageDelete), arg0, arg1)
 }
 
 // ProcessedMessageSave mocks base method.
