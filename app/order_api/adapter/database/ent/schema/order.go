@@ -29,6 +29,11 @@ func (Order) Fields() []ent.Field {
 				model.OrderStatus_Approved,
 				model.OrderStatus_Rejected,
 			),
+		field.Int64("version").
+			DefaultFunc(func() int64 {
+				return time.Now().UnixNano()
+			}).
+			Comment("Unix time of when the latest update occurred"),
 		field.Time("created_at").
 			Default(time.Now).
 			SchemaType(map[string]string{

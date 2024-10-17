@@ -31,6 +31,20 @@ func (oc *OrderCreate) SetStatus(o order.Status) *OrderCreate {
 	return oc
 }
 
+// SetVersion sets the "version" field.
+func (oc *OrderCreate) SetVersion(i int64) *OrderCreate {
+	oc.mutation.SetVersion(i)
+	return oc
+}
+
+// SetNillableVersion sets the "version" field if the given value is not nil.
+func (oc *OrderCreate) SetNillableVersion(i *int64) *OrderCreate {
+	if i != nil {
+		oc.SetVersion(*i)
+	}
+	return oc
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (oc *OrderCreate) SetCreatedAt(t time.Time) *OrderCreate {
 	oc.mutation.SetCreatedAt(t)
@@ -115,6 +129,10 @@ func (oc *OrderCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (oc *OrderCreate) defaults() {
+	if _, ok := oc.mutation.Version(); !ok {
+		v := order.DefaultVersion()
+		oc.mutation.SetVersion(v)
+	}
 	if _, ok := oc.mutation.CreatedAt(); !ok {
 		v := order.DefaultCreatedAt()
 		oc.mutation.SetCreatedAt(v)
@@ -134,6 +152,9 @@ func (oc *OrderCreate) check() error {
 		if err := order.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Order.status": %w`, err)}
 		}
+	}
+	if _, ok := oc.mutation.Version(); !ok {
+		return &ValidationError{Name: "version", err: errors.New(`ent: missing required field "Order.version"`)}
 	}
 	if _, ok := oc.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Order.created_at"`)}
@@ -180,6 +201,10 @@ func (oc *OrderCreate) createSpec() (*Order, *sqlgraph.CreateSpec) {
 	if value, ok := oc.mutation.Status(); ok {
 		_spec.SetField(order.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
+	}
+	if value, ok := oc.mutation.Version(); ok {
+		_spec.SetField(order.FieldVersion, field.TypeInt64, value)
+		_node.Version = value
 	}
 	if value, ok := oc.mutation.CreatedAt(); ok {
 		_spec.SetField(order.FieldCreatedAt, field.TypeTime, value)
@@ -269,6 +294,24 @@ func (u *OrderUpsert) UpdateStatus() *OrderUpsert {
 	return u
 }
 
+// SetVersion sets the "version" field.
+func (u *OrderUpsert) SetVersion(v int64) *OrderUpsert {
+	u.Set(order.FieldVersion, v)
+	return u
+}
+
+// UpdateVersion sets the "version" field to the value that was provided on create.
+func (u *OrderUpsert) UpdateVersion() *OrderUpsert {
+	u.SetExcluded(order.FieldVersion)
+	return u
+}
+
+// AddVersion adds v to the "version" field.
+func (u *OrderUpsert) AddVersion(v int64) *OrderUpsert {
+	u.Add(order.FieldVersion, v)
+	return u
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (u *OrderUpsert) SetCreatedAt(v time.Time) *OrderUpsert {
 	u.Set(order.FieldCreatedAt, v)
@@ -352,6 +395,27 @@ func (u *OrderUpsertOne) SetStatus(v order.Status) *OrderUpsertOne {
 func (u *OrderUpsertOne) UpdateStatus() *OrderUpsertOne {
 	return u.Update(func(s *OrderUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetVersion sets the "version" field.
+func (u *OrderUpsertOne) SetVersion(v int64) *OrderUpsertOne {
+	return u.Update(func(s *OrderUpsert) {
+		s.SetVersion(v)
+	})
+}
+
+// AddVersion adds v to the "version" field.
+func (u *OrderUpsertOne) AddVersion(v int64) *OrderUpsertOne {
+	return u.Update(func(s *OrderUpsert) {
+		s.AddVersion(v)
+	})
+}
+
+// UpdateVersion sets the "version" field to the value that was provided on create.
+func (u *OrderUpsertOne) UpdateVersion() *OrderUpsertOne {
+	return u.Update(func(s *OrderUpsert) {
+		s.UpdateVersion()
 	})
 }
 
@@ -609,6 +673,27 @@ func (u *OrderUpsertBulk) SetStatus(v order.Status) *OrderUpsertBulk {
 func (u *OrderUpsertBulk) UpdateStatus() *OrderUpsertBulk {
 	return u.Update(func(s *OrderUpsert) {
 		s.UpdateStatus()
+	})
+}
+
+// SetVersion sets the "version" field.
+func (u *OrderUpsertBulk) SetVersion(v int64) *OrderUpsertBulk {
+	return u.Update(func(s *OrderUpsert) {
+		s.SetVersion(v)
+	})
+}
+
+// AddVersion adds v to the "version" field.
+func (u *OrderUpsertBulk) AddVersion(v int64) *OrderUpsertBulk {
+	return u.Update(func(s *OrderUpsert) {
+		s.AddVersion(v)
+	})
+}
+
+// UpdateVersion sets the "version" field to the value that was provided on create.
+func (u *OrderUpsertBulk) UpdateVersion() *OrderUpsertBulk {
+	return u.Update(func(s *OrderUpsert) {
+		s.UpdateVersion()
 	})
 }
 

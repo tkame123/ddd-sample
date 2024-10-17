@@ -20,6 +20,8 @@ type Order struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// Status holds the value of the "status" field.
 	Status order.Status `json:"status,omitempty"`
+	// Unix time of when the latest update occurred
+	Version int64 `json:"version,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -53,6 +55,8 @@ func (*Order) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case order.FieldVersion:
+			values[i] = new(sql.NullInt64)
 		case order.FieldStatus:
 			values[i] = new(sql.NullString)
 		case order.FieldCreatedAt, order.FieldUpdatedAt:
@@ -85,6 +89,12 @@ func (o *Order) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
 				o.Status = order.Status(value.String)
+			}
+		case order.FieldVersion:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field version", values[i])
+			} else if value.Valid {
+				o.Version = value.Int64
 			}
 		case order.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -141,6 +151,9 @@ func (o *Order) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", o.ID))
 	builder.WriteString("status=")
 	builder.WriteString(fmt.Sprintf("%v", o.Status))
+	builder.WriteString(", ")
+	builder.WriteString("version=")
+	builder.WriteString(fmt.Sprintf("%v", o.Version))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(o.CreatedAt.Format(time.ANSIC))

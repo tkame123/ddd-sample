@@ -20,6 +20,7 @@ type Order struct {
 	OrderID    OrderID
 	OrderItems []*OrderItem
 	Status     OrderStatus
+	Version    int
 }
 
 type OrderItem struct {

@@ -6,10 +6,11 @@ import (
 	e_order "github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 	e_orderItem "github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/orderitem"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
+	"time"
 )
 
 func (r *repo) OrderFindOne(ctx context.Context, id model.OrderID) (*model.Order, error) {
-	orders, err := r.db.Order.Query().
+	order, err := r.db.Order.Query().
 		Where(e_order.ID(id)).
 		WithOrderItems().
 		First(ctx)
@@ -17,18 +18,33 @@ func (r *repo) OrderFindOne(ctx context.Context, id model.OrderID) (*model.Order
 		return nil, err
 	}
 
-	return toModelOrder(orders), nil
+	return toModelOrder(order), nil
 }
 
 func (r *repo) OrderSave(ctx context.Context, order *model.Order) error {
 	if err := r.WithTx(ctx, func(tx *ent.Tx) error {
-		err := tx.Order.Create().
-			SetID(order.OrderID).
-			SetStatus(fromModelOrderStatus(order.Status)).
-			OnConflictColumns("id").
-			UpdateStatus().
-			UpdateUpdatedAt().
-			Exec(ctx)
+		prev := int64(order.Version)
+		next := time.Now().UnixNano()
+
+		exits, err := tx.Order.Query().
+			Where(e_order.ID(order.OrderID), e_order.Version(prev)).
+			Exist(ctx)
+		if err != nil {
+			return err
+		}
+
+		if exits {
+			_, err = tx.Order.Update().
+				Where(e_order.ID(order.OrderID), e_order.Version(prev)).
+				SetStatus(fromModelOrderStatus(order.Status)).
+				SetVersion(next).
+				Save(ctx)
+		} else {
+			_, err = tx.Order.Create().
+				SetID(order.OrderID).
+				SetStatus(fromModelOrderStatus(order.Status)).
+				Save(ctx)
+		}
 		if err != nil {
 			return err
 		}
@@ -76,6 +92,7 @@ func toModelOrder(order *ent.Order) *model.Order {
 		OrderID:    order.ID,
 		Status:     toModelOrderStatus(order.Status),
 		OrderItems: items,
+		Version:    int(order.Version),
 	}
 }
 
