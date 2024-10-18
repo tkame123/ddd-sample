@@ -47,6 +47,102 @@ Any を使用: 動的なメッセージタイプを扱い、受信時に適切�
 使う場面に応じて、どちらの方法も柔軟に適用できます。
 ```
 
+Smple OneOf
+```
+package main
+
+import (
+    "fmt"
+    pb "path/to/protobuf/package"  // Protobufで生成されたコードのパス
+)
+
+func handleEvent(event *pb.Event) {
+    // oneof フィールドの型に応じて分岐
+    switch e := event.EventType.(type) {
+    case *pb.Event_LoginEvent:
+        fmt.Println("Login event for user:", e.LoginEvent.Username)
+    case *pb.Event_LogoutEvent:
+        fmt.Println("Logout event for user:", e.LogoutEvent.Username)
+    default:
+        fmt.Println("Unknown event type")
+    }
+}
+
+func main() {
+    // サンプルデータの作成
+    loginEvent := &pb.Event{
+        EventType: &pb.Event_LoginEvent{
+            LoginEvent: &pb.LoginEvent{
+                Username: "john_doe",
+            },
+        },
+    }
+
+    // イベントを処理
+    handleEvent(loginEvent)
+
+    logoutEvent := &pb.Event{
+        EventType: &pb.Event_LogoutEvent{
+            LogoutEvent: &pb.LogoutEvent{
+                Username: "john_doe",
+            },
+        },
+    }
+
+    handleEvent(logoutEvent)
+}
+```
+
+Sample Any
+```
+package main
+
+import (
+    "fmt"
+    "github.com/golang/protobuf/ptypes"
+    "github.com/golang/protobuf/ptypes/any"
+    pb "path/to/protobuf/package"  // Protobufで生成されたコードのパス
+)
+
+func handleEnvelope(envelope *pb.Envelope) {
+    var loginEvent pb.LoginEvent
+    var logoutEvent pb.LogoutEvent
+
+    // `Any` 型の `payload` フィールドを動的にアンマーシャルして型を判別
+    if err := ptypes.UnmarshalAny(envelope.Payload, &loginEvent); err == nil {
+        fmt.Println("Login event for user:", loginEvent.Username)
+        return
+    }
+
+    if err := ptypes.UnmarshalAny(envelope.Payload, &logoutEvent); err == nil {
+        fmt.Println("Logout event for user:", logoutEvent.Username)
+        return
+    }
+
+    fmt.Println("Unknown event type")
+}
+
+func main() {
+    // サンプルデータの作成
+    loginEvent := pb.LoginEvent{Username: "john_doe"}
+    anyLoginEvent, _ := ptypes.MarshalAny(&loginEvent)
+
+    envelope := &pb.Envelope{
+        Payload: anyLoginEvent,
+    }
+
+    // イベントを処理
+    handleEnvelope(envelope)
+
+    // LogoutEvent も同様に処理
+    logoutEvent := pb.LogoutEvent{Username: "john_doe"}
+    anyLogoutEvent, _ := ptypes.MarshalAny(&logoutEvent)
+
+    envelope.Payload = anyLogoutEvent
+    handleEnvelope(envelope)
+}
+
+```
 ## OrderAPI
 
 ### ORM: ent.
