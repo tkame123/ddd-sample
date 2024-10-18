@@ -126,17 +126,17 @@ func (e *CommandConsumer) workerHandler(ctx context.Context, msg *types.Message)
 
 	err = e.processEvent(ctx, mes)
 	if err != nil {
-		return rollback(ctx, *msg.MessageId, err)
+		return fmt.Errorf("failed to process event: %w", err)
 	}
 
 	err = e.rep.ProcessedMessageSave(ctx, *msg.MessageId)
 	if err != nil {
-		return rollback(ctx, *msg.MessageId, fmt.Errorf("failed to save processed message: %w", err))
+		return fmt.Errorf("failed to save processed message: %w", err)
 	}
 
 	err = e.deleteMessage(ctx, msg)
 	if err != nil {
-		return rollback(ctx, *msg.MessageId, fmt.Errorf("failed to delete message: %w", err))
+		return fmt.Errorf("failed to delete message: %w", err)
 	}
 
 	return nil
