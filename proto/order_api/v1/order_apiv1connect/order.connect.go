@@ -67,6 +67,7 @@ func NewOrderServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			httpClient,
 			baseURL+OrderServiceCreateOrderProcedure,
 			connect.WithSchema(orderServiceCreateOrderMethodDescriptor),
+			connect.WithIdempotency(connect.IdempotencyIdempotent),
 			connect.WithClientOptions(opts...),
 		),
 		findOrder: connect.NewClient[v1.FindOrderRequest, v1.FindOrderResponse](
@@ -110,6 +111,7 @@ func NewOrderServiceHandler(svc OrderServiceHandler, opts ...connect.HandlerOpti
 		OrderServiceCreateOrderProcedure,
 		svc.CreateOrder,
 		connect.WithSchema(orderServiceCreateOrderMethodDescriptor),
+		connect.WithIdempotency(connect.IdempotencyIdempotent),
 		connect.WithHandlerOptions(opts...),
 	)
 	orderServiceFindOrderHandler := connect.NewUnaryHandler(

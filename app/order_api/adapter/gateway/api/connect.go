@@ -3,6 +3,7 @@ package connect
 import (
 	"connectrpc.com/connect"
 	"fmt"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/idempotency"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/domain_event"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
 	"github.com/tkame123/ddd-sample/proto/order_api/v1/order_apiv1connect"
@@ -16,17 +17,20 @@ import (
 const address = "localhost:8080"
 
 type Server struct {
-	rep repository.Repository
-	pub domain_event.Publisher
+	rep            repository.Repository
+	pub            domain_event.Publisher
+	repIdempotency *idempotency.Repository
 }
 
 func NewServer(
 	rep repository.Repository,
 	pub domain_event.Publisher,
+	repIdempotency *idempotency.Repository,
 ) Server {
 	return Server{
-		rep: rep,
-		pub: pub,
+		rep:            rep,
+		pub:            pub,
+		repIdempotency: repIdempotency,
 	}
 }
 
@@ -49,6 +53,7 @@ func (s *Server) applyHandlers(mux *http.ServeMux) {
 
 func (s *Server) mustInterceptors() connect.Option {
 	return connect.WithInterceptors(
-	// MEMO: Add must interceptors here.
+		// MEMO: Add must interceptors here.
+		s.NewIdempotencyCheckInterceptor(),
 	)
 }
