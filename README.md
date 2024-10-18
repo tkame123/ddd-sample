@@ -47,7 +47,7 @@ Any を使用: 動的なメッセージタイプを扱い、受信時に適切�
 使う場面に応じて、どちらの方法も柔軟に適用できます。
 ```
 
-Smple OneOf
+Sample OneOf
 ```
 package main
 
