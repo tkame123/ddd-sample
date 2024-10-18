@@ -10,6 +10,7 @@ import (
 	"github.com/google/wire"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/gateway/api"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/idempotency"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/message"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/proxy"
 	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
@@ -44,7 +45,13 @@ func InitializeAPIServer() (connect.Server, func(), error) {
 		return connect.Server{}, nil, err
 	}
 	publisher := message.NewEventPublisher(publisherConfig, snsClient)
-	server := connect.NewServer(repository, publisher)
+	dynamodbClient, err := provider.NewDynamoClient(config)
+	if err != nil {
+		cleanup()
+		return connect.Server{}, nil, err
+	}
+	idempotencyRepository := idempotency.NewRepository(dynamodbClient)
+	server := connect.NewServer(repository, publisher, idempotencyRepository)
 	return server, func() {
 		cleanup()
 	}, nil
@@ -157,7 +164,7 @@ func InitializeReplyConsumer() (*message.ReplyConsumer, func(), error) {
 
 // wire.go:
 
-var providerServerSet = wire.NewSet(connect.NewServer, database.NewRepository, message.NewEventPublisher, provider.NewENV, provider.NewAWSConfig, provider.NewPublisherConfig, provider.NewOrderApiDB, provider.NewSNSClient)
+var providerServerSet = wire.NewSet(connect.NewServer, database.NewRepository, message.NewEventPublisher, idempotency.NewRepository, provider.NewENV, provider.NewAWSConfig, provider.NewPublisherConfig, provider.NewOrderApiDB, provider.NewSNSClient, provider.NewDynamoClient)
 
 var providerEventConsumerSet = wire.NewSet(message.NewEventConsumer, providerConsumerSet)
 

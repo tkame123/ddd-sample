@@ -1,4 +1,4 @@
-package Idempotency_key
+package idempotency
 
 type IdempotencyKey struct {
 	ID       IdempotencyKeyID
