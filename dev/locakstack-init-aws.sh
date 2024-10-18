@@ -11,6 +11,18 @@ export AWS_SECRET_ACCESS_KEY=dummy
 export AWS_DEFAULT_REGION=ap-northeast-1
 export AWS_ENDPOINT_URL=http://localhost:4566
 
+echo "DynamoDB Creating..."
+
+awslocal dynamodb create-table \
+    --table-name idempotency_key \
+    --attribute-definitions \
+        AttributeName=id,AttributeType=S \
+        AttributeName=type,AttributeType=S \
+    --key-schema \
+        AttributeName=id,KeyType=HASH \
+        AttributeName=type,KeyType=RANGE \
+    --billing-mode PAY_PER_REQUEST
+
 echo "SNS topic Creating..."
 
 awslocal sns create-topic --name ddd-sample-event-order-order_created

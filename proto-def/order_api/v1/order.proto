@@ -34,6 +34,8 @@ message FindOrderResponse {
 }
 
 service OrderService {
-  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse) {
+    option idempotency_level = IDEMPOTENT;
+  };
   rpc FindOrder(FindOrderRequest) returns (FindOrderResponse);
 }

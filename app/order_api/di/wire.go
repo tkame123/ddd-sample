@@ -5,6 +5,7 @@ package di
 
 import (
 	_ "github.com/lib/pq"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/idempotency"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/message"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/proxy"
 	"github.com/tkame123/ddd-sample/app/order_api/usecase/create_order"
@@ -19,12 +20,14 @@ var providerServerSet = wire.NewSet(
 	connect.NewServer,
 	database.NewRepository,
 	message.NewEventPublisher,
+	idempotency.NewRepository,
 
 	provider.NewENV,
 	provider.NewAWSConfig,
 	provider.NewPublisherConfig,
 	provider.NewOrderApiDB,
 	provider.NewSNSClient,
+	provider.NewDynamoClient,
 )
 
 var providerEventConsumerSet = wire.NewSet(

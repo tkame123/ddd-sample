@@ -129,11 +129,6 @@ func (e *CommandConsumer) workerHandler(ctx context.Context, msg *types.Message)
 		return fmt.Errorf("failed to process event: %w", err)
 	}
 
-	err = e.rep.ProcessedMessageSave(ctx, *msg.MessageId)
-	if err != nil {
-		return fmt.Errorf("failed to save processed message: %w", err)
-	}
-
 	err = e.deleteMessage(ctx, msg)
 	if err != nil {
 		return fmt.Errorf("failed to delete message: %w", err)

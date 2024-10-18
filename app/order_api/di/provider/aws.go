@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 )
@@ -25,4 +26,8 @@ func NewSNSClient(cfg *aws.Config) (*sns.Client, error) {
 
 func NewSQSClient(cfg *aws.Config) (*sqs.Client, error) {
 	return sqs.NewFromConfig(*cfg), nil
+}
+
+func NewDynamoClient(cfg *aws.Config) (*dynamodb.Client, error) {
+	return dynamodb.NewFromConfig(*cfg), nil
 }
