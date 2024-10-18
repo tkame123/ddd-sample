@@ -53,9 +53,6 @@ func (k *KitchenAPI) CreateTicket(ctx context.Context, orderID model.OrderID) er
 }
 
 func (k *KitchenAPI) ApproveTicket(ctx context.Context, orderID model.OrderID, ticketID model.TicketID) error {
-	//	TODO: Implement this（仮置き）
-	log.Println("KitchenAPI ApproveTicket")
-
 	command, err := model.CreateMessage(
 		&message.CommandTicketApprove{
 			OrderId:  orderID.String(),
@@ -73,6 +70,6 @@ func (k *KitchenAPI) ApproveTicket(ctx context.Context, orderID model.OrderID, t
 
 func (k *KitchenAPI) RejectTicket(ctx context.Context, orderID model.OrderID, ticketID model.TicketID) error {
 	//	TODO: Implement this
-	log.Println("KitchenAPI RejectTicket")
+	log.Println("implement me:  KitchenAPI RejectTicket")
 	return nil
 }

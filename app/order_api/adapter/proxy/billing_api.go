@@ -7,7 +7,6 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/domain_event"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
 	"github.com/tkame123/ddd-sample/proto/message"
-	"log"
 )
 
 type BillingAPI struct {
@@ -19,8 +18,6 @@ func NewBillingAPI(pub domain_event.Publisher) external_service.BillingAPI {
 }
 
 func (k *BillingAPI) AuthorizeCard(ctx context.Context, orderID model.OrderID) error {
-	//	TODO: Implement this(仮置き）
-	log.Println("AuthorizeCard")
 	command, err := model.CreateMessage(
 		&message.CommandCardAuthorize{
 			OrderId: orderID.String(),
