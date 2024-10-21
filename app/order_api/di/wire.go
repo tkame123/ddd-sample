@@ -23,6 +23,7 @@ var providerServerSet = wire.NewSet(
 	idempotency.NewRepository,
 
 	provider.NewENV,
+	provider.NewAuthConfig,
 	provider.NewAWSConfig,
 	provider.NewPublisherConfig,
 	provider.NewOrderApiDB,

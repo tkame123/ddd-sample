@@ -10,6 +10,10 @@ type EnvConfig struct {
 	DbDebug bool   `env:"DB_DEBUG" envDefault:"false"`
 	DSN     string `env:"ORDER_API_DSN"`
 
+	// AUTH0
+	AuthDomainName   string `env:"AUTH0_DOMAIN"`
+	AuthAudienceName string `env:"AUTH0_AUDIENCE"`
+
 	// SNS
 	ArnTopicEventOrderOrderCreated      string `env:"TOPIC_ARN_EVENT_ORDER_ORDER_CREATED"`
 	ArnTopicEventOrderOrderApproved     string `env:"TOPIC_ARN_EVENT_ORDER_ORDER_APPROVED"`

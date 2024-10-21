@@ -28,6 +28,7 @@ func InitializeAPIServer() (connect.Server, func(), error) {
 	if err != nil {
 		return connect.Server{}, nil, err
 	}
+	authConfig := provider.NewAuthConfig(envConfig)
 	client, cleanup, err := provider.NewOrderApiDB(envConfig)
 	if err != nil {
 		return connect.Server{}, nil, err
@@ -51,7 +52,7 @@ func InitializeAPIServer() (connect.Server, func(), error) {
 		return connect.Server{}, nil, err
 	}
 	idempotencyRepository := idempotency.NewRepository(dynamodbClient)
-	server := connect.NewServer(repository, publisher, idempotencyRepository)
+	server := connect.NewServer(authConfig, repository, publisher, idempotencyRepository)
 	return server, func() {
 		cleanup()
 	}, nil
@@ -164,7 +165,7 @@ func InitializeReplyConsumer() (*message.ReplyConsumer, func(), error) {
 
 // wire.go:
 
-var providerServerSet = wire.NewSet(connect.NewServer, database.NewRepository, message.NewEventPublisher, idempotency.NewRepository, provider.NewENV, provider.NewAWSConfig, provider.NewPublisherConfig, provider.NewOrderApiDB, provider.NewSNSClient, provider.NewDynamoClient)
+var providerServerSet = wire.NewSet(connect.NewServer, database.NewRepository, message.NewEventPublisher, idempotency.NewRepository, provider.NewENV, provider.NewAuthConfig, provider.NewAWSConfig, provider.NewPublisherConfig, provider.NewOrderApiDB, provider.NewSNSClient, provider.NewDynamoClient)
 
 var providerEventConsumerSet = wire.NewSet(message.NewEventConsumer, providerConsumerSet)
 

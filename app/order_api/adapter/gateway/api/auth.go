@@ -5,9 +5,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
 	"log"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
@@ -17,7 +17,7 @@ import (
 
 const authTokenHeader = "authorization"
 
-func NewAuthInterceptor() connect.UnaryInterceptorFunc {
+func NewAuthInterceptor(cfg *provider.AuthConfig) connect.UnaryInterceptorFunc {
 	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
 		return func(
 			ctx context.Context,
@@ -31,9 +31,9 @@ func NewAuthInterceptor() connect.UnaryInterceptorFunc {
 			accessToken = strings.TrimSpace(accessToken)
 
 			// 認証の実行
-			valid8r, err := getJWTValidator()
+			valid8r, err := getJWTValidator(cfg)
 			if err != nil {
-				return nil, errors.New("cannot get JWT validator")
+				return nil, fmt.Errorf("cannot get JWT validator: %w", err)
 			}
 
 			_, err = valid8r.ValidateToken(ctx, accessToken)
@@ -53,17 +53,18 @@ func NewAuthInterceptor() connect.UnaryInterceptorFunc {
 	return interceptor
 }
 
-func getJWTValidator() (*validator.Validator, error) {
-	issuerURL, err := url.Parse("https://" + os.Getenv("AUTH0_DOMAIN") + "/")
+func getJWTValidator(cfg *provider.AuthConfig) (*validator.Validator, error) {
+	issuerURL, err := url.Parse("https://" + cfg.DomainName + "/")
 	if err != nil {
 		log.Fatalf("Failed to parse the issuer url: %v", err)
 	}
-	provider := jwks.NewCachingProvider(issuerURL, 5*time.Minute)
+
+	jwtProvider := jwks.NewCachingProvider(issuerURL, 5*time.Minute)
 	jwtValidator, err := validator.New(
-		provider.KeyFunc,
+		jwtProvider.KeyFunc,
 		validator.RS256,
 		issuerURL.String(),
-		[]string{os.Getenv("AUTH0_AUDIENCE")},
+		[]string{cfg.AudienceName},
 	)
 	if err != nil {
 		return nil, err
