@@ -8,8 +8,7 @@ https://amzn.asia/d/f623yoI
 
 Sagaの実装
 
-[https://github.com/tkame123/ddd-sample//app/order_api/domain/service/create_order_saga
-](https://github.com/tkame123/ddd-sample/tree/main/app/order_api/domain/service)
+https://github.com/tkame123/ddd-sample/tree/main/app/order_api/domain/service
 
 # 構成
 
