@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
+	"github.com/tkame123/ddd-sample/lib/metadata"
 	"log"
 	"net/url"
 	"strings"
@@ -35,13 +36,20 @@ func NewAuthInterceptor(cfg *provider.AuthConfig) connect.UnaryInterceptorFunc {
 			if err != nil {
 				return nil, fmt.Errorf("cannot get JWT validator: %w", err)
 			}
-
-			_, err = valid8r.ValidateToken(ctx, accessToken)
+			validatedToken, err := valid8r.ValidateToken(ctx, accessToken)
 			if err != nil {
 				return nil, fmt.Errorf("cannot validate token (unauthenticated): %w", err)
 			}
-
-			// TODO: ID tokenの習得及びUser情報のContextへの格納
+			token, ok := validatedToken.(*validator.ValidatedClaims)
+			if !ok {
+				return nil, fmt.Errorf("cannot convert token to ValidatedClaims")
+			}
+			ctx = metadata.WithUserInfo(ctx, &metadata.UserInfo{
+				// sample
+				// 認可コード（openID scope 有り）：auth0|6715cc8e39951d1cd61461ed
+				// client-credentialsFlow: e0tpe0rHkPJ40AHB3M0HuXlv995CPwwq@clients
+				ID: token.RegisteredClaims.Subject,
+			})
 
 			// TODO: 認可の用意　アクセストークンからのScopeの対応
 

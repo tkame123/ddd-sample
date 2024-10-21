@@ -15,7 +15,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sns v1.33.2
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.36.2
 	github.com/caarlos0/env/v11 v11.2.2
-	github.com/go-kit/kit v0.13.0
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.6.0
