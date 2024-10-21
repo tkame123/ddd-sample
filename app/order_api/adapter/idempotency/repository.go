@@ -76,12 +76,11 @@ func ToDynamoDB(m IdempotencyKey) []*dynamo_db.IdempotencyKey {
 	ttl := newTTL().Unix()
 	data := make([]*dynamo_db.IdempotencyKey, 0, 3)
 
-	// MEMO: req,resは原則としてproto.Messageが入る模様
 	data = append(data, &dynamo_db.IdempotencyKey{
 		ID:   m.ID,
 		Type: dynamo_db.TypeNameRequest,
 		TTL:  ttl,
-		Data: fmt.Sprintf("%s", m.Request),
+		Data: fmt.Sprintf("%s", m.Request.Any()),
 	})
 	data = append(data, &dynamo_db.IdempotencyKey{
 		ID:   m.ID,
@@ -95,7 +94,7 @@ func ToDynamoDB(m IdempotencyKey) []*dynamo_db.IdempotencyKey {
 			ID:   m.ID,
 			Type: dynamo_db.TypeNameResponse,
 			TTL:  ttl,
-			Data: fmt.Sprintf("%s", m.Response),
+			Data: fmt.Sprintf("%s", m.Response.Any()),
 		})
 	}
 

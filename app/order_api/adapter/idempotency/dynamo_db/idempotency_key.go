@@ -18,7 +18,7 @@ type IdempotencyKeyID = string
 type TypeName = string
 
 const (
-	TypeNameRequest  = "Request"
-	TypeNameResponse = "Response"
-	TypeNameStatus   = "Status"
+	TypeNameRequest  TypeName = "Request"
+	TypeNameResponse TypeName = "Response"
+	TypeNameStatus   TypeName = "Status"
 )

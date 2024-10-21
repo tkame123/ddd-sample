@@ -57,7 +57,7 @@ func (s *Server) NewIdempotencyCheckInterceptor() connect.UnaryInterceptorFunc {
 			err = s.repIdempotency.IdempotencyKeySave(ctx, idempotency.IdempotencyKey{
 				ID:      idempotencyKey,
 				Status:  idempotency.IdempotencyKeyStatusProcessing,
-				Request: req.Any(),
+				Request: req,
 			})
 			if err != nil {
 				log.Printf("error caused by %v", err)
@@ -76,8 +76,8 @@ func (s *Server) NewIdempotencyCheckInterceptor() connect.UnaryInterceptorFunc {
 			err = s.repIdempotency.IdempotencyKeySave(ctx, idempotency.IdempotencyKey{
 				ID:       idempotencyKey,
 				Status:   idempotency.IdempotencyKeyStatusSuccess,
-				Request:  req.Any(),
-				Response: res.Any(),
+				Request:  req,
+				Response: res,
 			})
 			if err != nil {
 				log.Printf("error caused by %v", err)

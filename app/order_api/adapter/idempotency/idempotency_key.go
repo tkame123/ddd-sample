@@ -1,10 +1,12 @@
 package idempotency
 
+import "connectrpc.com/connect"
+
 type IdempotencyKey struct {
 	ID       IdempotencyKeyID
 	Status   Status
-	Request  any
-	Response any
+	Request  connect.AnyRequest
+	Response connect.AnyResponse
 }
 
 type IdempotencyKeyID = string
