@@ -54,6 +54,7 @@ func (s *Server) applyHandlers(mux *http.ServeMux) {
 func (s *Server) mustInterceptors() connect.Option {
 	return connect.WithInterceptors(
 		// MEMO: Add must interceptors here.
+		NewAuthInterceptor(),
 		s.NewIdempotencyCheckInterceptor(),
 	)
 }
