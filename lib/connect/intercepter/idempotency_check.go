@@ -1,4 +1,4 @@
-package connect
+package intercepter
 
 import (
 	"connectrpc.com/connect"
@@ -10,7 +10,7 @@ import (
 
 const idempotencyKeyHeader = "Idempotency-Key"
 
-func (s *Server) NewIdempotencyCheckInterceptor() connect.UnaryInterceptorFunc {
+func NewIdempotencyCheckInterceptor(repo *idempotency.Repository) connect.UnaryInterceptorFunc {
 	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
 		return func(
 			ctx context.Context,
@@ -28,7 +28,7 @@ func (s *Server) NewIdempotencyCheckInterceptor() connect.UnaryInterceptorFunc {
 				)
 			}
 
-			key, err := s.repIdempotency.IdempotencyKeyFindByID(ctx, idempotencyKey)
+			key, err := repo.IdempotencyKeyFindByID(ctx, idempotencyKey)
 			if err != nil && !idempotency.IsNotFound(err) {
 				log.Printf("error caused by %v", err)
 				return nil, connect.NewError(
@@ -54,7 +54,7 @@ func (s *Server) NewIdempotencyCheckInterceptor() connect.UnaryInterceptorFunc {
 				}
 			}
 
-			err = s.repIdempotency.IdempotencyKeySave(ctx, idempotency.IdempotencyKey{
+			err = repo.IdempotencyKeySave(ctx, idempotency.IdempotencyKey{
 				ID:      idempotencyKey,
 				Status:  idempotency.IdempotencyKeyStatusProcessing,
 				Request: req,
@@ -73,7 +73,7 @@ func (s *Server) NewIdempotencyCheckInterceptor() connect.UnaryInterceptorFunc {
 				return nil, err
 			}
 
-			err = s.repIdempotency.IdempotencyKeySave(ctx, idempotency.IdempotencyKey{
+			err = repo.IdempotencyKeySave(ctx, idempotency.IdempotencyKey{
 				ID:       idempotencyKey,
 				Status:   idempotency.IdempotencyKeyStatusSuccess,
 				Request:  req,

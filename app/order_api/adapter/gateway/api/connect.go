@@ -60,6 +60,6 @@ func (s *Server) mustInterceptors() connect.Option {
 	return connect.WithInterceptors(
 		// MEMO: Add must interceptors here.
 		intercepter.NewAuthInterceptor(s.authCfg),
-		s.NewIdempotencyCheckInterceptor(),
+		intercepter.NewIdempotencyCheckInterceptor(s.repIdempotency),
 	)
 }
