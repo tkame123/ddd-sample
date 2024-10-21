@@ -6,11 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
+	"github.com/tkame123/ddd-sample/lib/metadata"
 	"log"
 	"net/url"
 	"strings"
 	"time"
 
+	"github.com/auth0/go-auth0/authentication"
 	"github.com/auth0/go-jwt-middleware/v2/jwks"
 	"github.com/auth0/go-jwt-middleware/v2/validator"
 )
@@ -41,7 +43,20 @@ func NewAuthInterceptor(cfg *provider.AuthConfig) connect.UnaryInterceptorFunc {
 				return nil, fmt.Errorf("cannot validate token (unauthenticated): %w", err)
 			}
 
-			// TODO: ID tokenの習得及びUser情報のContextへの格納
+			// User情報の格納
+			authClient, err := authentication.New(ctx, cfg.DomainName)
+			if err != nil {
+				return nil, fmt.Errorf("cannot create auth0 client: %w", err)
+			}
+			// MEMO: LateLimitが存在/ アクセストークンをKeyにキャッシュを返すのが良さそう
+			// https://auth0.com/docs/api/authentication?shell#user-profile
+			userInfo, err := authClient.UserInfo(ctx, accessToken)
+			if err != nil {
+				return nil, fmt.Errorf("cannot get user info: %w", err)
+			}
+			ctx = metadata.WithUserInfo(ctx, &metadata.UserInfo{
+				ID: userInfo.Sub,
+			})
 
 			// TODO: 認可の用意　アクセストークンからのScopeの対応
 
