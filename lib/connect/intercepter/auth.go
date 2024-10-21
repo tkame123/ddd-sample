@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/auth0/go-auth0/authentication"
 	"github.com/auth0/go-jwt-middleware/v2/jwks"
 	"github.com/auth0/go-jwt-middleware/v2/validator"
 )
@@ -37,25 +36,19 @@ func NewAuthInterceptor(cfg *provider.AuthConfig) connect.UnaryInterceptorFunc {
 			if err != nil {
 				return nil, fmt.Errorf("cannot get JWT validator: %w", err)
 			}
-
-			_, err = valid8r.ValidateToken(ctx, accessToken)
+			validatedToken, err := valid8r.ValidateToken(ctx, accessToken)
 			if err != nil {
 				return nil, fmt.Errorf("cannot validate token (unauthenticated): %w", err)
 			}
-
-			// User情報の格納
-			authClient, err := authentication.New(ctx, cfg.DomainName)
-			if err != nil {
-				return nil, fmt.Errorf("cannot create auth0 client: %w", err)
-			}
-			// MEMO: LateLimitが存在/ アクセストークンをKeyにキャッシュを返すのが良さそう
-			// https://auth0.com/docs/api/authentication?shell#user-profile
-			userInfo, err := authClient.UserInfo(ctx, accessToken)
-			if err != nil {
-				return nil, fmt.Errorf("cannot get user info: %w", err)
+			token, ok := validatedToken.(*validator.ValidatedClaims)
+			if !ok {
+				return nil, fmt.Errorf("cannot convert token to ValidatedClaims")
 			}
 			ctx = metadata.WithUserInfo(ctx, &metadata.UserInfo{
-				ID: userInfo.Sub,
+				// sample
+				// 認可コード（openID scope 有り）：auth0|6715cc8e39951d1cd61461ed
+				// client-credentialsFlow: e0tpe0rHkPJ40AHB3M0HuXlv995CPwwq@clients
+				ID: token.RegisteredClaims.Subject,
 			})
 
 			// TODO: 認可の用意　アクセストークンからのScopeの対応
