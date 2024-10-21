@@ -7,6 +7,7 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/domain_event"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
+	"github.com/tkame123/ddd-sample/lib/connect/intercepter"
 	"github.com/tkame123/ddd-sample/proto/order_api/v1/order_apiv1connect"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -58,7 +59,7 @@ func (s *Server) applyHandlers(mux *http.ServeMux) {
 func (s *Server) mustInterceptors() connect.Option {
 	return connect.WithInterceptors(
 		// MEMO: Add must interceptors here.
-		NewAuthInterceptor(s.authCfg),
+		intercepter.NewAuthInterceptor(s.authCfg),
 		s.NewIdempotencyCheckInterceptor(),
 	)
 }

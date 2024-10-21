@@ -1,4 +1,4 @@
-package connect
+package intercepter
 
 import (
 	"connectrpc.com/connect"
