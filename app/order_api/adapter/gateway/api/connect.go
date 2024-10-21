@@ -4,8 +4,10 @@ import (
 	"connectrpc.com/connect"
 	"fmt"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/idempotency"
+	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/domain_event"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
+	"github.com/tkame123/ddd-sample/lib/connect/intercepter"
 	"github.com/tkame123/ddd-sample/proto/order_api/v1/order_apiv1connect"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -17,17 +19,20 @@ import (
 const address = "localhost:8080"
 
 type Server struct {
+	authCfg        *provider.AuthConfig
 	rep            repository.Repository
 	pub            domain_event.Publisher
 	repIdempotency *idempotency.Repository
 }
 
 func NewServer(
+	authCfg *provider.AuthConfig,
 	rep repository.Repository,
 	pub domain_event.Publisher,
 	repIdempotency *idempotency.Repository,
 ) Server {
 	return Server{
+		authCfg:        authCfg,
 		rep:            rep,
 		pub:            pub,
 		repIdempotency: repIdempotency,
@@ -54,6 +59,7 @@ func (s *Server) applyHandlers(mux *http.ServeMux) {
 func (s *Server) mustInterceptors() connect.Option {
 	return connect.WithInterceptors(
 		// MEMO: Add must interceptors here.
+		intercepter.NewAuthInterceptor(s.authCfg),
 		s.NewIdempotencyCheckInterceptor(),
 	)
 }
