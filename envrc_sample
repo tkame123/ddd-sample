@@ -1,3 +1,5 @@
+export ENV=develop
+
 export ORDER_API_DSN=hogehoge
 export KITCHEN_API_DSN=hogehoge
 

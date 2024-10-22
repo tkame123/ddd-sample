@@ -5,7 +5,16 @@ import (
 	"github.com/caarlos0/env/v11"
 )
 
+type ENV = string
+
+const (
+	EnvDevelopment ENV = "development"
+	EnvProduction  ENV = "production"
+)
+
 type EnvConfig struct {
+	ENV string `env:"ENV" envDefault:"production"`
+
 	// DB
 	DbDebug bool   `env:"DB_DEBUG" envDefault:"false"`
 	DSN     string `env:"ORDER_API_DSN"`

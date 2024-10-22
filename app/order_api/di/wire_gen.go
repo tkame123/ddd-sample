@@ -57,7 +57,7 @@ func InitializeAPIServer() (connect.Server, func(), error) {
 		cleanup()
 		return connect.Server{}, nil, err
 	}
-	server := connect.NewServer(authConfig, repository, publisher, idempotencyRepository, enforcer)
+	server := connect.NewServer(envConfig, authConfig, repository, publisher, idempotencyRepository, enforcer)
 	return server, func() {
 		cleanup()
 	}, nil

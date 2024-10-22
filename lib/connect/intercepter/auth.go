@@ -13,23 +13,30 @@ import (
 )
 
 const authTokenHeader = "authorization"
+const developModeHeader = "x-develop-mode"
 
-func NewAuthInterceptor(cfg *provider.AuthConfig, enforcer *casbin.Enforcer) connect.UnaryInterceptorFunc {
+func NewAuthInterceptor(env *provider.EnvConfig, cfg *provider.AuthConfig, enforcer *casbin.Enforcer) connect.UnaryInterceptorFunc {
 	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
 		return func(
 			ctx context.Context,
 			req connect.AnyRequest,
 		) (connect.AnyResponse, error) {
 			authProvider := auth.Context{}
+			var strategy auth.Strategy
+			if env.ENV != provider.EnvProduction &&
+				req.Header().Get(developModeHeader) == "true" {
+				strategy = auth_intercepter.NewAuthStrategyNop()
+			} else {
+				accessToken := req.Header().Get(authTokenHeader)
+				if accessToken == "" {
+					return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("error: invalid token"))
+				}
+				accessToken = strings.TrimPrefix(accessToken, "Bearer")
+				accessToken = strings.TrimSpace(accessToken)
 
-			accessToken := req.Header().Get(authTokenHeader)
-			if accessToken == "" {
-				return nil, connect.NewError(connect.CodeUnauthenticated, errors.New("error: invalid token"))
+				strategy = auth_intercepter.NewAuthStrategyJWT(cfg, enforcer, accessToken, req.Spec().Procedure)
 			}
-			accessToken = strings.TrimPrefix(accessToken, "Bearer")
-			accessToken = strings.TrimSpace(accessToken)
-
-			authProvider.SetAuthStrategy(auth_intercepter.NewAuthStrategyJWT(cfg, enforcer, accessToken, req.Spec().Procedure))
+			authProvider.SetAuthStrategy(strategy)
 
 			userInfo, err := authProvider.Authenticate(ctx)
 			if auth_intercepter.IsAuthenticationError(err) {

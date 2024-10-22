@@ -20,6 +20,7 @@ import (
 const address = "localhost:8080"
 
 type Server struct {
+	env            *provider.EnvConfig
 	authCfg        *provider.AuthConfig
 	rep            repository.Repository
 	pub            domain_event.Publisher
@@ -28,6 +29,7 @@ type Server struct {
 }
 
 func NewServer(
+	env *provider.EnvConfig,
 	authCfg *provider.AuthConfig,
 	rep repository.Repository,
 	pub domain_event.Publisher,
@@ -35,6 +37,7 @@ func NewServer(
 	enforcer *casbin.Enforcer,
 ) Server {
 	return Server{
+		env:            env,
 		authCfg:        authCfg,
 		rep:            rep,
 		pub:            pub,
@@ -63,7 +66,7 @@ func (s *Server) applyHandlers(mux *http.ServeMux) {
 func (s *Server) mustInterceptors() connect.Option {
 	return connect.WithInterceptors(
 		// MEMO: Add must interceptors here.
-		intercepter.NewAuthInterceptor(s.authCfg, s.enforcer),
+		intercepter.NewAuthInterceptor(s.env, s.authCfg, s.enforcer),
 		intercepter.NewIdempotencyCheckInterceptor(s.repIdempotency),
 	)
 }
