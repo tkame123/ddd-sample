@@ -7,6 +7,7 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
 	"github.com/tkame123/ddd-sample/lib/auth"
 	"github.com/tkame123/ddd-sample/lib/connect/intercepter/auth_intercepter"
+	"github.com/tkame123/ddd-sample/lib/metadata"
 	"strings"
 )
 
@@ -18,7 +19,7 @@ func NewAuthInterceptor(cfg *provider.AuthConfig) connect.UnaryInterceptorFunc {
 			ctx context.Context,
 			req connect.AnyRequest,
 		) (connect.AnyResponse, error) {
-			auth := auth.Context{}
+			authProvider := auth.Context{}
 
 			accessToken := req.Header().Get(authTokenHeader)
 			if accessToken == "" {
@@ -27,19 +28,21 @@ func NewAuthInterceptor(cfg *provider.AuthConfig) connect.UnaryInterceptorFunc {
 			accessToken = strings.TrimPrefix(accessToken, "Bearer")
 			accessToken = strings.TrimSpace(accessToken)
 
-			provider, err := auth_intercepter.NewAuth(cfg, accessToken)
-			if err != nil {
-				return nil, err
-			}
-			auth.SetAuthStrategy(provider)
+			authProvider.SetAuthStrategy(auth_intercepter.NewAuthStrategyJWT(cfg, accessToken))
 
-			err = auth.Authenticate(ctx)
-			if err != nil {
+			userInfo, err := authProvider.Authenticate(ctx)
+			if auth_intercepter.IsAuthenticationError(err) {
+				return nil, connect.NewError(connect.CodeUnauthenticated, err)
+			} else if err != nil {
 				return nil, err
 			}
 
-			err = auth.Authorize(ctx)
-			if err != nil {
+			ctx = metadata.WithUserInfo(ctx, userInfo)
+
+			err = authProvider.Authorize(ctx)
+			if auth_intercepter.IsPermissionError(err) {
+				return nil, connect.NewError(connect.CodePermissionDenied, err)
+			} else if err != nil {
 				return nil, err
 			}
 

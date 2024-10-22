@@ -6,6 +6,7 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
 	"github.com/tkame123/ddd-sample/lib/auth"
 	"github.com/tkame123/ddd-sample/lib/metadata"
+	"log"
 	"net/url"
 	"time"
 
@@ -13,44 +14,53 @@ import (
 	"github.com/auth0/go-jwt-middleware/v2/validator"
 )
 
-type Auth struct {
+type authStrategyJWT struct {
 	cfg         *provider.AuthConfig
 	accessToken string
 }
 
-func NewAuth(cfg *provider.AuthConfig, accessToken string) (auth.Strategy, error) {
-	return &Auth{
+func NewAuthStrategyJWT(cfg *provider.AuthConfig, accessToken string) auth.Strategy {
+	return &authStrategyJWT{
 		cfg:         cfg,
 		accessToken: accessToken,
-	}, nil
+	}
 }
 
-func (a *Auth) Authenticate(ctx context.Context) error {
+func (a *authStrategyJWT) Authenticate(ctx context.Context) (*metadata.UserInfo, error) {
 	valid8r, err := getJWTValidator(a.cfg)
 	if err != nil {
-		return fmt.Errorf("cannot get JWT validator: %w", err)
+		return nil, fmt.Errorf("cannot get JWT validator: %w", err)
 	}
 	validatedToken, err := valid8r.ValidateToken(ctx, a.accessToken)
 	if err != nil {
-		return fmt.Errorf("cannot validate token (unauthenticated): %w", err)
+		return nil, &AuthenticationError{cause: err}
 	}
+
 	token, ok := validatedToken.(*validator.ValidatedClaims)
 	if !ok {
-		return fmt.Errorf("cannot convert token to ValidatedClaims")
+		return nil, fmt.Errorf("cannot convert token to ValidatedClaims")
 	}
-
-	// 認証結果のContextへの格納
-	ctx = metadata.WithUserInfo(ctx, &metadata.UserInfo{
-		// sample
+	claims, ok := token.CustomClaims.(*CustomClaims)
+	if !ok {
+		return nil, fmt.Errorf("cannot convert token to CustomClaims")
+	}
+	return &metadata.UserInfo{
+		// auth0 sample
 		// 認可コード（openID scope 有り）：auth0|6715cc8e39951d1cd61461ed
 		// client-credentialsFlow: e0tpe0rHkPJ40AHB3M0HuXlv995CPwwq@clients
-		ID: token.RegisteredClaims.Subject,
-	})
-	return nil
+		ID:           token.RegisteredClaims.Subject,
+		AccessPolicy: &metadata.AccessPolicy{Permissions: claims.Permissions},
+	}, nil
 }
 
-func (a *Auth) Authorize(ctx context.Context) error {
+func (a *authStrategyJWT) Authorize(ctx context.Context) error {
 	//TODO implement me
+	userInfo, ok := metadata.GetUserInfo(ctx)
+	if !ok {
+		return fmt.Errorf("cannot get user info from context")
+	}
+	log.Printf("user info: %v", userInfo.AccessPolicy.Permissions)
+
 	return nil
 }
 
@@ -66,6 +76,12 @@ func getJWTValidator(cfg *provider.AuthConfig) (*validator.Validator, error) {
 		validator.RS256,
 		issuerURL.String(),
 		[]string{cfg.AudienceName},
+		validator.WithCustomClaims(
+			func() validator.CustomClaims {
+				return &CustomClaims{}
+			},
+		),
+		validator.WithAllowedClockSkew(time.Minute),
 	)
 	if err != nil {
 		return nil, err

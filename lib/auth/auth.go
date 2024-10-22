@@ -2,10 +2,11 @@ package auth
 
 import (
 	"context"
+	"github.com/tkame123/ddd-sample/lib/metadata"
 )
 
 type Strategy interface {
-	Authenticate(ctx context.Context) error
+	Authenticate(ctx context.Context) (*metadata.UserInfo, error)
 	Authorize(ctx context.Context) error
 }
 
@@ -17,7 +18,7 @@ func (a *Context) SetAuthStrategy(strategy Strategy) {
 	a.strategy = strategy
 }
 
-func (a *Context) Authenticate(ctx context.Context) error {
+func (a *Context) Authenticate(ctx context.Context) (*metadata.UserInfo, error) {
 	return a.strategy.Authenticate(ctx)
 }
 
