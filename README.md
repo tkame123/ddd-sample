@@ -12,6 +12,22 @@ https://github.com/tkame123/ddd-sample/tree/main/app/order_api/domain/service
 
 # 構成
 
+## 認証・認可
+
+IdaasにAuth0
+
+認可はCasbin
+
+https://casbin.org/ja/
+
+RBAC関しては以下で設計
+- Permission、Roleの定義とUserへの割当はAuth0が担当
+- 提供されたPermission情報に基づいて、BEが認可を実施するがこの処理をCasbinを利用する
+
+Modelのサンプルも豊富で、柔軟な変更もできそうでいい感じ
+
+https://casbin.org/docs/supported-models
+
 ## Message
 
 SQS/SNS
