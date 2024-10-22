@@ -36,6 +36,8 @@ func NewAuthStrategyJWT(
 }
 
 func (a *authStrategyJWT) Authenticate(ctx context.Context) (*metadata.UserInfo, error) {
+	//MEMO: 厳密にはAccessTokenの検証であり認証といっていいのかが疑問ではある。。
+
 	valid8r, err := getJWTValidator(a.cfg)
 	if err != nil {
 		return nil, fmt.Errorf("cannot get JWT validator: %w", err)
