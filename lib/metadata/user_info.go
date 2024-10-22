@@ -1,11 +1,19 @@
 package metadata
 
-import "context"
+import (
+	"context"
+)
 
 type UserID = string
+type Permission = string
 
 type UserInfo struct {
-	ID UserID
+	ID           UserID
+	AccessPolicy *AccessPolicy
+}
+
+type AccessPolicy struct {
+	Permissions []Permission
 }
 
 type userInfoKey struct{}
