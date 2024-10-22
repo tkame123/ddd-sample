@@ -10,6 +10,9 @@ type AuthenticationError struct {
 }
 
 func (e *AuthenticationError) Error() string {
+	if e.cause == nil {
+		return "Authentication error"
+	}
 	return fmt.Sprintf("Authentication error: %v", e.cause)
 }
 
@@ -26,6 +29,9 @@ type PermissionError struct {
 }
 
 func (e *PermissionError) Error() string {
+	if e.cause == nil {
+		return "Permission error"
+	}
 	return fmt.Sprintf("Permission error: %v", e.cause)
 }
 

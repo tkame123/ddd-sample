@@ -3,10 +3,10 @@ package auth_intercepter
 import (
 	"context"
 	"fmt"
+	"github.com/casbin/casbin/v2"
 	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
 	"github.com/tkame123/ddd-sample/lib/auth"
 	"github.com/tkame123/ddd-sample/lib/metadata"
-	"log"
 	"net/url"
 	"time"
 
@@ -17,12 +17,21 @@ import (
 type authStrategyJWT struct {
 	cfg         *provider.AuthConfig
 	accessToken string
+	obj         string
+	enforcer    *casbin.Enforcer
 }
 
-func NewAuthStrategyJWT(cfg *provider.AuthConfig, accessToken string) auth.Strategy {
+func NewAuthStrategyJWT(
+	cfg *provider.AuthConfig,
+	enforcer *casbin.Enforcer,
+	accessToken string,
+	obj string,
+) auth.Strategy {
 	return &authStrategyJWT{
 		cfg:         cfg,
+		enforcer:    enforcer,
 		accessToken: accessToken,
+		obj:         obj,
 	}
 }
 
@@ -54,14 +63,25 @@ func (a *authStrategyJWT) Authenticate(ctx context.Context) (*metadata.UserInfo,
 }
 
 func (a *authStrategyJWT) Authorize(ctx context.Context) error {
-	//TODO implement me
 	userInfo, ok := metadata.GetUserInfo(ctx)
 	if !ok {
 		return fmt.Errorf("cannot get user info from context")
 	}
-	log.Printf("user info: %v", userInfo.AccessPolicy.Permissions)
 
-	return nil
+	for _, permission := range userInfo.AccessPolicy.Permissions {
+		ok, err := a.enforcer.Enforce(
+			auth.Permission(permission).Sub(),
+			a.obj,
+			auth.Permission(permission).Act(),
+		)
+		if err != nil {
+			return err
+		}
+		if ok {
+			return nil
+		}
+	}
+	return &PermissionError{}
 }
 
 func getJWTValidator(cfg *provider.AuthConfig) (*validator.Validator, error) {

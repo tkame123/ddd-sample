@@ -4,6 +4,7 @@ import (
 	"connectrpc.com/connect"
 	"context"
 	"errors"
+	"github.com/casbin/casbin/v2"
 	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
 	"github.com/tkame123/ddd-sample/lib/auth"
 	"github.com/tkame123/ddd-sample/lib/connect/intercepter/auth_intercepter"
@@ -13,7 +14,7 @@ import (
 
 const authTokenHeader = "authorization"
 
-func NewAuthInterceptor(cfg *provider.AuthConfig) connect.UnaryInterceptorFunc {
+func NewAuthInterceptor(cfg *provider.AuthConfig, enforcer *casbin.Enforcer) connect.UnaryInterceptorFunc {
 	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
 		return func(
 			ctx context.Context,
@@ -28,7 +29,7 @@ func NewAuthInterceptor(cfg *provider.AuthConfig) connect.UnaryInterceptorFunc {
 			accessToken = strings.TrimPrefix(accessToken, "Bearer")
 			accessToken = strings.TrimSpace(accessToken)
 
-			authProvider.SetAuthStrategy(auth_intercepter.NewAuthStrategyJWT(cfg, accessToken))
+			authProvider.SetAuthStrategy(auth_intercepter.NewAuthStrategyJWT(cfg, enforcer, accessToken, req.Spec().Procedure))
 
 			userInfo, err := authProvider.Authenticate(ctx)
 			if auth_intercepter.IsAuthenticationError(err) {

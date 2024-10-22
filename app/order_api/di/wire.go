@@ -24,6 +24,7 @@ var providerServerSet = wire.NewSet(
 
 	provider.NewENV,
 	provider.NewAuthConfig,
+	provider.NewCasbinEnforcer,
 	provider.NewAWSConfig,
 	provider.NewPublisherConfig,
 	provider.NewOrderApiDB,
