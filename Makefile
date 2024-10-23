@@ -26,7 +26,7 @@ order.wire:
 order.test.mock:
 	mockgen -destination=app/order_api/domain/port/mock/domain_event.go --package=mock github.com/tkame123/ddd-sample/app/order_api/domain/port/domain_event EventHandler,Publisher
 	mockgen -destination=app/order_api/domain/port/mock/external_api.go -package=mock github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service BillingAPI,KitchenAPI
-	mockgen -destination=app/order_api/domain/port/mock/repository.go -package=mock github.com/tkame123/ddd-sample/app/order_api/domain/port/repository Repository,CreateOrderSagaState,Order
+	mockgen -destination=app/order_api/domain/port/mock/repository.go -package=mock github.com/tkame123/ddd-sample/app/order_api/domain/port/repository Repository,CreateOrderSagaState,Order,CancelOrderSagaState
 	mockgen -destination=app/order_api/domain/port/mock/service.go -package=mock github.com/tkame123/ddd-sample/app/order_api/domain/port/service CreateOrder,CancelOrder
 
 order.ent.generate:
