@@ -11,7 +11,7 @@ export AWS_ENDPOINT_URL=http://localhost:4566
 
 # Auth0
 export AUTH0_DOMAIN=hoge
-export AUTH0_AUDIENCE=hoge
+export AUTH0_AUDIENCE_ORDER_API=hoge
 
 # AWS SNS
 export TOPIC_ARN_EVENT_ORDER_ORDER_CREATED=arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-order-order_created

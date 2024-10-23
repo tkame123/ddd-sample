@@ -21,7 +21,7 @@ type EnvConfig struct {
 
 	// AUTH0
 	AuthDomainName   string `env:"AUTH0_DOMAIN"`
-	AuthAudienceName string `env:"AUTH0_AUDIENCE"`
+	AuthAudienceName string `env:"AUTH0_AUDIENCE_ORDER_API"`
 
 	// SNS
 	ArnTopicEventOrderOrderCreated      string `env:"TOPIC_ARN_EVENT_ORDER_ORDER_CREATED"`
