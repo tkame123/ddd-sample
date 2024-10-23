@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/message/event_handler"
 	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
@@ -23,31 +24,34 @@ import (
 )
 
 type CommandConsumer struct {
-	cfg        *provider.ConsumerConfig
-	sqsClient  *sqs.Client
-	queueUrl   string
-	rep        repository.Repository
-	orderSVC   service.CreateOrder
-	kitchenAPI external_service.KitchenAPI
-	billingAPI external_service.BillingAPI
+	cfg            *provider.ConsumerConfig
+	sqsClient      *sqs.Client
+	queueUrl       string
+	rep            repository.Repository
+	createOrderSVC service.CreateOrder
+	cancelOrderSVC service.CancelOrder
+	kitchenAPI     external_service.KitchenAPI
+	billingAPI     external_service.BillingAPI
 }
 
 func NewCommandConsumer(
 	cfg *provider.ConsumerConfig,
 	sqsClient *sqs.Client,
 	rep repository.Repository,
-	orderSVC service.CreateOrder,
+	createOrderSVC service.CreateOrder,
+	cancelOrderSVC service.CancelOrder,
 	kitchenAPI external_service.KitchenAPI,
 	billingAPI external_service.BillingAPI,
 ) *CommandConsumer {
 	return &CommandConsumer{
-		cfg:        cfg,
-		sqsClient:  sqsClient,
-		queueUrl:   cfg.Command.QueueUrl,
-		rep:        rep,
-		orderSVC:   orderSVC,
-		kitchenAPI: kitchenAPI,
-		billingAPI: billingAPI,
+		cfg:            cfg,
+		sqsClient:      sqsClient,
+		queueUrl:       cfg.Command.QueueUrl,
+		rep:            rep,
+		createOrderSVC: createOrderSVC,
+		cancelOrderSVC: cancelOrderSVC,
+		kitchenAPI:     kitchenAPI,
+		billingAPI:     billingAPI,
 	}
 }
 
@@ -146,7 +150,22 @@ func (e *CommandConsumer) workerHandler(ctx context.Context, msg *types.Message)
 }
 
 func (e *CommandConsumer) processEvent(ctx context.Context, mes *message.Message) error {
-	return fmt.Errorf("not important for this type: %s", mes.Subject.Type)
+	handler, err := event_handler.NewHandlerProducer(
+		e.rep,
+		e.createOrderSVC,
+		e.cancelOrderSVC,
+		e.kitchenAPI,
+		e.billingAPI,
+	).GetHandler(mes)
+	if err != nil {
+		return err
+	}
+	err = handler.Handler(ctx, mes)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (e *CommandConsumer) deleteMessage(ctx context.Context, msg *types.Message) error {

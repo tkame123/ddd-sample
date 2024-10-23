@@ -8,6 +8,7 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/idempotency"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/message"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/proxy"
+	"github.com/tkame123/ddd-sample/app/order_api/usecase/cancel_order"
 	"github.com/tkame123/ddd-sample/app/order_api/usecase/create_order"
 
 	"github.com/google/wire"
@@ -51,6 +52,7 @@ var providerConsumerSet = wire.NewSet(
 	message.NewEventPublisher,
 	database.NewRepository,
 	create_order.NewService,
+	cancel_order.NewService,
 	proxy.NewBillingAPI,
 	proxy.NewKitchenAPI,
 

@@ -1,4 +1,4 @@
-package message
+package event_handler
 
 import (
 	"context"
@@ -12,20 +12,20 @@ import (
 	"github.com/tkame123/ddd-sample/proto/message"
 )
 
-type eventHandler struct {
+type createOrderSagaEventHandler struct {
 	rep        repository.Repository
 	orderSVC   service.CreateOrder
 	kitchenAPI external_service.KitchenAPI
 	billingAPI external_service.BillingAPI
 }
 
-func NewEventHandler(
+func NewCreateOrderSagaEventHandler(
 	rep repository.Repository,
 	orderSVC service.CreateOrder,
 	kitchenAPI external_service.KitchenAPI,
 	billingAPI external_service.BillingAPI,
 ) domain_event.EventHandler {
-	return &eventHandler{
+	return &createOrderSagaEventHandler{
 		rep:        rep,
 		orderSVC:   orderSVC,
 		kitchenAPI: kitchenAPI,
@@ -33,7 +33,7 @@ func NewEventHandler(
 	}
 }
 
-func (h *eventHandler) Handler(ctx context.Context, m *message.Message) error {
+func (h *createOrderSagaEventHandler) Handler(ctx context.Context, m *message.Message) error {
 	var id *model.OrderID
 
 	switch m.Subject.Type {
