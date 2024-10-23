@@ -14,6 +14,8 @@ const (
 	OrderStatus_ApprovalPending OrderStatus = "Pending"
 	OrderStatus_Approved        OrderStatus = "Approved"
 	OrderStatus_Rejected        OrderStatus = "Rejected"
+	OrderStatus_CancelPending   OrderStatus = "CancelPending"
+	OrderStatus_Canceled        OrderStatus = "Canceled"
 )
 
 // 集約ルート
@@ -77,7 +79,7 @@ func NewOrder(items []*OrderItemRequest) (*Order, []*message.Message, error) {
 }
 
 func (o *Order) ApproveOrder() ([]*message.Message, error) {
-	if !o.StatusFSM().Can("approve") {
+	if !o.StatusFSM().Can("authorized") {
 		return nil, errors.New("order is not in approval pending status")
 	}
 
@@ -96,14 +98,71 @@ func (o *Order) ApproveOrder() ([]*message.Message, error) {
 }
 
 func (o *Order) RejectOrder() ([]*message.Message, error) {
-	if !o.StatusFSM().Can("reject") {
-		return nil, errors.New("order is not in approval pending status")
+	if !o.StatusFSM().Can("rejected") {
+		return nil, errors.New("order is not in rejected status")
 	}
 
 	o.Status = OrderStatus_Rejected
 
 	mes, err := CreateMessage(
 		&message.EventOrderRejected{
+			OrderId: o.OrderID.String(),
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return []*message.Message{mes}, nil
+}
+
+func (o *Order) CancelOrder() ([]*message.Message, error) {
+	if !o.StatusFSM().Can("cancel") {
+		return nil, errors.New("order is not in cancel status")
+	}
+
+	o.Status = OrderStatus_CancelPending
+
+	mes, err := CreateMessage(
+		&message.EventOrderCanceled{
+			OrderId: o.OrderID.String(),
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return []*message.Message{mes}, nil
+}
+
+func (o *Order) CancelConfirm() ([]*message.Message, error) {
+	if !o.StatusFSM().Can("cancelConfirmed") {
+		return nil, errors.New("order is not in cancel status")
+	}
+
+	o.Status = OrderStatus_Canceled
+
+	mes, err := CreateMessage(
+		&message.EventOrderCancellationConfirmed{
+			OrderId: o.OrderID.String(),
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return []*message.Message{mes}, nil
+}
+
+func (o *Order) CancelReject() ([]*message.Message, error) {
+	if !o.StatusFSM().Can("cancelRejected") {
+		return nil, errors.New("order is not in cancel status")
+	}
+
+	o.Status = OrderStatus_Canceled
+
+	mes, err := CreateMessage(
+		&message.EventOrderCancellationRejected{
 			OrderId: o.OrderID.String(),
 		},
 	)
@@ -128,14 +187,29 @@ func (o *Order) StatusFSM() *fsm.FSM {
 		o.Status,
 		fsm.Events{
 			{
-				Name: "approve",
+				Name: "authorized",
 				Src:  []string{OrderStatus_ApprovalPending},
 				Dst:  OrderStatus_Approved,
 			},
 			{
-				Name: "reject",
+				Name: "rejected",
 				Src:  []string{OrderStatus_ApprovalPending},
 				Dst:  OrderStatus_Rejected,
+			},
+			{
+				Name: "cancel",
+				Src:  []string{OrderStatus_Approved},
+				Dst:  OrderStatus_CancelPending,
+			},
+			{
+				Name: "cancelConfirmed",
+				Src:  []string{OrderStatus_CancelPending},
+				Dst:  OrderStatus_Canceled,
+			},
+			{
+				Name: "cancelRejected",
+				Src:  []string{OrderStatus_CancelPending},
+				Dst:  OrderStatus_Approved,
 			},
 		},
 		fsm.Callbacks{},
