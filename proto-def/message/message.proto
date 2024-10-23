@@ -7,20 +7,32 @@ import "google/protobuf/any.proto";
 
 enum Type {
   TYPE_UNSPECIFIED = 0;
+
   TYPE_EVENT_ORDER_CREATED = 1;
   TYPE_EVENT_ORDER_APPROVED = 2;
   TYPE_EVENT_ORDER_REJECTED = 3;
+  TYPE_EVENT_ORDER_CANCELED = 14;
+  TYPE_EVENT_ORDER_CANCELLATION_CONFIRMED = 15;
+  TYPE_EVENT_ORDER_CANCELLATION_REJECTED = 16;
+
   TYPE_EVENT_TICKET_CREATED = 4;
   TYPE_EVENT_TICKET_APPROVED = 5;
   TYPE_EVENT_TICKET_REJECTED = 6;
   TYPE_EVENT_TICKET_CREATION_FAILED = 7;
+  TYPE_EVENT_TICKET_CANCELED = 17;
+  TYPE_EVENT_TICKET_CANCELLATION_REJECTED = 18;
+
   TYPE_EVENT_CARD_AUTHORIZED = 8;
   TYPE_EVENT_CARD_AUTHORIZATION_FAILED = 9;
+  TYPE_EVENT_CARD_CANCELED = 19;
 
   TYPE_COMMAND_TICKET_CREATE = 10;
   TYPE_COMMAND_TICKET_APPROVE = 11;
   TYPE_COMMAND_TICKET_REJECT = 12;
+  TYPE_COMMAND_TICKET_CANCEL = 20;
+
   TYPE_COMMAND_CARD_AUTHORIZE = 13;
+  TYPE_COMMAND_CARD_CANCEL = 21;
 }
 
 enum Service {
@@ -58,6 +70,20 @@ message EventOrderRejected {
   string reason = 2;
 }
 
+message EventOrderCanceled {
+  string order_id = 1;
+  string reason = 2;
+}
+
+message EventOrderCancellationConfirmed {
+  string order_id = 1;
+}
+
+message EventOrderCancellationRejected {
+  string order_id = 1;
+  string reason = 2;
+}
+
 message EventTicketCreated {
   string order_id = 1;
   string ticket_id = 2;
@@ -79,6 +105,18 @@ message EventTicketCreationFailed {
   string reason = 2;
 }
 
+message EventTicketCanceled {
+  string order_id = 1;
+  string ticket_id = 2;
+  string reason = 3;
+}
+
+message EventTicketCancellationRejected {
+  string order_id = 1;
+  string ticket_id = 2;
+  string reason = 3;
+}
+
 message EventCardAuthorized {
   string order_id = 1;
 }
@@ -86,6 +124,11 @@ message EventCardAuthorized {
 message EventCardAuthorizationFailed {
   string order_id = 1;
   string reason = 2;
+}
+
+message EventCardCanceled {
+  string order_id = 1;
+  string bill_id=2;
 }
 
 message CommandTicketCreate {
@@ -109,12 +152,20 @@ message CommandTicketReject {
   string reason = 3;
 }
 
+message CommandTicketCancel {
+  string order_id = 1;
+  string ticket_id = 2;
+  string reason = 3;
+}
+
 message CommandCardAuthorize {
   string order_id = 1;
-//  string card_number = 2;
-//  string card_holder = 3;
-//  string expiration = 4;
-//  string cvc = 5;
-//  int32 amount = 6;
 }
+
+message CommandCardCancel {
+  string order_id = 1;
+  string bill_id=2;
+  string reason = 3;
+}
+
 
