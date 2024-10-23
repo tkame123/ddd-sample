@@ -31,6 +31,12 @@ awslocal sns create-topic --name ddd-sample-event-order-order_approved
 
 awslocal sns create-topic --name ddd-sample-event-order-order_rejected
 
+awslocal sns create-topic --name ddd-sample-event-order-order_canceled
+
+awslocal sns create-topic --name ddd-sample-event-order-order_cancellation_confirmed
+
+awslocal sns create-topic --name ddd-sample-event-order-order_cancellation_rejected
+
 awslocal sns create-topic --name ddd-sample-command-order-order_approve
 
 awslocal sns create-topic --name ddd-sample-command-order-order_reject
@@ -43,17 +49,27 @@ awslocal sns create-topic --name ddd-sample-event-kitchen-ticket_approved
 
 awslocal sns create-topic --name ddd-sample-event-kitchen-ticket_rejected
 
+awslocal sns create-topic --name ddd-sample-event-kitchen-ticket_canceled
+
+awslocal sns create-topic --name ddd-sample-event-kitchen-ticket_cancellation_rejected
+
 awslocal sns create-topic --name ddd-sample-command-kitchen-ticket_create
 
 awslocal sns create-topic --name ddd-sample-command-kitchen-ticket_approve
 
 awslocal sns create-topic --name ddd-sample-command-kitchen-ticket_reject
 
+awslocal sns create-topic --name ddd-sample-command-kitchen-ticket_cancel
+
 awslocal sns create-topic --name ddd-sample-event-billing-card_authorized
 
 awslocal sns create-topic --name ddd-sample-event-billing-card_authorize_failed
 
+awslocal sns create-topic --name ddd-sample-event-billing-card_canceled
+
 awslocal sns create-topic --name ddd-sample-command-billing-card_authorize
+
+awslocal sns create-topic --name ddd-sample-command-billing-card_cancel
 
 # OrderAPI SQS
 

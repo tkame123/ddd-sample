@@ -27,7 +27,7 @@ type EnvConfig struct {
 	ArnTopicEventOrderOrderCreated               string `env:"TOPIC_ARN_EVENT_ORDER_ORDER_CREATED"`
 	ArnTopicEventOrderOrderApproved              string `env:"TOPIC_ARN_EVENT_ORDER_ORDER_APPROVED"`
 	ArnTopicEventOrderOrderRejected              string `env:"TOPIC_ARN_EVENT_ORDER_ORDER_REJECTED"`
-	ArnTopicEventOrderOrderCanceled              string `env:"TOPIC_ARN_EVENT_ORDER_ORDER_CANCELLED"`
+	ArnTopicEventOrderOrderCanceled              string `env:"TOPIC_ARN_EVENT_ORDER_ORDER_CANCELED"`
 	ArnTopicEventOrderOrderCancellationConfirmed string `env:"TOPIC_ARN_EVENT_ORDER_ORDER_CANCELLATION_CONFIRMED"`
 	ArnTopicEventOrderOrderCancellationRejected  string `env:"TOPIC_ARN_EVENT_ORDER_ORDER_CANCELLATION_REJECTED"`
 

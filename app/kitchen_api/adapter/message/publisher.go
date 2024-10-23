@@ -52,7 +52,7 @@ func (s *EventPublisher) PublishMessage(ctx context.Context, event *message.Mess
 	}
 	_, err = s.Client.Publish(ctx, &input)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to publish message: %w arn: %s", err, arn)
 	}
 	return nil
 }
