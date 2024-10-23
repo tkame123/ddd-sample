@@ -34,7 +34,7 @@ func NewAuthInterceptor(env *provider.EnvConfig, cfg *provider.AuthConfig, enfor
 				accessToken = strings.TrimPrefix(accessToken, "Bearer")
 				accessToken = strings.TrimSpace(accessToken)
 
-				strategy = auth_intercepter.NewAuthStrategyJWT(cfg, enforcer, accessToken, req.Spec().Procedure)
+				strategy = auth_intercepter.NewAuthStrategyOIDC(cfg, enforcer, accessToken, req.Spec().Procedure)
 			}
 			authProvider.SetAuthStrategy(strategy)
 

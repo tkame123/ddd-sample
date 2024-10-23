@@ -14,20 +14,20 @@ import (
 	"github.com/auth0/go-jwt-middleware/v2/validator"
 )
 
-type authStrategyJWT struct {
+type authStrategyOIDC struct {
 	cfg         *provider.AuthConfig
 	accessToken string
 	obj         string
 	enforcer    *casbin.Enforcer
 }
 
-func NewAuthStrategyJWT(
+func NewAuthStrategyOIDC(
 	cfg *provider.AuthConfig,
 	enforcer *casbin.Enforcer,
 	accessToken string,
 	obj string,
 ) auth.Strategy {
-	return &authStrategyJWT{
+	return &authStrategyOIDC{
 		cfg:         cfg,
 		enforcer:    enforcer,
 		accessToken: accessToken,
@@ -35,7 +35,7 @@ func NewAuthStrategyJWT(
 	}
 }
 
-func (a *authStrategyJWT) Authenticate(ctx context.Context) (*metadata.UserInfo, error) {
+func (a *authStrategyOIDC) Authenticate(ctx context.Context) (*metadata.UserInfo, error) {
 	//MEMO: 厳密にはAccessTokenの検証であり認証といっていいのかが疑問ではある。。
 
 	valid8r, err := getJWTValidator(a.cfg)
@@ -64,7 +64,7 @@ func (a *authStrategyJWT) Authenticate(ctx context.Context) (*metadata.UserInfo,
 	}, nil
 }
 
-func (a *authStrategyJWT) Authorize(ctx context.Context) error {
+func (a *authStrategyOIDC) Authorize(ctx context.Context) error {
 	userInfo, ok := metadata.GetUserInfo(ctx)
 	if !ok {
 		return fmt.Errorf("cannot get user info from context")
