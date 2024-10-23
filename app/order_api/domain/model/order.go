@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"github.com/looplab/fsm"
 	"github.com/tkame123/ddd-sample/proto/message"
 )
 
@@ -76,7 +77,7 @@ func NewOrder(items []*OrderItemRequest) (*Order, []*message.Message, error) {
 }
 
 func (o *Order) ApproveOrder() ([]*message.Message, error) {
-	if o.Status != OrderStatus_ApprovalPending {
+	if !o.StatusFSM().Can("approve") {
 		return nil, errors.New("order is not in approval pending status")
 	}
 
@@ -95,7 +96,7 @@ func (o *Order) ApproveOrder() ([]*message.Message, error) {
 }
 
 func (o *Order) RejectOrder() ([]*message.Message, error) {
-	if o.Status != OrderStatus_ApprovalPending {
+	if !o.StatusFSM().Can("reject") {
 		return nil, errors.New("order is not in approval pending status")
 	}
 
@@ -120,4 +121,24 @@ func (o *Order) validateApprovalLimit() bool {
 	}
 
 	return sum <= APPOVAL_LIMIT
+}
+
+func (o *Order) StatusFSM() *fsm.FSM {
+	ms := fsm.NewFSM(
+		o.Status,
+		fsm.Events{
+			{
+				Name: "approve",
+				Src:  []string{OrderStatus_ApprovalPending},
+				Dst:  OrderStatus_Approved,
+			},
+			{
+				Name: "reject",
+				Src:  []string{OrderStatus_ApprovalPending},
+				Dst:  OrderStatus_Rejected,
+			},
+		},
+		fsm.Callbacks{},
+	)
+	return ms
 }
