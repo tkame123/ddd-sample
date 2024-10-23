@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/createordersagastate"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
@@ -17,13 +16,13 @@ func (r *repo) CreateOrderSagaStateFindOne(ctx context.Context, id model.OrderID
 		return nil, err
 	}
 
-	return toModelOrderSagaState(state), nil
+	return toModelCreateOrderSagaState(state), nil
 }
 
 func (r *repo) CreateOrderSagaStateSave(ctx context.Context, state *create_order_saga.CreateOrderSagaState) error {
 	err := r.db.CreateOrderSagaState.Create().
 		SetID(state.OrderID).
-		SetCurrent(fromModelCurrentState(state.Current)).
+		SetCurrent(fromModelCreateOrderSagaCurrentState(state.Current)).
 		SetNillableTicketID(fromModelTicketID(state.TicketID)).
 		OnConflictColumns("id").
 		UpdateTicketID().
@@ -37,14 +36,7 @@ func (r *repo) CreateOrderSagaStateSave(ctx context.Context, state *create_order
 	return nil
 }
 
-func fromModelTicketID(ticketID uuid.NullUUID) *uuid.UUID {
-	if ticketID.Valid {
-		return &ticketID.UUID
-	}
-	return nil
-}
-
-func fromModelCurrentState(state create_order_saga.CreateOrderSagaStep) createordersagastate.Current {
+func fromModelCreateOrderSagaCurrentState(state create_order_saga.CreateOrderSagaStep) createordersagastate.Current {
 	switch state {
 	case create_order_saga.CreateOrderSagaStep_ApprovalPending:
 		return createordersagastate.CurrentApprovalPending
@@ -70,7 +62,7 @@ func fromModelCurrentState(state create_order_saga.CreateOrderSagaStep) createor
 	}
 }
 
-func toModelCurrentState(state createordersagastate.Current) create_order_saga.CreateOrderSagaStep {
+func toModelCreateOrderSagaCurrentState(state createordersagastate.Current) create_order_saga.CreateOrderSagaStep {
 	switch state {
 	case createordersagastate.CurrentApprovalPending:
 		return create_order_saga.CreateOrderSagaStep_ApprovalPending
@@ -96,20 +88,10 @@ func toModelCurrentState(state createordersagastate.Current) create_order_saga.C
 	}
 }
 
-func toModelTicketID(ticketID *uuid.UUID) uuid.NullUUID {
-	if ticketID == nil {
-		return uuid.NullUUID{Valid: false}
-	}
-	return uuid.NullUUID{
-		UUID:  *ticketID,
-		Valid: true,
-	}
-}
-
-func toModelOrderSagaState(state *ent.CreateOrderSagaState) *create_order_saga.CreateOrderSagaState {
+func toModelCreateOrderSagaState(state *ent.CreateOrderSagaState) *create_order_saga.CreateOrderSagaState {
 	return &create_order_saga.CreateOrderSagaState{
 		OrderID:  state.ID,
-		Current:  toModelCurrentState(state.Current),
+		Current:  toModelCreateOrderSagaCurrentState(state.Current),
 		TicketID: toModelTicketID(state.TicketID),
 	}
 }
