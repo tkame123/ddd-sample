@@ -73,3 +73,8 @@ func (k *KitchenAPI) RejectTicket(ctx context.Context, orderID model.OrderID, ti
 	log.Println("implement me:  KitchenAPI RejectTicket")
 	return nil
 }
+
+func (k *KitchenAPI) CancelTicket(ctx context.Context, orderID model.OrderID, ticketID model.TicketID) error {
+	//TODO implement me
+	panic("implement me")
+}

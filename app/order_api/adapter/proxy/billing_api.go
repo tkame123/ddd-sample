@@ -31,3 +31,8 @@ func (k *BillingAPI) AuthorizeCard(ctx context.Context, orderID model.OrderID) e
 
 	return nil
 }
+
+func (k *BillingAPI) CancelCard(ctx context.Context, orderID model.OrderID) error {
+	//TODO implement me
+	panic("implement me")
+}
