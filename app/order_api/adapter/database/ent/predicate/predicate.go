@@ -6,6 +6,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// CancelOrderSagaState is the predicate function for cancelordersagastate builders.
+type CancelOrderSagaState func(*sql.Selector)
+
 // CreateOrderSagaState is the predicate function for createordersagastate builders.
 type CreateOrderSagaState func(*sql.Selector)
 
