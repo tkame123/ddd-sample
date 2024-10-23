@@ -11,6 +11,7 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
 	model "github.com/tkame123/ddd-sample/app/order_api/domain/model"
+	create_order_saga "github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga"
 )
 
 // MockRepository is a mock of Repository interface.
@@ -37,10 +38,10 @@ func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 }
 
 // CreateOrderSagaStateFindOne mocks base method.
-func (m *MockRepository) CreateOrderSagaStateFindOne(arg0 context.Context, arg1 uuid.UUID) (*model.CreateOrderSagaState, error) {
+func (m *MockRepository) CreateOrderSagaStateFindOne(arg0 context.Context, arg1 uuid.UUID) (*create_order_saga.CreateOrderSagaState, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateOrderSagaStateFindOne", arg0, arg1)
-	ret0, _ := ret[0].(*model.CreateOrderSagaState)
+	ret0, _ := ret[0].(*create_order_saga.CreateOrderSagaState)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -52,7 +53,7 @@ func (mr *MockRepositoryMockRecorder) CreateOrderSagaStateFindOne(arg0, arg1 int
 }
 
 // CreateOrderSagaStateSave mocks base method.
-func (m *MockRepository) CreateOrderSagaStateSave(arg0 context.Context, arg1 *model.CreateOrderSagaState) error {
+func (m *MockRepository) CreateOrderSagaStateSave(arg0 context.Context, arg1 *create_order_saga.CreateOrderSagaState) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateOrderSagaStateSave", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -146,10 +147,10 @@ func (m *MockCreateOrderSagaState) EXPECT() *MockCreateOrderSagaStateMockRecorde
 }
 
 // CreateOrderSagaStateFindOne mocks base method.
-func (m *MockCreateOrderSagaState) CreateOrderSagaStateFindOne(arg0 context.Context, arg1 uuid.UUID) (*model.CreateOrderSagaState, error) {
+func (m *MockCreateOrderSagaState) CreateOrderSagaStateFindOne(arg0 context.Context, arg1 uuid.UUID) (*create_order_saga.CreateOrderSagaState, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateOrderSagaStateFindOne", arg0, arg1)
-	ret0, _ := ret[0].(*model.CreateOrderSagaState)
+	ret0, _ := ret[0].(*create_order_saga.CreateOrderSagaState)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -161,7 +162,7 @@ func (mr *MockCreateOrderSagaStateMockRecorder) CreateOrderSagaStateFindOne(arg0
 }
 
 // CreateOrderSagaStateSave mocks base method.
-func (m *MockCreateOrderSagaState) CreateOrderSagaStateSave(arg0 context.Context, arg1 *model.CreateOrderSagaState) error {
+func (m *MockCreateOrderSagaState) CreateOrderSagaStateSave(arg0 context.Context, arg1 *create_order_saga.CreateOrderSagaState) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateOrderSagaStateSave", arg0, arg1)
 	ret0, _ := ret[0].(error)

@@ -6,9 +6,10 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/createordersagastate"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga"
 )
 
-func (r *repo) CreateOrderSagaStateFindOne(ctx context.Context, id model.OrderID) (*model.CreateOrderSagaState, error) {
+func (r *repo) CreateOrderSagaStateFindOne(ctx context.Context, id model.OrderID) (*create_order_saga.CreateOrderSagaState, error) {
 	state, err := r.db.CreateOrderSagaState.Query().
 		Where(createordersagastate.ID(id)).
 		First(ctx)
@@ -19,7 +20,7 @@ func (r *repo) CreateOrderSagaStateFindOne(ctx context.Context, id model.OrderID
 	return toModelOrderSagaState(state), nil
 }
 
-func (r *repo) CreateOrderSagaStateSave(ctx context.Context, state *model.CreateOrderSagaState) error {
+func (r *repo) CreateOrderSagaStateSave(ctx context.Context, state *create_order_saga.CreateOrderSagaState) error {
 	err := r.db.CreateOrderSagaState.Create().
 		SetID(state.OrderID).
 		SetCurrent(fromModelCurrentState(state.Current)).
@@ -43,25 +44,25 @@ func fromModelTicketID(ticketID uuid.NullUUID) *uuid.UUID {
 	return nil
 }
 
-func fromModelCurrentState(state model.CreateOrderSagaStep) createordersagastate.Current {
+func fromModelCurrentState(state create_order_saga.CreateOrderSagaStep) createordersagastate.Current {
 	switch state {
-	case model.CreateOrderSagaStep_ApprovalPending:
+	case create_order_saga.CreateOrderSagaStep_ApprovalPending:
 		return createordersagastate.CurrentApprovalPending
-	case model.CreateOrderSagaStep_CreatingTicket:
+	case create_order_saga.CreateOrderSagaStep_CreatingTicket:
 		return createordersagastate.CurrentCreatingTicket
-	case model.CreateOrderSagaStep_AuthorizingCard:
+	case create_order_saga.CreateOrderSagaStep_AuthorizingCard:
 		return createordersagastate.CurrentAuthorizingCard
-	case model.CreateOrderSagaStep_ApprovingTicket:
+	case create_order_saga.CreateOrderSagaStep_ApprovingTicket:
 		return createordersagastate.CurrentApprovingTicket
-	case model.CreateOrderSagaStep_ApprovingOrder:
+	case create_order_saga.CreateOrderSagaStep_ApprovingOrder:
 		return createordersagastate.CurrentApprovingOrder
-	case model.CreateOrderSagaStep_OrderApproved:
+	case create_order_saga.CreateOrderSagaStep_OrderApproved:
 		return createordersagastate.CurrentOrderApproved
-	case model.CreateOrderSagaStep_RejectingTicket:
+	case create_order_saga.CreateOrderSagaStep_RejectingTicket:
 		return createordersagastate.CurrentRejectingTicket
-	case model.CreateOrderSagaStep_RejectingOrder:
+	case create_order_saga.CreateOrderSagaStep_RejectingOrder:
 		return createordersagastate.CurrentRejectingOrder
-	case model.CreateOrderSagaStep_OrderRejected:
+	case create_order_saga.CreateOrderSagaStep_OrderRejected:
 		return createordersagastate.CurrentOrderRejected
 
 	default:
@@ -69,26 +70,26 @@ func fromModelCurrentState(state model.CreateOrderSagaStep) createordersagastate
 	}
 }
 
-func toModelCurrentState(state createordersagastate.Current) model.CreateOrderSagaStep {
+func toModelCurrentState(state createordersagastate.Current) create_order_saga.CreateOrderSagaStep {
 	switch state {
 	case createordersagastate.CurrentApprovalPending:
-		return model.CreateOrderSagaStep_ApprovalPending
+		return create_order_saga.CreateOrderSagaStep_ApprovalPending
 	case createordersagastate.CurrentCreatingTicket:
-		return model.CreateOrderSagaStep_CreatingTicket
+		return create_order_saga.CreateOrderSagaStep_CreatingTicket
 	case createordersagastate.CurrentAuthorizingCard:
-		return model.CreateOrderSagaStep_AuthorizingCard
+		return create_order_saga.CreateOrderSagaStep_AuthorizingCard
 	case createordersagastate.CurrentApprovingTicket:
-		return model.CreateOrderSagaStep_ApprovingTicket
+		return create_order_saga.CreateOrderSagaStep_ApprovingTicket
 	case createordersagastate.CurrentApprovingOrder:
-		return model.CreateOrderSagaStep_ApprovingOrder
+		return create_order_saga.CreateOrderSagaStep_ApprovingOrder
 	case createordersagastate.CurrentOrderApproved:
-		return model.CreateOrderSagaStep_OrderApproved
+		return create_order_saga.CreateOrderSagaStep_OrderApproved
 	case createordersagastate.CurrentRejectingTicket:
-		return model.CreateOrderSagaStep_RejectingTicket
+		return create_order_saga.CreateOrderSagaStep_RejectingTicket
 	case createordersagastate.CurrentRejectingOrder:
-		return model.CreateOrderSagaStep_RejectingOrder
+		return create_order_saga.CreateOrderSagaStep_RejectingOrder
 	case createordersagastate.CurrentOrderRejected:
-		return model.CreateOrderSagaStep_OrderRejected
+		return create_order_saga.CreateOrderSagaStep_OrderRejected
 
 	default:
 		panic("unexpected state")
@@ -105,8 +106,8 @@ func toModelTicketID(ticketID *uuid.UUID) uuid.NullUUID {
 	}
 }
 
-func toModelOrderSagaState(state *ent.CreateOrderSagaState) *model.CreateOrderSagaState {
-	return &model.CreateOrderSagaState{
+func toModelOrderSagaState(state *ent.CreateOrderSagaState) *create_order_saga.CreateOrderSagaState {
+	return &create_order_saga.CreateOrderSagaState{
 		OrderID:  state.ID,
 		Current:  toModelCurrentState(state.Current),
 		TicketID: toModelTicketID(state.TicketID),

@@ -22,7 +22,7 @@ type CreateOrderSaga struct {
 }
 
 func NewCreateOrderSaga(
-	currentState *model.CreateOrderSagaState,
+	currentState *CreateOrderSagaState,
 	orderSVC service.CreateOrder,
 	kitchenAPI external_service.KitchenAPI,
 	billingAPI external_service.BillingAPI,
@@ -41,56 +41,56 @@ func NewCreateOrderSaga(
 	}
 
 	ms := fsm.NewFSM(
-		model.CreateOrderSagaStep_ApprovalPending,
+		CreateOrderSagaStep_ApprovalPending,
 		fsm.Events{
 			{
 				Name: message.Type_TYPE_EVENT_ORDER_CREATED.String(),
-				Src:  []string{model.CreateOrderSagaStep_ApprovalPending},
-				Dst:  model.CreateOrderSagaStep_CreatingTicket,
+				Src:  []string{CreateOrderSagaStep_ApprovalPending},
+				Dst:  CreateOrderSagaStep_CreatingTicket,
 			},
 			{
 				Name: message.Type_TYPE_EVENT_TICKET_CREATED.String(),
-				Src:  []string{model.CreateOrderSagaStep_CreatingTicket},
-				Dst:  model.CreateOrderSagaStep_AuthorizingCard,
+				Src:  []string{CreateOrderSagaStep_CreatingTicket},
+				Dst:  CreateOrderSagaStep_AuthorizingCard,
 			},
 			{
 				Name: message.Type_TYPE_EVENT_CARD_AUTHORIZED.String(),
-				Src:  []string{model.CreateOrderSagaStep_AuthorizingCard},
-				Dst:  model.CreateOrderSagaStep_ApprovingTicket,
+				Src:  []string{CreateOrderSagaStep_AuthorizingCard},
+				Dst:  CreateOrderSagaStep_ApprovingTicket,
 			},
 			{
 				Name: message.Type_TYPE_EVENT_TICKET_APPROVED.String(),
-				Src:  []string{model.CreateOrderSagaStep_ApprovingTicket},
-				Dst:  model.CreateOrderSagaStep_ApprovingOrder,
+				Src:  []string{CreateOrderSagaStep_ApprovingTicket},
+				Dst:  CreateOrderSagaStep_ApprovingOrder,
 			},
 			{
 				Name: message.Type_TYPE_EVENT_ORDER_APPROVED.String(),
-				Src:  []string{model.CreateOrderSagaStep_ApprovingOrder},
-				Dst:  model.CreateOrderSagaStep_OrderApproved,
+				Src:  []string{CreateOrderSagaStep_ApprovingOrder},
+				Dst:  CreateOrderSagaStep_OrderApproved,
 			},
 
 			// Ticketの作成が失敗した場合
 			{
 				Name: message.Type_TYPE_EVENT_TICKET_CREATION_FAILED.String(),
-				Src:  []string{model.CreateOrderSagaStep_CreatingTicket},
-				Dst:  model.CreateOrderSagaStep_OrderRejected,
+				Src:  []string{CreateOrderSagaStep_CreatingTicket},
+				Dst:  CreateOrderSagaStep_OrderRejected,
 			},
 
 			// オーソリ（仮売上）が失敗した場合
 			{
 				Name: message.Type_TYPE_EVENT_CARD_AUTHORIZATION_FAILED.String(),
-				Src:  []string{model.CreateOrderSagaStep_AuthorizingCard},
-				Dst:  model.CreateOrderSagaStep_RejectingTicket,
+				Src:  []string{CreateOrderSagaStep_AuthorizingCard},
+				Dst:  CreateOrderSagaStep_RejectingTicket,
 			},
 			{
 				Name: message.Type_TYPE_EVENT_TICKET_REJECTED.String(),
-				Src:  []string{model.CreateOrderSagaStep_RejectingTicket},
-				Dst:  model.CreateOrderSagaStep_RejectingOrder,
+				Src:  []string{CreateOrderSagaStep_RejectingTicket},
+				Dst:  CreateOrderSagaStep_RejectingOrder,
 			},
 			{
 				Name: message.Type_TYPE_EVENT_ORDER_REJECTED.String(),
-				Src:  []string{model.CreateOrderSagaStep_RejectingOrder},
-				Dst:  model.CreateOrderSagaStep_OrderRejected,
+				Src:  []string{CreateOrderSagaStep_RejectingOrder},
+				Dst:  CreateOrderSagaStep_OrderRejected,
 			},
 		},
 		fsm.Callbacks{
@@ -158,8 +158,8 @@ func (c *CreateOrderSaga) Event(ctx context.Context, causeEvent *message.Message
 	return nil
 }
 
-func (c *CreateOrderSaga) ExportState() *model.CreateOrderSagaState {
-	return &model.CreateOrderSagaState{
+func (c *CreateOrderSaga) ExportState() *CreateOrderSagaState {
+	return &CreateOrderSagaState{
 		Current:  c.fsm.Current(),
 		OrderID:  c.orderID,
 		TicketID: c.ticketID,
