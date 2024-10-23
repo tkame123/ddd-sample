@@ -101,7 +101,6 @@ func NewCreateOrderSaga(
 				e.Err = c.approveTicket(ctx)
 			},
 			fmt.Sprintf("before_%s", message.Type_TYPE_EVENT_TICKET_CREATED.String()): func(ctx context.Context, e *fsm.Event) {
-				log.Println("before_AuthorizingCard")
 				m, ok := e.Args[0].(*message.Message)
 				if !ok {
 					e.Err = fmt.Errorf("invalid message type")
