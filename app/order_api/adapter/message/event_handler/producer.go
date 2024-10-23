@@ -46,6 +46,15 @@ func (fp *HandlerProducer) GetHandler(m *message.Message) (domain_event.EventHan
 		message.Type_TYPE_EVENT_CARD_AUTHORIZED,
 		message.Type_TYPE_EVENT_CARD_AUTHORIZATION_FAILED:
 		return NewCreateOrderSagaEventHandler(fp.rep, fp.orderCreateSVC, fp.kitchenAPI, fp.billingAPI), nil
+
+	case
+		message.Type_TYPE_EVENT_ORDER_CANCELED,
+		message.Type_TYPE_EVENT_TICKET_CANCELED,
+		message.Type_TYPE_EVENT_CARD_CANCELED,
+		message.Type_TYPE_EVENT_ORDER_CANCELLATION_CONFIRMED,
+		message.Type_TYPE_EVENT_TICKET_CANCELLATION_REJECTED,
+		message.Type_TYPE_EVENT_ORDER_CANCELLATION_REJECTED:
+		return NewCreateCancelSagaEventHandler(fp.rep, fp.orderCancelSVC, fp.kitchenAPI, fp.billingAPI), nil
 	}
 
 	return nil, errors.New("handler not found for event type " + m.Subject.Type.String())
