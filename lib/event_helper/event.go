@@ -31,6 +31,7 @@ var EnvelopNameMap = map[protoreflect.Name]message.Type{
 	"CommandTicketCreate":             message.Type_TYPE_COMMAND_TICKET_CREATE,
 	"CommandTicketApprove":            message.Type_TYPE_COMMAND_TICKET_APPROVE,
 	"CommandTicketReject":             message.Type_TYPE_COMMAND_TICKET_REJECT,
+	"CommandTicketCancel":             message.Type_TYPE_COMMAND_TICKET_CANCEL,
 	"CommandCardAuthorize":            message.Type_TYPE_COMMAND_CARD_AUTHORIZE,
 	"CommandCardCancel":               message.Type_TYPE_COMMAND_CARD_CANCEL,
 }
