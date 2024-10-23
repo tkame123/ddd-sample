@@ -6,6 +6,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/port/mock"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/service/cancel_order_saga"
 	"github.com/tkame123/ddd-sample/proto/message"
 	pb "google.golang.org/protobuf/proto"
@@ -22,6 +23,10 @@ func TestCancelOrderSaga_ShouldCancelOrder(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	mockKitchenAPI := mock.NewMockKitchenAPI(mockCtrl)
+	mockBillingAPI := mock.NewMockBillingAPI(mockCtrl)
+	mockOrderSVC := mock.NewMockCancelOrder(mockCtrl)
+
 	o, _, err := model.NewOrder(nil)
 	if err != nil {
 		t.Errorf("err: %v\n", err)
@@ -31,11 +36,18 @@ func TestCancelOrderSaga_ShouldCancelOrder(t *testing.T) {
 	initialStep := &cancel_order_saga.CancelOrderSagaState{OrderID: orderID, Current: cancel_order_saga.CancelOrderSagaStep_CancelPending}
 	saga, _ := cancel_order_saga.NewCancelOrderSaga(
 		initialStep,
+		mockOrderSVC,
+		mockKitchenAPI,
+		mockBillingAPI,
 	)
 
 	// 下記で絵になるので、迷ったら出力して比較する
 	// http://www.webgraphviz.com/
 	fmt.Println(saga.GetFSMVisualize())
+
+	mockKitchenAPI.EXPECT().CancelTicket(gomock.Any(), gomock.Any(), gomock.Any()).MinTimes(1).Return(nil)
+	mockBillingAPI.EXPECT().CancelCard(gomock.Any(), gomock.Any()).MinTimes(1).Return(nil)
+	mockOrderSVC.EXPECT().CancelConfirmOrder(gomock.Any(), gomock.Any()).MinTimes(1)
 
 	err = saga.Event(ctx,
 		eventCreateHelper(
@@ -89,6 +101,10 @@ func TestCancelOrderSaga_OrderCancelRejectDutToTicketCancelReject(t *testing.T) 
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	mockKitchenAPI := mock.NewMockKitchenAPI(mockCtrl)
+	mockBillingAPI := mock.NewMockBillingAPI(mockCtrl)
+	mockOrderSVC := mock.NewMockCancelOrder(mockCtrl)
+
 	o, _, err := model.NewOrder(nil)
 	if err != nil {
 		t.Errorf("err: %v\n", err)
@@ -98,11 +114,17 @@ func TestCancelOrderSaga_OrderCancelRejectDutToTicketCancelReject(t *testing.T) 
 	initialStep := &cancel_order_saga.CancelOrderSagaState{OrderID: orderID, Current: cancel_order_saga.CancelOrderSagaStep_CancelPending}
 	saga, _ := cancel_order_saga.NewCancelOrderSaga(
 		initialStep,
+		mockOrderSVC,
+		mockKitchenAPI,
+		mockBillingAPI,
 	)
 
 	// 下記で絵になるので、迷ったら出力して比較する
 	// http://www.webgraphviz.com/
 	fmt.Println(saga.GetFSMVisualize())
+
+	mockKitchenAPI.EXPECT().CancelTicket(gomock.Any(), gomock.Any(), gomock.Any()).MinTimes(1).Return(nil)
+	mockOrderSVC.EXPECT().CancelRejectOrder(gomock.Any(), gomock.Any()).MinTimes(1)
 
 	err = saga.Event(ctx,
 		eventCreateHelper(

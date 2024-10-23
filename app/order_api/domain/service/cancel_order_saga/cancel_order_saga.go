@@ -4,22 +4,41 @@ import (
 	"context"
 	"fmt"
 	"github.com/looplab/fsm"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/port/service"
 	"github.com/tkame123/ddd-sample/proto/message"
 	"log"
 )
 
 type CancelOrderSaga struct {
-	fsm *fsm.FSM
+	fsm        *fsm.FSM
+	orderSVC   service.CancelOrder
+	kitchenAPI external_service.KitchenAPI
+	billingAPI external_service.BillingAPI
+
+	orderID  model.OrderID
+	ticketID model.TicketID
 }
 
 func NewCancelOrderSaga(
 	currentState *CancelOrderSagaState,
+	orderSVC service.CancelOrder,
+	kitchenAPI external_service.KitchenAPI,
+	billingAPI external_service.BillingAPI,
 ) (*CancelOrderSaga, error) {
 	if currentState == nil {
 		return nil, fmt.Errorf("current state is nil")
 	}
 
-	c := &CancelOrderSaga{}
+	c := &CancelOrderSaga{
+		orderSVC:   orderSVC,
+		kitchenAPI: kitchenAPI,
+		billingAPI: billingAPI,
+
+		orderID:  currentState.OrderID,
+		ticketID: currentState.TicketID,
+	}
 
 	ms := fsm.NewFSM(
 		CancelOrderSagaStep_CancelPending,
@@ -60,51 +79,26 @@ func NewCancelOrderSaga(
 			// CARDの仮売上のキャンセルの失敗は想定されない
 		},
 		fsm.Callbacks{
-			//"enter_CreatingTicket": func(ctx context.Context, e *fsm.Event) {
-			//	e.Err = c.createTicket(ctx)
-			//},
-			//"enter_ApprovingTicket": func(ctx context.Context, e *fsm.Event) {
-			//	e.Err = c.approveTicket(ctx)
-			//},
-			//fmt.Sprintf("before_%s", message.Type_TYPE_EVENT_TICKET_CREATED.String()): func(ctx context.Context, e *fsm.Event) {
-			//	log.Println("before_AuthorizingCard")
-			//	m, ok := e.Args[0].(*message.Message)
-			//	if !ok {
-			//		e.Err = fmt.Errorf("invalid message type")
-			//		return
-			//	}
-			//	var v message.EventTicketCreated
-			//	if err := m.Envelope.UnmarshalTo(&v); err != nil {
-			//		e.Err = fmt.Errorf("unmarshal failed: %w", err)
-			//		return
-			//	}
-			//	id, err := model.TicketIdParse(v.TicketId)
-			//	if err != nil {
-			//		e.Err = fmt.Errorf("parse ticket id failed: %w", err)
-			//		return
-			//	}
-			//
-			//	e.Err = c.storeTicketID(ctx, *id)
-			//},
-			//"enter_AuthorizingCard": func(ctx context.Context, e *fsm.Event) {
-			//	e.Err = c.authorizeCard(ctx)
-			//},
-			//"enter_ApprovingOrder": func(ctx context.Context, e *fsm.Event) {
-			//	e.Err = c.approveOrder(ctx)
-			//},
-			//"enter_RejectingTicket": func(ctx context.Context, e *fsm.Event) {
-			//	e.Err = c.rejectTicket(ctx)
-			//},
-			//"enter_RejectingOrder": func(ctx context.Context, e *fsm.Event) {
-			//	e.Err = c.rejectOrder(ctx)
-			//},
+			"enter_CancelingTicket": func(ctx context.Context, e *fsm.Event) {
+				e.Err = c.cancelTicket(ctx)
+			},
+			"enter_CancelingCard": func(ctx context.Context, e *fsm.Event) {
+				e.Err = c.cancelCard(ctx)
+			},
+			"enter_CancellationConfirmingOrder": func(ctx context.Context, e *fsm.Event) {
+				e.Err = c.cancelConfirmOrder(ctx)
+			},
+
+			"enter_CancellationRejectingOrder": func(ctx context.Context, e *fsm.Event) {
+				e.Err = c.cancelRejectOrder(ctx)
+			},
 		},
 	)
 
 	ms.SetState(currentState.Current)
 	c.fsm = ms
 
-	log.Println("CreateOrderSaga initialized and available transitions are:", c.fsm.AvailableTransitions())
+	log.Println("CancelOrderSaga initialized and available transitions are:", c.fsm.AvailableTransitions())
 
 	return c, nil
 }
@@ -124,49 +118,36 @@ func (c *CancelOrderSaga) Event(ctx context.Context, causeEvent *message.Message
 	return nil
 }
 
-//func (c *CancelOrderSaga) ExportState() *CancelOrderSagaState {
-//	return &CancelOrderSagaState{
-//		Current:  c.fsm.Current(),
-//		OrderID:  c.orderID,
-//		TicketID: c.ticketID,
-//	}
-//}
+func (c *CancelOrderSaga) ExportState() *CancelOrderSagaState {
+	return &CancelOrderSagaState{
+		Current:  c.fsm.Current(),
+		OrderID:  c.orderID,
+		TicketID: c.ticketID,
+	}
+}
 
-//func (c *CreateOrderSaga) createTicket(ctx context.Context) error {
-//	return c.kitchenAPI.CreateTicket(ctx, c.orderID)
-//}
-//
-//func (c *CreateOrderSaga) approveTicket(ctx context.Context) error {
-//	return c.kitchenAPI.ApproveTicket(ctx, c.orderID, c.ticketID)
-//}
-//
-//func (c *CreateOrderSaga) rejectTicket(ctx context.Context) error {
-//	return c.kitchenAPI.RejectTicket(ctx, c.orderID, c.ticketID)
-//}
-//
-//func (c *CreateOrderSaga) storeTicketID(ctx context.Context, ticketID model.TicketID) error {
-//	c.ticketID = ticketID
-//	return nil
-//}
-//
-//func (c *CreateOrderSaga) authorizeCard(ctx context.Context) error {
-//	return c.billingAPI.AuthorizeCard(ctx, c.orderID)
-//}
-//
-//func (c *CreateOrderSaga) approveOrder(ctx context.Context) error {
-//	_, err := c.orderSVC.ApproveOrder(ctx, c.orderID)
-//	if err != nil {
-//		return fmt.Errorf("approve order failed: %w", err)
-//	}
-//
-//	return nil
-//}
-//
-//func (c *CreateOrderSaga) rejectOrder(ctx context.Context) error {
-//	_, err := c.orderSVC.RejectOrder(ctx, c.orderID)
-//	if err != nil {
-//		return fmt.Errorf("reject order failed: %w", err)
-//	}
-//
-//	return nil
-//}
+func (c *CancelOrderSaga) cancelConfirmOrder(ctx context.Context) error {
+	_, err := c.orderSVC.CancelConfirmOrder(ctx, c.orderID)
+	if err != nil {
+		return fmt.Errorf("cancel confirm order failed: %w", err)
+	}
+
+	return nil
+}
+
+func (c *CancelOrderSaga) cancelRejectOrder(ctx context.Context) error {
+	_, err := c.orderSVC.CancelRejectOrder(ctx, c.orderID)
+	if err != nil {
+		return fmt.Errorf("cancel reject order failed: %w", err)
+	}
+
+	return nil
+}
+
+func (c *CancelOrderSaga) cancelTicket(ctx context.Context) error {
+	return c.kitchenAPI.CancelTicket(ctx, c.orderID, c.ticketID)
+}
+
+func (c *CancelOrderSaga) cancelCard(ctx context.Context) error {
+	return c.billingAPI.CancelCard(ctx, c.orderID)
+}
