@@ -9,4 +9,5 @@ type KitchenAPI interface {
 	CreateTicket(ctx context.Context, orderID model.OrderID) error
 	ApproveTicket(ctx context.Context, orderID model.OrderID, ticketID model.TicketID) error
 	RejectTicket(ctx context.Context, orderID model.OrderID, ticketID model.TicketID) error
+	CancelTicket(ctx context.Context, orderID model.OrderID, ticketID model.TicketID) error
 }

@@ -14,7 +14,7 @@ import (
 var providerCommandConsumerSet = wire.NewSet(
 	message.NewCommandConsumer,
 	message.NewEventPublisher,
-	usecase.NewService,
+	usecase.NewBillService,
 	database.NewRepository,
 
 	provider.NewENV,

@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/cancelordersagastate"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/createordersagastate"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/orderitem"
@@ -76,6 +77,7 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			cancelordersagastate.Table: cancelordersagastate.ValidColumn,
 			createordersagastate.Table: createordersagastate.ValidColumn,
 			order.Table:                order.ValidColumn,
 			orderitem.Table:            orderitem.ValidColumn,

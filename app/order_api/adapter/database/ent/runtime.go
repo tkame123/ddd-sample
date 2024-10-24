@@ -5,6 +5,7 @@ package ent
 import (
 	"time"
 
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/cancelordersagastate"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/createordersagastate"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/orderitem"
@@ -16,6 +17,18 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	cancelordersagastateFields := schema.CancelOrderSagaState{}.Fields()
+	_ = cancelordersagastateFields
+	// cancelordersagastateDescCreatedAt is the schema descriptor for created_at field.
+	cancelordersagastateDescCreatedAt := cancelordersagastateFields[3].Descriptor()
+	// cancelordersagastate.DefaultCreatedAt holds the default value on creation for the created_at field.
+	cancelordersagastate.DefaultCreatedAt = cancelordersagastateDescCreatedAt.Default.(func() time.Time)
+	// cancelordersagastateDescUpdatedAt is the schema descriptor for updated_at field.
+	cancelordersagastateDescUpdatedAt := cancelordersagastateFields[4].Descriptor()
+	// cancelordersagastate.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	cancelordersagastate.DefaultUpdatedAt = cancelordersagastateDescUpdatedAt.Default.(func() time.Time)
+	// cancelordersagastate.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	cancelordersagastate.UpdateDefaultUpdatedAt = cancelordersagastateDescUpdatedAt.UpdateDefault.(func() time.Time)
 	createordersagastateFields := schema.CreateOrderSagaState{}.Fields()
 	_ = createordersagastateFields
 	// createordersagastateDescCreatedAt is the schema descriptor for created_at field.

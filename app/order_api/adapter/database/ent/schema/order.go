@@ -28,6 +28,8 @@ func (Order) Fields() []ent.Field {
 				model.OrderStatus_ApprovalPending,
 				model.OrderStatus_Approved,
 				model.OrderStatus_Rejected,
+				model.OrderStatus_CancelPending,
+				model.OrderStatus_Canceled,
 			),
 		field.Int64("version").
 			DefaultFunc(func() int64 {

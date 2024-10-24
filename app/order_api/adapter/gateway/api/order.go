@@ -4,7 +4,7 @@ import (
 	"connectrpc.com/connect"
 	"context"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/domain_event"
-	"github.com/tkame123/ddd-sample/app/order_api/usecase/create_order"
+	"github.com/tkame123/ddd-sample/app/order_api/usecase"
 	"github.com/tkame123/ddd-sample/proto/order_api/v1/order_apiv1connect"
 
 	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
@@ -22,7 +22,7 @@ type orderServiceServer struct {
 func (s *orderServiceServer) CreateOrder(
 	ctx context.Context, req *connect.Request[order_apiv1.CreateOrderRequest],
 ) (*connect.Response[order_apiv1.CreateOrderResponse], error) {
-	svc := create_order.NewService(s.rep, s.pub)
+	svc := usecase.NewOrderService(s.rep, s.pub)
 
 	items, err := toModelOrderItemRequest(req.Msg.GetItems())
 	if err != nil {
@@ -35,6 +35,27 @@ func (s *orderServiceServer) CreateOrder(
 	}
 
 	return connect.NewResponse(&order_apiv1.CreateOrderResponse{
+		Id: orderId.String(),
+	}), nil
+}
+
+func (s *orderServiceServer) CancelOrder(
+	ctx context.Context, req *connect.Request[order_apiv1.CancelOrderRequest],
+) (*connect.Response[order_apiv1.CancelOrderResponse], error) {
+	id := req.Msg.GetId()
+	parsedId, err := model.OrderIdParse(id)
+	if err != nil {
+		return nil, err
+	}
+
+	svc := usecase.NewOrderService(s.rep, s.pub)
+
+	orderId, err := svc.CancelOrder(ctx, *parsedId)
+	if err != nil {
+		return nil, err
+	}
+
+	return connect.NewResponse(&order_apiv1.CancelOrderResponse{
 		Id: orderId.String(),
 	}), nil
 }

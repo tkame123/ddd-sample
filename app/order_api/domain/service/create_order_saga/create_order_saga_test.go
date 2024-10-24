@@ -25,7 +25,7 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 
 	mockKitchenAPI := mock.NewMockKitchenAPI(mockCtrl)
 	mockBillingAPI := mock.NewMockBillingAPI(mockCtrl)
-	mockOrderSVC := mock.NewMockCreateOrder(mockCtrl)
+	mockOrderSVC := mock.NewMockOrderService(mockCtrl)
 
 	o, _, err := model.NewOrder(nil)
 	if err != nil {
@@ -33,7 +33,7 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 	}
 	orderID := o.OrderID
 	ticketID := uuid.New()
-	initialStep := &model.CreateOrderSagaState{OrderID: orderID, Current: model.CreateOrderSagaStep_ApprovalPending}
+	initialStep := &servive.CreateOrderSagaState{OrderID: orderID, Current: servive.CreateOrderSagaStep_ApprovalPending}
 	saga, _ := servive.NewCreateOrderSaga(
 		initialStep,
 		mockOrderSVC,
@@ -109,8 +109,8 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	if got := saga.CurrentStep(); got != model.CreateOrderSagaStep_OrderApproved {
-		t.Errorf("CurrentStep() = %v, want %v", got, model.CreateOrderSagaStep_OrderApproved)
+	if got := saga.CurrentStep(); got != servive.CreateOrderSagaStep_OrderApproved {
+		t.Errorf("CurrentStep() = %v, want %v", got, servive.CreateOrderSagaStep_OrderApproved)
 	}
 }
 
@@ -121,14 +121,14 @@ func TestCreateOrderSaga_OrderRejectedDutToTicketCreationFailed(t *testing.T) {
 
 	mockKitchenAPI := mock.NewMockKitchenAPI(mockCtrl)
 	mockBillingAPI := mock.NewMockBillingAPI(mockCtrl)
-	mockOrderSVC := mock.NewMockCreateOrder(mockCtrl)
+	mockOrderSVC := mock.NewMockOrderService(mockCtrl)
 
 	o, _, err := model.NewOrder(nil)
 	if err != nil {
 		t.Errorf("err: %v\n", err)
 	}
 	orderID := o.OrderID
-	initialStep := &model.CreateOrderSagaState{OrderID: orderID, Current: model.CreateOrderSagaStep_ApprovalPending}
+	initialStep := &servive.CreateOrderSagaState{OrderID: orderID, Current: servive.CreateOrderSagaStep_ApprovalPending}
 	saga, _ := servive.NewCreateOrderSaga(
 		initialStep,
 		mockOrderSVC,
@@ -160,8 +160,8 @@ func TestCreateOrderSaga_OrderRejectedDutToTicketCreationFailed(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	if got := saga.CurrentStep(); got != model.CreateOrderSagaStep_OrderRejected {
-		t.Errorf("CurrentStep() = %v, want %v", got, model.CreateOrderSagaStep_OrderRejected)
+	if got := saga.CurrentStep(); got != servive.CreateOrderSagaStep_OrderRejected {
+		t.Errorf("CurrentStep() = %v, want %v", got, servive.CreateOrderSagaStep_OrderRejected)
 	}
 }
 
@@ -172,14 +172,14 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 
 	mockKitchenAPI := mock.NewMockKitchenAPI(mockCtrl)
 	mockBillingAPI := mock.NewMockBillingAPI(mockCtrl)
-	mockOrderSVC := mock.NewMockCreateOrder(mockCtrl)
+	mockOrderSVC := mock.NewMockOrderService(mockCtrl)
 
 	o, _, err := model.NewOrder(nil)
 	if err != nil {
 		t.Errorf("err: %v\n", err)
 	}
 	orderID := o.OrderID
-	initialStep := &model.CreateOrderSagaState{OrderID: orderID, Current: model.CreateOrderSagaStep_ApprovalPending}
+	initialStep := &servive.CreateOrderSagaState{OrderID: orderID, Current: servive.CreateOrderSagaStep_ApprovalPending}
 	saga, _ := servive.NewCreateOrderSaga(
 		initialStep,
 		mockOrderSVC,
@@ -241,7 +241,7 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 		t.Errorf("err: %v\n", err)
 	}
 
-	if got := saga.CurrentStep(); got != model.CreateOrderSagaStep_OrderRejected {
-		t.Errorf("CurrentStep() = %v, want %v", got, model.CreateOrderSagaStep_OrderRejected)
+	if got := saga.CurrentStep(); got != servive.CreateOrderSagaStep_OrderRejected {
+		t.Errorf("CurrentStep() = %v, want %v", got, servive.CreateOrderSagaStep_OrderRejected)
 	}
 }

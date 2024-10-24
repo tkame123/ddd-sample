@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/cancelordersagastate"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/createordersagastate"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/order"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent/orderitem"
@@ -27,6 +28,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// CancelOrderSagaState is the client for interacting with the CancelOrderSagaState builders.
+	CancelOrderSagaState *CancelOrderSagaStateClient
 	// CreateOrderSagaState is the client for interacting with the CreateOrderSagaState builders.
 	CreateOrderSagaState *CreateOrderSagaStateClient
 	// Order is the client for interacting with the Order builders.
@@ -46,6 +49,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.CancelOrderSagaState = NewCancelOrderSagaStateClient(c.config)
 	c.CreateOrderSagaState = NewCreateOrderSagaStateClient(c.config)
 	c.Order = NewOrderClient(c.config)
 	c.OrderItem = NewOrderItemClient(c.config)
@@ -142,6 +146,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:                  ctx,
 		config:               cfg,
+		CancelOrderSagaState: NewCancelOrderSagaStateClient(cfg),
 		CreateOrderSagaState: NewCreateOrderSagaStateClient(cfg),
 		Order:                NewOrderClient(cfg),
 		OrderItem:            NewOrderItemClient(cfg),
@@ -165,6 +170,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:                  ctx,
 		config:               cfg,
+		CancelOrderSagaState: NewCancelOrderSagaStateClient(cfg),
 		CreateOrderSagaState: NewCreateOrderSagaStateClient(cfg),
 		Order:                NewOrderClient(cfg),
 		OrderItem:            NewOrderItemClient(cfg),
@@ -175,7 +181,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		CreateOrderSagaState.
+//		CancelOrderSagaState.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -197,6 +203,7 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.CancelOrderSagaState.Use(hooks...)
 	c.CreateOrderSagaState.Use(hooks...)
 	c.Order.Use(hooks...)
 	c.OrderItem.Use(hooks...)
@@ -206,6 +213,7 @@ func (c *Client) Use(hooks ...Hook) {
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.CancelOrderSagaState.Intercept(interceptors...)
 	c.CreateOrderSagaState.Intercept(interceptors...)
 	c.Order.Intercept(interceptors...)
 	c.OrderItem.Intercept(interceptors...)
@@ -215,6 +223,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *CancelOrderSagaStateMutation:
+		return c.CancelOrderSagaState.mutate(ctx, m)
 	case *CreateOrderSagaStateMutation:
 		return c.CreateOrderSagaState.mutate(ctx, m)
 	case *OrderMutation:
@@ -225,6 +235,139 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.ProcessedMessage.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// CancelOrderSagaStateClient is a client for the CancelOrderSagaState schema.
+type CancelOrderSagaStateClient struct {
+	config
+}
+
+// NewCancelOrderSagaStateClient returns a client for the CancelOrderSagaState from the given config.
+func NewCancelOrderSagaStateClient(c config) *CancelOrderSagaStateClient {
+	return &CancelOrderSagaStateClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `cancelordersagastate.Hooks(f(g(h())))`.
+func (c *CancelOrderSagaStateClient) Use(hooks ...Hook) {
+	c.hooks.CancelOrderSagaState = append(c.hooks.CancelOrderSagaState, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `cancelordersagastate.Intercept(f(g(h())))`.
+func (c *CancelOrderSagaStateClient) Intercept(interceptors ...Interceptor) {
+	c.inters.CancelOrderSagaState = append(c.inters.CancelOrderSagaState, interceptors...)
+}
+
+// Create returns a builder for creating a CancelOrderSagaState entity.
+func (c *CancelOrderSagaStateClient) Create() *CancelOrderSagaStateCreate {
+	mutation := newCancelOrderSagaStateMutation(c.config, OpCreate)
+	return &CancelOrderSagaStateCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CancelOrderSagaState entities.
+func (c *CancelOrderSagaStateClient) CreateBulk(builders ...*CancelOrderSagaStateCreate) *CancelOrderSagaStateCreateBulk {
+	return &CancelOrderSagaStateCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *CancelOrderSagaStateClient) MapCreateBulk(slice any, setFunc func(*CancelOrderSagaStateCreate, int)) *CancelOrderSagaStateCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &CancelOrderSagaStateCreateBulk{err: fmt.Errorf("calling to CancelOrderSagaStateClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*CancelOrderSagaStateCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &CancelOrderSagaStateCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CancelOrderSagaState.
+func (c *CancelOrderSagaStateClient) Update() *CancelOrderSagaStateUpdate {
+	mutation := newCancelOrderSagaStateMutation(c.config, OpUpdate)
+	return &CancelOrderSagaStateUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CancelOrderSagaStateClient) UpdateOne(coss *CancelOrderSagaState) *CancelOrderSagaStateUpdateOne {
+	mutation := newCancelOrderSagaStateMutation(c.config, OpUpdateOne, withCancelOrderSagaState(coss))
+	return &CancelOrderSagaStateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CancelOrderSagaStateClient) UpdateOneID(id uuid.UUID) *CancelOrderSagaStateUpdateOne {
+	mutation := newCancelOrderSagaStateMutation(c.config, OpUpdateOne, withCancelOrderSagaStateID(id))
+	return &CancelOrderSagaStateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CancelOrderSagaState.
+func (c *CancelOrderSagaStateClient) Delete() *CancelOrderSagaStateDelete {
+	mutation := newCancelOrderSagaStateMutation(c.config, OpDelete)
+	return &CancelOrderSagaStateDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CancelOrderSagaStateClient) DeleteOne(coss *CancelOrderSagaState) *CancelOrderSagaStateDeleteOne {
+	return c.DeleteOneID(coss.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CancelOrderSagaStateClient) DeleteOneID(id uuid.UUID) *CancelOrderSagaStateDeleteOne {
+	builder := c.Delete().Where(cancelordersagastate.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CancelOrderSagaStateDeleteOne{builder}
+}
+
+// Query returns a query builder for CancelOrderSagaState.
+func (c *CancelOrderSagaStateClient) Query() *CancelOrderSagaStateQuery {
+	return &CancelOrderSagaStateQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCancelOrderSagaState},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a CancelOrderSagaState entity by its id.
+func (c *CancelOrderSagaStateClient) Get(ctx context.Context, id uuid.UUID) (*CancelOrderSagaState, error) {
+	return c.Query().Where(cancelordersagastate.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CancelOrderSagaStateClient) GetX(ctx context.Context, id uuid.UUID) *CancelOrderSagaState {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CancelOrderSagaStateClient) Hooks() []Hook {
+	return c.hooks.CancelOrderSagaState
+}
+
+// Interceptors returns the client interceptors.
+func (c *CancelOrderSagaStateClient) Interceptors() []Interceptor {
+	return c.inters.CancelOrderSagaState
+}
+
+func (c *CancelOrderSagaStateClient) mutate(ctx context.Context, m *CancelOrderSagaStateMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CancelOrderSagaStateCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CancelOrderSagaStateUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CancelOrderSagaStateUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CancelOrderSagaStateDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown CancelOrderSagaState mutation op: %q", m.Op())
 	}
 }
 
@@ -795,9 +938,11 @@ func (c *ProcessedMessageClient) mutate(ctx context.Context, m *ProcessedMessage
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		CreateOrderSagaState, Order, OrderItem, ProcessedMessage []ent.Hook
+		CancelOrderSagaState, CreateOrderSagaState, Order, OrderItem,
+		ProcessedMessage []ent.Hook
 	}
 	inters struct {
-		CreateOrderSagaState, Order, OrderItem, ProcessedMessage []ent.Interceptor
+		CancelOrderSagaState, CreateOrderSagaState, Order, OrderItem,
+		ProcessedMessage []ent.Interceptor
 	}
 )

@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/database/ent"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/message/event_handler"
 	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
@@ -27,7 +28,7 @@ type EventConsumer struct {
 	sqsClient  *sqs.Client
 	queueUrl   string
 	rep        repository.Repository
-	orderSVC   service.CreateOrder
+	orderSVC   service.OrderService
 	kitchenAPI external_service.KitchenAPI
 	billingAPI external_service.BillingAPI
 }
@@ -36,7 +37,7 @@ func NewEventConsumer(
 	cfg *provider.ConsumerConfig,
 	sqsClient *sqs.Client,
 	rep repository.Repository,
-	orderSVC service.CreateOrder,
+	orderSVC service.OrderService,
 	kitchenAPI external_service.KitchenAPI,
 	billingAPI external_service.BillingAPI,
 ) *EventConsumer {
@@ -146,12 +147,12 @@ func (e *EventConsumer) workerHandler(ctx context.Context, msg *types.Message) e
 }
 
 func (e *EventConsumer) processEvent(ctx context.Context, mes *message.Message) error {
-	err := NewEventHandler(
+	err := event_handler.EventMap[mes.Subject.Type](
 		e.rep,
 		e.orderSVC,
 		e.kitchenAPI,
-		e.billingAPI).
-		Handler(ctx, mes)
+		e.billingAPI,
+	).Handler(ctx, mes)
 	if err != nil {
 		return err
 	}

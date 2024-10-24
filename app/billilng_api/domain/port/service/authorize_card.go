@@ -5,6 +5,7 @@ import (
 	"github.com/tkame123/ddd-sample/app/billilng_api/domain/model"
 )
 
-type CreateBill interface {
+type Bill interface {
 	AuthorizeCard(ctx context.Context, orderID model.OrderID, token any) error
+	CancelCard(ctx context.Context, orderID model.OrderID) error
 }

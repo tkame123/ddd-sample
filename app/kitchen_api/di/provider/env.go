@@ -10,10 +10,12 @@ type EnvConfig struct {
 	DSN string `env:"KITCHEN_API_DSN"`
 
 	// SNS
-	ArnTopicEventKitchenTicketCreated        string `env:"TOPIC_ARN_EVENT_KITCHEN_TICKET_CREATED"`
-	ArnTopicEventKitchenTicketCreationFailed string `env:"TOPIC_ARN_EVENT_KITCHEN_TICKET_CREATION_FAILED"`
-	ArnTopicEventKitchenTicketApproved       string `env:"TOPIC_ARN_EVENT_KITCHEN_TICKET_APPROVED"`
-	ArnTopicEventKitchenTicketRejected       string `env:"TOPIC_ARN_EVENT_KITCHEN_TICKET_REJECTED"`
+	ArnTopicEventKitchenTicketCreated              string `env:"TOPIC_ARN_EVENT_KITCHEN_TICKET_CREATED"`
+	ArnTopicEventKitchenTicketCreationFailed       string `env:"TOPIC_ARN_EVENT_KITCHEN_TICKET_CREATION_FAILED"`
+	ArnTopicEventKitchenTicketApproved             string `env:"TOPIC_ARN_EVENT_KITCHEN_TICKET_APPROVED"`
+	ArnTopicEventKitchenTicketRejected             string `env:"TOPIC_ARN_EVENT_KITCHEN_TICKET_REJECTED"`
+	ArnTopicEventKitchenTicketCanceled             string `env:"TOPIC_ARN_EVENT_KITCHEN_TICKET_CANCELED"`
+	ArnTopicEventKitchenTicketCancellationRejected string `env:"TOPIC_ARN_EVENT_KITCHEN_TICKET_CANCELLATION_REJECTED"`
 
 	// SQS
 	SqsUrlKitchenEvent   string `env:"SQS_URL_KITCHEN_EVENT"`

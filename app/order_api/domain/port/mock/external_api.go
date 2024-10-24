@@ -49,6 +49,20 @@ func (mr *MockBillingAPIMockRecorder) AuthorizeCard(arg0, arg1 interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthorizeCard", reflect.TypeOf((*MockBillingAPI)(nil).AuthorizeCard), arg0, arg1)
 }
 
+// CancelCard mocks base method.
+func (m *MockBillingAPI) CancelCard(arg0 context.Context, arg1 uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CancelCard", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CancelCard indicates an expected call of CancelCard.
+func (mr *MockBillingAPIMockRecorder) CancelCard(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CancelCard", reflect.TypeOf((*MockBillingAPI)(nil).CancelCard), arg0, arg1)
+}
+
 // MockKitchenAPI is a mock of KitchenAPI interface.
 type MockKitchenAPI struct {
 	ctrl     *gomock.Controller
@@ -84,6 +98,20 @@ func (m *MockKitchenAPI) ApproveTicket(arg0 context.Context, arg1 uuid.UUID, arg
 func (mr *MockKitchenAPIMockRecorder) ApproveTicket(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ApproveTicket", reflect.TypeOf((*MockKitchenAPI)(nil).ApproveTicket), arg0, arg1, arg2)
+}
+
+// CancelTicket mocks base method.
+func (m *MockKitchenAPI) CancelTicket(arg0 context.Context, arg1 uuid.UUID, arg2 uuid.NullUUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CancelTicket", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CancelTicket indicates an expected call of CancelTicket.
+func (mr *MockKitchenAPIMockRecorder) CancelTicket(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CancelTicket", reflect.TypeOf((*MockKitchenAPI)(nil).CancelTicket), arg0, arg1, arg2)
 }
 
 // CreateTicket mocks base method.

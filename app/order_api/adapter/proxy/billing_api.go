@@ -31,3 +31,18 @@ func (k *BillingAPI) AuthorizeCard(ctx context.Context, orderID model.OrderID) e
 
 	return nil
 }
+
+func (k *BillingAPI) CancelCard(ctx context.Context, orderID model.OrderID) error {
+	command, err := model.CreateMessage(
+		&message.CommandCardCancel{
+			OrderId: orderID.String(),
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create message: %w", err)
+	}
+
+	k.pub.PublishMessages(ctx, []*message.Message{command})
+
+	return nil
+}

@@ -8,7 +8,6 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/external_service"
 	"github.com/tkame123/ddd-sample/app/order_api/domain/port/repository"
 	"github.com/tkame123/ddd-sample/proto/message"
-	"log"
 )
 
 type KitchenAPI struct {
@@ -69,7 +68,33 @@ func (k *KitchenAPI) ApproveTicket(ctx context.Context, orderID model.OrderID, t
 }
 
 func (k *KitchenAPI) RejectTicket(ctx context.Context, orderID model.OrderID, ticketID model.TicketID) error {
-	//	TODO: Implement this
-	log.Println("implement me:  KitchenAPI RejectTicket")
+	command, err := model.CreateMessage(
+		&message.CommandTicketReject{
+			OrderId:  orderID.String(),
+			TicketId: ticketID.UUID.String(),
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create message: %w", err)
+	}
+
+	k.pub.PublishMessages(ctx, []*message.Message{command})
+
+	return nil
+}
+
+func (k *KitchenAPI) CancelTicket(ctx context.Context, orderID model.OrderID, ticketID model.TicketID) error {
+	command, err := model.CreateMessage(
+		&message.CommandTicketCancel{
+			OrderId:  orderID.String(),
+			TicketId: ticketID.UUID.String(),
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create message: %w", err)
+	}
+
+	k.pub.PublishMessages(ctx, []*message.Message{command})
+
 	return nil
 }

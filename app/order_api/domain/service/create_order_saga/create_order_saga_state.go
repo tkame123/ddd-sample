@@ -1,9 +1,12 @@
-package model
+package create_order_saga
+
+import "github.com/tkame123/ddd-sample/app/order_api/domain/model"
 
 type CreateOrderSagaState struct {
-	OrderID  OrderID
-	Current  CreateOrderSagaStep
-	TicketID TicketID
+	Current CreateOrderSagaStep
+
+	OrderID  model.OrderID
+	TicketID model.TicketID
 }
 
 type CreateOrderSagaStep = string

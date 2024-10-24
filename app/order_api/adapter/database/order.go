@@ -115,6 +115,10 @@ func fromModelOrderStatus(status model.OrderStatus) e_order.Status {
 		return e_order.StatusApproved
 	case model.OrderStatus_Rejected:
 		return e_order.StatusRejected
+	case model.OrderStatus_CancelPending:
+		return e_order.StatusCancelPending
+	case model.OrderStatus_Canceled:
+		return e_order.StatusCanceled
 	default:
 		panic("invalid status")
 	}
@@ -128,6 +132,10 @@ func toModelOrderStatus(status e_order.Status) model.OrderStatus {
 		return model.OrderStatus_Approved
 	case e_order.StatusRejected:
 		return model.OrderStatus_Rejected
+	case e_order.StatusCancelPending:
+		return model.OrderStatus_CancelPending
+	case e_order.StatusCanceled:
+		return model.OrderStatus_Canceled
 	default:
 		panic("invalid status")
 	}

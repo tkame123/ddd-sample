@@ -1,19 +1,19 @@
+// go:build wireinject
 //go:build wireinject
 // +build wireinject
 
 package di
 
 import (
+	"github.com/google/wire"
 	_ "github.com/lib/pq"
+	"github.com/tkame123/ddd-sample/app/order_api/adapter/database"
+	connect "github.com/tkame123/ddd-sample/app/order_api/adapter/gateway/api"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/idempotency"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/message"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/proxy"
-	"github.com/tkame123/ddd-sample/app/order_api/usecase/create_order"
-
-	"github.com/google/wire"
-	"github.com/tkame123/ddd-sample/app/order_api/adapter/database"
-	connect "github.com/tkame123/ddd-sample/app/order_api/adapter/gateway/api"
 	provider "github.com/tkame123/ddd-sample/app/order_api/di/provider"
+	"github.com/tkame123/ddd-sample/app/order_api/usecase"
 )
 
 var providerServerSet = wire.NewSet(
@@ -50,7 +50,7 @@ var providerReplyConsumerSet = wire.NewSet(
 var providerConsumerSet = wire.NewSet(
 	message.NewEventPublisher,
 	database.NewRepository,
-	create_order.NewService,
+	usecase.NewOrderService,
 	proxy.NewBillingAPI,
 	proxy.NewKitchenAPI,
 

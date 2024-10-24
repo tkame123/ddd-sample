@@ -12,6 +12,7 @@ type EnvConfig struct {
 	// SNS
 	ArnTopicEventBillingCardAuthorized      string `env:"TOPIC_ARN_EVENT_BILLING_CARD_AUTHORIZED"`
 	ArnTopicEventBillingCardAuthorizeFailed string `env:"TOPIC_ARN_EVENT_BILLING_CARD_AUTHORIZE_FAILED"`
+	ArnTopicEventBillingCardCanceled        string `env:"TOPIC_ARN_EVENT_BILLING_CARD_CANCELED"`
 
 	// SQS
 	SqsUrlBillingEvent   string `env:"SQS_URL_BILLING_EVENT"`

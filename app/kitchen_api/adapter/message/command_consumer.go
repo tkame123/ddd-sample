@@ -26,21 +26,21 @@ type CommandConsumer struct {
 	sqsClient *sqs.Client
 	queueUrl  string
 	rep       repository.Repository
-	svc       service.CreateTicket
+	ticketSVC service.Ticket
 }
 
 func NewCommandConsumer(
 	cfg *provider.ConsumerConfig,
 	sqsClient *sqs.Client,
 	rep repository.Repository,
-	svc service.CreateTicket,
+	ticketSVC service.Ticket,
 ) *CommandConsumer {
 	return &CommandConsumer{
 		cfg:       cfg,
 		sqsClient: sqsClient,
 		rep:       rep,
 		queueUrl:  cfg.Command.QueueUrl,
-		svc:       svc,
+		ticketSVC: ticketSVC,
 	}
 }
 
@@ -138,10 +138,7 @@ func (e *CommandConsumer) workerHandler(ctx context.Context, msg *types.Message)
 }
 
 func (e *CommandConsumer) processEvent(ctx context.Context, mes *message.Message) error {
-	if !event_handler2.IsCreateTicketEvent(mes.Subject.Type) {
-		return fmt.Errorf("invalid event: %s", mes.Subject.Type)
-	}
-	err := event_handler2.EventMap[mes.Subject.Type](e.svc).Handler(ctx, mes)
+	err := event_handler2.EventMap[mes.Subject.Type](e.ticketSVC).Handler(ctx, mes)
 	if err != nil {
 		return err
 	}

@@ -31,6 +31,12 @@ awslocal sns create-topic --name ddd-sample-event-order-order_approved
 
 awslocal sns create-topic --name ddd-sample-event-order-order_rejected
 
+awslocal sns create-topic --name ddd-sample-event-order-order_canceled
+
+awslocal sns create-topic --name ddd-sample-event-order-order_cancellation_confirmed
+
+awslocal sns create-topic --name ddd-sample-event-order-order_cancellation_rejected
+
 awslocal sns create-topic --name ddd-sample-command-order-order_approve
 
 awslocal sns create-topic --name ddd-sample-command-order-order_reject
@@ -43,17 +49,27 @@ awslocal sns create-topic --name ddd-sample-event-kitchen-ticket_approved
 
 awslocal sns create-topic --name ddd-sample-event-kitchen-ticket_rejected
 
+awslocal sns create-topic --name ddd-sample-event-kitchen-ticket_canceled
+
+awslocal sns create-topic --name ddd-sample-event-kitchen-ticket_cancellation_rejected
+
 awslocal sns create-topic --name ddd-sample-command-kitchen-ticket_create
 
 awslocal sns create-topic --name ddd-sample-command-kitchen-ticket_approve
 
 awslocal sns create-topic --name ddd-sample-command-kitchen-ticket_reject
 
+awslocal sns create-topic --name ddd-sample-command-kitchen-ticket_cancel
+
 awslocal sns create-topic --name ddd-sample-event-billing-card_authorized
 
 awslocal sns create-topic --name ddd-sample-event-billing-card_authorize_failed
 
+awslocal sns create-topic --name ddd-sample-event-billing-card_canceled
+
 awslocal sns create-topic --name ddd-sample-command-billing-card_authorize
+
+awslocal sns create-topic --name ddd-sample-command-billing-card_cancel
 
 # OrderAPI SQS
 
@@ -95,6 +111,12 @@ awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-
 
 awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-order-order_rejected" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-event-queque"
 
+awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-order-order_canceled" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-event-queque"
+
+awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-order-order_cancellation_confirmed" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-event-queque"
+
+awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-order-order_cancellation_rejected" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-event-queque"
+
 awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-kitchen-ticket_created" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-reply-queque"
 
 awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-kitchen-ticket_creation_failed" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-reply-queque"
@@ -103,9 +125,15 @@ awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-
 
 awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-kitchen-ticket_rejected" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-reply-queque"
 
+awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-kitchen-ticket_canceled" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-reply-queque"
+
+awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-kitchen-ticket_cancellation_rejected" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-reply-queque"
+
 awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-billing-card_authorized" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-reply-queque"
 
 awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-billing-card_authorize_failed" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-reply-queque"
+
+awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-event-billing-card_canceled" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-reply-queque"
 
 awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-order-order_approve" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-order-command-queque"
 
@@ -149,6 +177,8 @@ awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-
 
 awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-kitchen-ticket_reject" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-kitchen-command-queque"
 
+awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-kitchen-ticket_cancel" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-kitchen-command-queque"
+
 # BillingAPI SQS
 
 echo "BillingAPI SQS Creating..."
@@ -182,3 +212,5 @@ awslocal sqs set-queue-attributes \
 echo "BillingAPI SubScribe Creating..."
 
 awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-billing-card_authorize" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-billing-command-queque"
+
+awslocal sns subscribe --topic-arn "arn:aws:sns:ap-northeast-1:000000000000:ddd-sample-command-billing-card_cancel" --protocol sqs --notification-endpoint "arn:aws:sqs:ap-northeast-1:000000000000:ddd-sample-billing-command-queque"

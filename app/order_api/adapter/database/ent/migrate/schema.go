@@ -8,6 +8,20 @@ import (
 )
 
 var (
+	// CancelOrderSagaStatesColumns holds the columns for the "cancel_order_saga_states" table.
+	CancelOrderSagaStatesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "current", Type: field.TypeEnum, Enums: []string{"CancelPending", "CancelingTicket", "CancelingCard", "CancellationConfirmingOrder", "OrderCanceled", "CancellationRejectingOrder", "OrderCancellationRejected"}},
+		{Name: "ticket_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "datetime"}},
+		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "datetime"}},
+	}
+	// CancelOrderSagaStatesTable holds the schema information for the "cancel_order_saga_states" table.
+	CancelOrderSagaStatesTable = &schema.Table{
+		Name:       "cancel_order_saga_states",
+		Columns:    CancelOrderSagaStatesColumns,
+		PrimaryKey: []*schema.Column{CancelOrderSagaStatesColumns[0]},
+	}
 	// CreateOrderSagaStatesColumns holds the columns for the "create_order_saga_states" table.
 	CreateOrderSagaStatesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -25,7 +39,7 @@ var (
 	// OrdersColumns holds the columns for the "orders" table.
 	OrdersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"Pending", "Approved", "Rejected"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"Pending", "Approved", "Rejected", "CancelPending", "Canceled"}},
 		{Name: "version", Type: field.TypeInt64},
 		{Name: "created_at", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "datetime"}},
 		{Name: "updated_at", Type: field.TypeTime, SchemaType: map[string]string{"mysql": "datetime"}},
@@ -75,6 +89,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		CancelOrderSagaStatesTable,
 		CreateOrderSagaStatesTable,
 		OrdersTable,
 		OrderItemsTable,

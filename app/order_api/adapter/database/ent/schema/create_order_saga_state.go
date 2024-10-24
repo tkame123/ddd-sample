@@ -5,7 +5,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
-	"github.com/tkame123/ddd-sample/app/order_api/domain/model"
+	"github.com/tkame123/ddd-sample/app/order_api/domain/service/create_order_saga"
 	"time"
 )
 
@@ -22,15 +22,15 @@ func (CreateOrderSagaState) Fields() []ent.Field {
 			Unique(),
 		field.Enum("current").
 			Values(
-				model.CreateOrderSagaStep_ApprovalPending,
-				model.CreateOrderSagaStep_CreatingTicket,
-				model.CreateOrderSagaStep_AuthorizingCard,
-				model.CreateOrderSagaStep_ApprovingTicket,
-				model.CreateOrderSagaStep_ApprovingOrder,
-				model.CreateOrderSagaStep_OrderApproved,
-				model.CreateOrderSagaStep_RejectingTicket,
-				model.CreateOrderSagaStep_RejectingOrder,
-				model.CreateOrderSagaStep_OrderRejected,
+				create_order_saga.CreateOrderSagaStep_ApprovalPending,
+				create_order_saga.CreateOrderSagaStep_CreatingTicket,
+				create_order_saga.CreateOrderSagaStep_AuthorizingCard,
+				create_order_saga.CreateOrderSagaStep_ApprovingTicket,
+				create_order_saga.CreateOrderSagaStep_ApprovingOrder,
+				create_order_saga.CreateOrderSagaStep_OrderApproved,
+				create_order_saga.CreateOrderSagaStep_RejectingTicket,
+				create_order_saga.CreateOrderSagaStep_RejectingOrder,
+				create_order_saga.CreateOrderSagaStep_OrderRejected,
 			),
 		field.UUID("ticket_id", uuid.UUID{}).
 			Optional().

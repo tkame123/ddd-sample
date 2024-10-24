@@ -13,6 +13,7 @@ func NewPublisherConfig(envCfg *EnvConfig) *PublisherConfig {
 		TopicMap: map[message.Type]TopicArn{
 			message.Type_TYPE_EVENT_CARD_AUTHORIZED:           envCfg.ArnTopicEventBillingCardAuthorized,
 			message.Type_TYPE_EVENT_CARD_AUTHORIZATION_FAILED: envCfg.ArnTopicEventBillingCardAuthorizeFailed,
+			message.Type_TYPE_EVENT_CARD_CANCELED:             envCfg.ArnTopicEventBillingCardCanceled,
 		},
 	}
 }
