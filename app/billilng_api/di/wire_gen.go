@@ -37,12 +37,12 @@ func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
 		return nil, nil, err
 	}
 	publisher := message.NewEventPublisher(publisherConfig, snsClient)
-	createBill := usecase.NewService(publisher)
-	commandConsumer := message.NewCommandConsumer(consumerConfig, client, repository, createBill)
+	bill := usecase.NewBillService(publisher)
+	commandConsumer := message.NewCommandConsumer(consumerConfig, client, repository, bill)
 	return commandConsumer, func() {
 	}, nil
 }
 
 // wire.go:
 
-var providerCommandConsumerSet = wire.NewSet(message.NewCommandConsumer, message.NewEventPublisher, usecase.NewService, database.NewRepository, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewPublisherConfig, provider.NewSQSClient, provider.NewSNSClient)
+var providerCommandConsumerSet = wire.NewSet(message.NewCommandConsumer, message.NewEventPublisher, usecase.NewBillService, database.NewRepository, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewPublisherConfig, provider.NewSQSClient, provider.NewSNSClient)

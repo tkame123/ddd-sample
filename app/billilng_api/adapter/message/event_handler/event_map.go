@@ -6,6 +6,7 @@ import (
 	"github.com/tkame123/ddd-sample/proto/message"
 )
 
-var EventMap = map[message.Type]func(svc service.CreateBill) domain_event.EventHandler{
+var EventMap = map[message.Type]func(svc service.Bill) domain_event.EventHandler{
 	message.Type_TYPE_COMMAND_CARD_AUTHORIZE: NewCardAuthorizeWhenCardAuthorizeHandler,
+	message.Type_TYPE_COMMAND_CARD_CANCEL:    NewCardCancelWhenCardCancelHandler,
 }

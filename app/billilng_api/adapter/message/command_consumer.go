@@ -26,21 +26,21 @@ type CommandConsumer struct {
 	sqsClient *sqs.Client
 	queueUrl  string
 	rep       repository.Repository
-	svc       service.CreateBill
+	billSVC   service.Bill
 }
 
 func NewCommandConsumer(
 	cfg *provider.ConsumerConfig,
 	sqsClient *sqs.Client,
 	rep repository.Repository,
-	svc service.CreateBill,
+	billSVC service.Bill,
 ) *CommandConsumer {
 	return &CommandConsumer{
 		cfg:       cfg,
 		sqsClient: sqsClient,
 		queueUrl:  cfg.Command.QueueUrl,
 		rep:       rep,
-		svc:       svc,
+		billSVC:   billSVC,
 	}
 }
 
@@ -138,10 +138,7 @@ func (e *CommandConsumer) workerHandler(ctx context.Context, msg *types.Message)
 }
 
 func (e *CommandConsumer) processEvent(ctx context.Context, mes *message.Message) error {
-	if !event_handler.IsCreateBillEvent(mes.Subject.Type) {
-		return fmt.Errorf("invalid event: %s", mes.Subject.Type)
-	}
-	err := event_handler.EventMap[mes.Subject.Type](e.svc).Handler(ctx, mes)
+	err := event_handler.EventMap[mes.Subject.Type](e.billSVC).Handler(ctx, mes)
 	if err != nil {
 		return err
 	}

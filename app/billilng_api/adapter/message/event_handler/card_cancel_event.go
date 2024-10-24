@@ -9,20 +9,20 @@ import (
 	"github.com/tkame123/ddd-sample/proto/message"
 )
 
-type CardAuthorizeWhenCardAuthorizeHandler struct {
-	svc service.CreateBill
+type cardCancelWhenCardCancelHandler struct {
+	svc service.Bill
 }
 
-func NewCardAuthorizeWhenCardAuthorizeHandler(svc service.CreateBill) domain_event.EventHandler {
-	return &CardAuthorizeWhenCardAuthorizeHandler{svc: svc}
+func NewCardCancelWhenCardCancelHandler(svc service.Bill) domain_event.EventHandler {
+	return &cardCancelWhenCardCancelHandler{svc: svc}
 }
 
-func (h *CardAuthorizeWhenCardAuthorizeHandler) Handler(ctx context.Context, mes *message.Message) error {
-	if mes.Subject.Type != message.Type_TYPE_COMMAND_CARD_AUTHORIZE {
+func (h *cardCancelWhenCardCancelHandler) Handler(ctx context.Context, mes *message.Message) error {
+	if mes.Subject.Type != message.Type_TYPE_COMMAND_CARD_CANCEL {
 		return fmt.Errorf("invalid event type: %v", mes.Subject.Type)
 	}
 
-	var v message.CommandCardAuthorize
+	var v message.CommandCardCancel
 	err := mes.Envelope.UnmarshalTo(&v)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal event: %w", err)
@@ -33,7 +33,7 @@ func (h *CardAuthorizeWhenCardAuthorizeHandler) Handler(ctx context.Context, mes
 		return fmt.Errorf("failed to parse order id: %w", err)
 	}
 
-	if err := h.svc.AuthorizeCard(ctx, *id, nil); err != nil {
+	if err := h.svc.CancelCard(ctx, *id); err != nil {
 		return err
 	}
 

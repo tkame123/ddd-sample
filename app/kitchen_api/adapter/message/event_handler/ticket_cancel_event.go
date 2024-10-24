@@ -18,7 +18,7 @@ func NewTicketCancelWhenTicketCancelHandler(svc service.Ticket) domain_event.Eve
 }
 
 func (h *TicketCancelWhenTicketCancelHandler) Handler(ctx context.Context, mes *message.Message) error {
-	if mes.Subject.Type != message.Type_TYPE_COMMAND_TICKET_CREATE {
+	if mes.Subject.Type != message.Type_TYPE_COMMAND_TICKET_CANCEL {
 		return fmt.Errorf("invalid event type: %v", mes.Subject.Type)
 	}
 

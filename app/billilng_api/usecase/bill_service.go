@@ -9,21 +9,39 @@ import (
 	"log"
 )
 
-type CreatBillService struct {
+type billService struct {
 	pub domain_event.Publisher
 }
 
-func NewService(pub domain_event.Publisher) service.CreateBill {
-	return &CreatBillService{pub: pub}
+func NewBillService(pub domain_event.Publisher) service.Bill {
+	return &billService{pub: pub}
 }
 
-func (c CreatBillService) AuthorizeCard(ctx context.Context, orderID model.OrderID, token any) error {
+func (c billService) AuthorizeCard(ctx context.Context, orderID model.OrderID, token any) error {
 	//TODO implement me
 	log.Println("implement me: AuthorizeCard")
 
 	// TODO: 仮置き
 	m, err := model.CreateMessage(
 		&message.EventCardAuthorized{
+			OrderId: orderID.String(),
+		})
+	if err != nil {
+		return err
+	}
+
+	c.pub.PublishMessages(ctx, []*message.Message{m})
+
+	return nil
+}
+
+func (c billService) CancelCard(ctx context.Context, orderID model.OrderID) error {
+	//TODO implement me
+	log.Println("implement me: CancelCard")
+
+	// TODO: 仮置き
+	m, err := model.CreateMessage(
+		&message.EventCardCanceled{
 			OrderId: orderID.String(),
 		})
 	if err != nil {
