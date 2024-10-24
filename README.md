@@ -14,19 +14,67 @@ https://github.com/tkame123/ddd-sample/tree/main/app/order_api/domain/service
 
 ## 認証・認可
 
-IdaasにAuth0
+IdaasにAuth0をつかった、SPAにおけるOIDC構成とする
 
-認可はCasbin
+以下理解を整頓
 
-https://casbin.org/ja/
+### 全体概要
 
-RBAC関しては以下で設計
-- Permission、Roleの定義とUserへの割当はAuth0が担当
-- 提供されたPermission情報に基づいて、BEが認可を実施するがこの処理をCasbinを利用する
+- auth0を認可サーバ、BEをRPとしたOIDC構成
+- 利用者の本人確認はauth0の責務となり、結果としてIdTokenとAccessTokenを利用者に発行する
+- RPとなるBEは認可サーバに認証を委任するため、認可サーバが発行したAccessTokenの検証でBEの認証行為とする
 
-Modelのサンプルも豊富で、柔軟な変更もできそうでいい感じ
+### 認証
+
+BEが行う認証行為はAccessTokenの検証となる
+
+- issuerがAuth0の想定するテナントである点
+- 署名がissuerによるものである点
+- 有効期限の確認
+- audienceが自分を指す点
+- 上記確認がIdTokenでは出来ない（idTokenのAudienceは利用者を指すのがOIDCの推奨定義の為）ので、BEはAccessTokenを検証する
+
+参考
+
+https://auth0.com/blog/id-token-access-token-what-is-the-difference/
+
+https://qiita.com/TakahikoKawasaki/items/8f0e422c7edd2d220e06
+
+https://qiita.com/TakahikoKawasaki/items/970548727761f9e02bcd
+
+
+実装は、Auth0が提供するライブラリを利用
+
+https://github.com/auth0/go-jwt-middleware
+
+### 認可
+
+- Auth0のRBAC機能を利用してRBACベースで実装する
+- Auth0のAPI単位でPermissionを定義する
+- Roleに対してPermissionを設定する
+- AccessTokenにPermissionをClaim追加する設定を行う
+- BE側はAccessTokenから取り出したpermissionを評価する
+
+Permissionの評価はCasbinを利用
+
+- Modelのサンプルも豊富で、柔軟な変更もできそうでいい感じ
+
+参考
+
+https://auth0.com/docs/get-started/apis/enable-role-based-access-control-for-apis
 
 https://casbin.org/docs/supported-models
+
+### その他
+
+SPA側でのアクセストークンの保存先をローカルストレージでなくメモリへという点
+Auth0のSDKだと対応している模様
+
+https://qiita.com/kura_lab/items/8eda9b2899e00e95a50c
+
+Cognitoはこの点、AWS側のSDKがLocalStorageに格納して定期的に話題にあがっている理解
+
+https://github.com/aws-amplify/amplify-js/issues/3436
 
 ## Message
 
@@ -171,7 +219,7 @@ https://entgo.io/ja/
 
 migrationやShemaのVisualize対応等含めて、ワンセットで便利な感じ
 
-### ORM: Connect
+### API: Connect
 
 gRPCとgrpc gateewayを自分で対応するより全然便利。。。
 
