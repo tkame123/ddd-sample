@@ -59,6 +59,30 @@ Permissionの評価はCasbinを利用
 
 - Modelのサンプルも豊富で、柔軟な変更もできそうでいい感じ
 
+具体的には以下とした
+
+```
+sub: だれが 
+obj: 何に 
+act: 何をする
+```
+
+- Permission を　{act} : {sub} と定義
+- objを protoのService単位とする
+
+Auth0 Permissio Sample
+```
+read:orders
+write:orders
+```
+
+Casbin Policy Sample
+```
+p, orders, /order_api.v1.OrderService/FindOrder, write
+p, orders, /order_api.v1.OrderService/FindOrder, read
+p, orders, /order_api.v1.OrderService/CreateOrder, write
+```
+
 参考
 
 https://auth0.com/docs/get-started/apis/enable-role-based-access-control-for-apis
