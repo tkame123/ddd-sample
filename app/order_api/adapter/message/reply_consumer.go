@@ -24,34 +24,31 @@ import (
 )
 
 type ReplyConsumer struct {
-	cfg            *provider.ConsumerConfig
-	sqsClient      *sqs.Client
-	queueUrl       string
-	rep            repository.Repository
-	createOrderSVC service.CreateOrder
-	cancelOrderSVC service.CancelOrder
-	kitchenAPI     external_service.KitchenAPI
-	billingAPI     external_service.BillingAPI
+	cfg        *provider.ConsumerConfig
+	sqsClient  *sqs.Client
+	queueUrl   string
+	rep        repository.Repository
+	orderSVC   service.OrderService
+	kitchenAPI external_service.KitchenAPI
+	billingAPI external_service.BillingAPI
 }
 
 func NewReplyConsumer(
 	cfg *provider.ConsumerConfig,
 	sqsClient *sqs.Client,
 	rep repository.Repository,
-	createOrderSVC service.CreateOrder,
-	cancelOrderSVC service.CancelOrder,
+	orderSVC service.OrderService,
 	kitchenAPI external_service.KitchenAPI,
 	billingAPI external_service.BillingAPI,
 ) *ReplyConsumer {
 	return &ReplyConsumer{
-		cfg:            cfg,
-		sqsClient:      sqsClient,
-		queueUrl:       cfg.Reply.QueueUrl,
-		rep:            rep,
-		createOrderSVC: createOrderSVC,
-		cancelOrderSVC: cancelOrderSVC,
-		kitchenAPI:     kitchenAPI,
-		billingAPI:     billingAPI,
+		cfg:        cfg,
+		sqsClient:  sqsClient,
+		queueUrl:   cfg.Reply.QueueUrl,
+		rep:        rep,
+		orderSVC:   orderSVC,
+		kitchenAPI: kitchenAPI,
+		billingAPI: billingAPI,
 	}
 }
 
@@ -150,17 +147,12 @@ func (e *ReplyConsumer) workerHandler(ctx context.Context, msg *types.Message) e
 }
 
 func (e *ReplyConsumer) processEvent(ctx context.Context, mes *message.Message) error {
-	handler, err := event_handler.NewHandlerProducer(
+	err := event_handler.EventMap[mes.Subject.Type](
 		e.rep,
-		e.createOrderSVC,
-		e.cancelOrderSVC,
+		e.orderSVC,
 		e.kitchenAPI,
 		e.billingAPI,
-	).GetHandler(mes)
-	if err != nil {
-		return err
-	}
-	err = handler.Handler(ctx, mes)
+	).Handler(ctx, mes)
 	if err != nil {
 		return err
 	}

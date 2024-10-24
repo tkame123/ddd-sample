@@ -13,7 +13,7 @@ import (
 
 type CreateOrderSaga struct {
 	fsm        *fsm.FSM
-	orderSVC   service.CreateOrder
+	orderSVC   service.OrderService
 	kitchenAPI external_service.KitchenAPI
 	billingAPI external_service.BillingAPI
 
@@ -23,7 +23,7 @@ type CreateOrderSaga struct {
 
 func NewCreateOrderSaga(
 	currentState *CreateOrderSagaState,
-	orderSVC service.CreateOrder,
+	orderSVC service.OrderService,
 	kitchenAPI external_service.KitchenAPI,
 	billingAPI external_service.BillingAPI,
 ) (*CreateOrderSaga, error) {

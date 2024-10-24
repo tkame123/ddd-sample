@@ -13,7 +13,7 @@ import (
 
 type CancelOrderSaga struct {
 	fsm        *fsm.FSM
-	orderSVC   service.CancelOrder
+	orderSVC   service.OrderService
 	kitchenAPI external_service.KitchenAPI
 	billingAPI external_service.BillingAPI
 
@@ -23,7 +23,7 @@ type CancelOrderSaga struct {
 
 func NewCancelOrderSaga(
 	currentState *CancelOrderSagaState,
-	orderSVC service.CancelOrder,
+	orderSVC service.OrderService,
 	kitchenAPI external_service.KitchenAPI,
 	billingAPI external_service.BillingAPI,
 ) (*CancelOrderSaga, error) {

@@ -25,7 +25,7 @@ func TestCreateOrderSaga_ShouldCreateOrder(t *testing.T) {
 
 	mockKitchenAPI := mock.NewMockKitchenAPI(mockCtrl)
 	mockBillingAPI := mock.NewMockBillingAPI(mockCtrl)
-	mockOrderSVC := mock.NewMockCreateOrder(mockCtrl)
+	mockOrderSVC := mock.NewMockOrderService(mockCtrl)
 
 	o, _, err := model.NewOrder(nil)
 	if err != nil {
@@ -121,7 +121,7 @@ func TestCreateOrderSaga_OrderRejectedDutToTicketCreationFailed(t *testing.T) {
 
 	mockKitchenAPI := mock.NewMockKitchenAPI(mockCtrl)
 	mockBillingAPI := mock.NewMockBillingAPI(mockCtrl)
-	mockOrderSVC := mock.NewMockCreateOrder(mockCtrl)
+	mockOrderSVC := mock.NewMockOrderService(mockCtrl)
 
 	o, _, err := model.NewOrder(nil)
 	if err != nil {
@@ -172,7 +172,7 @@ func TestCreateOrderSaga_OrderRejectedDutToCardAuthorizeFailed(t *testing.T) {
 
 	mockKitchenAPI := mock.NewMockKitchenAPI(mockCtrl)
 	mockBillingAPI := mock.NewMockBillingAPI(mockCtrl)
-	mockOrderSVC := mock.NewMockCreateOrder(mockCtrl)
+	mockOrderSVC := mock.NewMockOrderService(mockCtrl)
 
 	o, _, err := model.NewOrder(nil)
 	if err != nil {

@@ -14,8 +14,7 @@ import (
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/message"
 	"github.com/tkame123/ddd-sample/app/order_api/adapter/proxy"
 	"github.com/tkame123/ddd-sample/app/order_api/di/provider"
-	"github.com/tkame123/ddd-sample/app/order_api/usecase/cancel_order"
-	"github.com/tkame123/ddd-sample/app/order_api/usecase/create_order"
+	"github.com/tkame123/ddd-sample/app/order_api/usecase"
 )
 
 import (
@@ -90,11 +89,10 @@ func InitializeEventConsumer() (*message.EventConsumer, func(), error) {
 		return nil, nil, err
 	}
 	publisher := message.NewEventPublisher(publisherConfig, snsClient)
-	createOrder := create_order.NewService(repository, publisher)
-	cancelOrder := cancel_order.NewService(repository, publisher)
+	orderService := usecase.NewOrderService(repository, publisher)
 	kitchenAPI := proxy.NewKitchenAPI(repository, publisher)
 	billingAPI := proxy.NewBillingAPI(publisher)
-	eventConsumer := message.NewEventConsumer(consumerConfig, client, repository, createOrder, cancelOrder, kitchenAPI, billingAPI)
+	eventConsumer := message.NewEventConsumer(consumerConfig, client, repository, orderService, kitchenAPI, billingAPI)
 	return eventConsumer, func() {
 		cleanup()
 	}, nil
@@ -126,11 +124,10 @@ func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
 		return nil, nil, err
 	}
 	publisher := message.NewEventPublisher(publisherConfig, snsClient)
-	createOrder := create_order.NewService(repository, publisher)
-	cancelOrder := cancel_order.NewService(repository, publisher)
+	orderService := usecase.NewOrderService(repository, publisher)
 	kitchenAPI := proxy.NewKitchenAPI(repository, publisher)
 	billingAPI := proxy.NewBillingAPI(publisher)
-	commandConsumer := message.NewCommandConsumer(consumerConfig, client, repository, createOrder, cancelOrder, kitchenAPI, billingAPI)
+	commandConsumer := message.NewCommandConsumer(consumerConfig, client, repository, orderService, kitchenAPI, billingAPI)
 	return commandConsumer, func() {
 		cleanup()
 	}, nil
@@ -162,11 +159,10 @@ func InitializeReplyConsumer() (*message.ReplyConsumer, func(), error) {
 		return nil, nil, err
 	}
 	publisher := message.NewEventPublisher(publisherConfig, snsClient)
-	createOrder := create_order.NewService(repository, publisher)
-	cancelOrder := cancel_order.NewService(repository, publisher)
+	orderService := usecase.NewOrderService(repository, publisher)
 	kitchenAPI := proxy.NewKitchenAPI(repository, publisher)
 	billingAPI := proxy.NewBillingAPI(publisher)
-	replyConsumer := message.NewReplyConsumer(consumerConfig, client, repository, createOrder, cancelOrder, kitchenAPI, billingAPI)
+	replyConsumer := message.NewReplyConsumer(consumerConfig, client, repository, orderService, kitchenAPI, billingAPI)
 	return replyConsumer, func() {
 		cleanup()
 	}, nil
@@ -182,4 +178,4 @@ var providerCommandConsumerSet = wire.NewSet(message.NewCommandConsumer, provide
 
 var providerReplyConsumerSet = wire.NewSet(message.NewReplyConsumer, providerConsumerSet)
 
-var providerConsumerSet = wire.NewSet(message.NewEventPublisher, database.NewRepository, create_order.NewService, cancel_order.NewService, proxy.NewBillingAPI, proxy.NewKitchenAPI, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewPublisherConfig, provider.NewOrderApiDB, provider.NewSQSClient, provider.NewSNSClient)
+var providerConsumerSet = wire.NewSet(message.NewEventPublisher, database.NewRepository, usecase.NewOrderService, proxy.NewBillingAPI, proxy.NewKitchenAPI, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewPublisherConfig, provider.NewOrderApiDB, provider.NewSQSClient, provider.NewSNSClient)

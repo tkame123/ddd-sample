@@ -25,7 +25,7 @@ func TestCancelOrderSaga_ShouldCancelOrder(t *testing.T) {
 
 	mockKitchenAPI := mock.NewMockKitchenAPI(mockCtrl)
 	mockBillingAPI := mock.NewMockBillingAPI(mockCtrl)
-	mockOrderSVC := mock.NewMockCancelOrder(mockCtrl)
+	mockOrderSVC := mock.NewMockOrderService(mockCtrl)
 
 	o, _, err := model.NewOrder(nil)
 	if err != nil {
@@ -103,7 +103,7 @@ func TestCancelOrderSaga_OrderCancelRejectDutToTicketCancelReject(t *testing.T) 
 
 	mockKitchenAPI := mock.NewMockKitchenAPI(mockCtrl)
 	mockBillingAPI := mock.NewMockBillingAPI(mockCtrl)
-	mockOrderSVC := mock.NewMockCancelOrder(mockCtrl)
+	mockOrderSVC := mock.NewMockOrderService(mockCtrl)
 
 	o, _, err := model.NewOrder(nil)
 	if err != nil {

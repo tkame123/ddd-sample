@@ -24,34 +24,31 @@ import (
 )
 
 type EventConsumer struct {
-	cfg            *provider.ConsumerConfig
-	sqsClient      *sqs.Client
-	queueUrl       string
-	rep            repository.Repository
-	createOrderSVC service.CreateOrder
-	cancelOrderSVC service.CancelOrder
-	kitchenAPI     external_service.KitchenAPI
-	billingAPI     external_service.BillingAPI
+	cfg        *provider.ConsumerConfig
+	sqsClient  *sqs.Client
+	queueUrl   string
+	rep        repository.Repository
+	orderSVC   service.OrderService
+	kitchenAPI external_service.KitchenAPI
+	billingAPI external_service.BillingAPI
 }
 
 func NewEventConsumer(
 	cfg *provider.ConsumerConfig,
 	sqsClient *sqs.Client,
 	rep repository.Repository,
-	createOrderSVC service.CreateOrder,
-	cancelOrderSVC service.CancelOrder,
+	orderSVC service.OrderService,
 	kitchenAPI external_service.KitchenAPI,
 	billingAPI external_service.BillingAPI,
 ) *EventConsumer {
 	return &EventConsumer{
-		cfg:            cfg,
-		sqsClient:      sqsClient,
-		queueUrl:       cfg.Event.QueueUrl,
-		rep:            rep,
-		createOrderSVC: createOrderSVC,
-		cancelOrderSVC: cancelOrderSVC,
-		kitchenAPI:     kitchenAPI,
-		billingAPI:     billingAPI,
+		cfg:        cfg,
+		sqsClient:  sqsClient,
+		queueUrl:   cfg.Event.QueueUrl,
+		rep:        rep,
+		orderSVC:   orderSVC,
+		kitchenAPI: kitchenAPI,
+		billingAPI: billingAPI,
 	}
 }
 
@@ -150,17 +147,12 @@ func (e *EventConsumer) workerHandler(ctx context.Context, msg *types.Message) e
 }
 
 func (e *EventConsumer) processEvent(ctx context.Context, mes *message.Message) error {
-	handler, err := event_handler.NewHandlerProducer(
+	err := event_handler.EventMap[mes.Subject.Type](
 		e.rep,
-		e.createOrderSVC,
-		e.cancelOrderSVC,
+		e.orderSVC,
 		e.kitchenAPI,
 		e.billingAPI,
-	).GetHandler(mes)
-	if err != nil {
-		return err
-	}
-	err = handler.Handler(ctx, mes)
+	).Handler(ctx, mes)
 	if err != nil {
 		return err
 	}
