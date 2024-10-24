@@ -64,7 +64,7 @@ Sagaは特定の統率者が、状態を管理し行うべきアクションを�
 - commutative update(交換可能な更新）
 - Passimistic view(悲観的天格ぃ）
 - Reread vallue(値の読み直し）
-- Version FIle(
+- Version FIle
 - By Value
 
 ひとまずは、、semantic lockをいれるのは必須かなあ。。
@@ -73,7 +73,7 @@ Sagaは特定の統率者が、状態を管理し行うべきアクションを�
 
 例；Orderキャンセル時には、キャンセル実施中として、競合する処理が実施されないようにする　等
 
-これは、Microservice文脈でなくても、Sggaとして処理を切り離して別に管理する間、に作業中という状況で対象を保護するのは有効な手法かなと思う
+これは、Microservice文脈でなくても、Sagaとして処理を切り離して別に管理する間、に作業中という状況で対象を保護するのは有効な手法かなと思う
 
 # 構成
 
