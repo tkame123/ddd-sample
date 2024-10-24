@@ -10,10 +10,10 @@ import (
 )
 
 type TicketApproveWhenTicketApproveHandler struct {
-	svc service.CreateTicket
+	svc service.Ticket
 }
 
-func NewTicketApproveWhenTicketApproveHandler(svc service.CreateTicket) domain_event.EventHandler {
+func NewTicketApproveWhenTicketApproveHandler(svc service.Ticket) domain_event.EventHandler {
 	return &TicketApproveWhenTicketApproveHandler{svc: svc}
 }
 

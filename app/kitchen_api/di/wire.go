@@ -8,12 +8,12 @@ import (
 	"github.com/tkame123/ddd-sample/app/kitchen_api/adapter/database"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/adapter/message"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/di/provider"
-	"github.com/tkame123/ddd-sample/app/kitchen_api/usecase/create_ticket"
+	"github.com/tkame123/ddd-sample/app/kitchen_api/usecase"
 )
 
 var providerCommandConsumerSet = wire.NewSet(
 	message.NewCommandConsumer,
-	create_ticket.NewService,
+	usecase.NewTicketService,
 	message.NewEventPublisher,
 	database.NewRepository,
 

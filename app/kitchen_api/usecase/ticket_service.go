@@ -1,4 +1,4 @@
-package create_ticket
+package usecase
 
 import (
 	"context"
@@ -9,19 +9,19 @@ import (
 	"github.com/tkame123/ddd-sample/proto/message"
 )
 
-type CreatTicketService struct {
+type ticketService struct {
 	rep repository.Repository
 	pub domain_event.Publisher
 }
 
-func NewService(rep repository.Repository, pub domain_event.Publisher) service.CreateTicket {
-	return &CreatTicketService{
+func NewTicketService(rep repository.Repository, pub domain_event.Publisher) service.Ticket {
+	return &ticketService{
 		rep: rep,
 		pub: pub,
 	}
 }
 
-func (s *CreatTicketService) CreateTicket(ctx context.Context, orderID model.OrderID, items []*model.TicketItemRequest) error {
+func (s *ticketService) CreateTicket(ctx context.Context, orderID model.OrderID, items []*model.TicketItemRequest) error {
 	ticket, events, err := model.NewTicket(orderID, items)
 	if err != nil {
 		return err
@@ -36,7 +36,7 @@ func (s *CreatTicketService) CreateTicket(ctx context.Context, orderID model.Ord
 	return nil
 }
 
-func (s *CreatTicketService) ApproveTicket(ctx context.Context, orderID model.OrderID, ticketID model.TicketID) error {
+func (s *ticketService) ApproveTicket(ctx context.Context, orderID model.OrderID, ticketID model.TicketID) error {
 	mes, err := model.CreateMessage(
 		&message.EventTicketApproved{
 			OrderId:  orderID.String(),
@@ -67,7 +67,7 @@ func (s *CreatTicketService) ApproveTicket(ctx context.Context, orderID model.Or
 	//return nil
 }
 
-func (s *CreatTicketService) RejectTicket(ctx context.Context, orderID model.OrderID, ticketID model.TicketID) error {
+func (s *ticketService) RejectTicket(ctx context.Context, orderID model.OrderID, ticketID model.TicketID) error {
 	ticket, err := s.rep.TicketFindOneByOrderID(ctx, orderID)
 	if err != nil {
 		return err
@@ -79,6 +79,24 @@ func (s *CreatTicketService) RejectTicket(ctx context.Context, orderID model.Ord
 	}
 
 	s.pub.PublishMessages(ctx, events)
+
+	return nil
+}
+
+func (c *ticketService) CancelTicket(ctx context.Context, orderID model.OrderID, ticketID model.TicketID) error {
+	// TODO: Repository実装後に仕上げる必要有り
+
+	mes, err := model.CreateMessage(
+		&message.EventTicketCanceled{
+			OrderId:  orderID.String(),
+			TicketId: ticketID.String(),
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	c.pub.PublishMessages(ctx, []*message.Message{mes})
 
 	return nil
 }

@@ -11,7 +11,7 @@ import (
 	"github.com/tkame123/ddd-sample/app/kitchen_api/adapter/database"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/adapter/message"
 	"github.com/tkame123/ddd-sample/app/kitchen_api/di/provider"
-	"github.com/tkame123/ddd-sample/app/kitchen_api/usecase/create_ticket"
+	"github.com/tkame123/ddd-sample/app/kitchen_api/usecase"
 )
 
 // Injectors from wire.go:
@@ -37,12 +37,12 @@ func InitializeCommandConsumer() (*message.CommandConsumer, func(), error) {
 		return nil, nil, err
 	}
 	publisher := message.NewEventPublisher(publisherConfig, snsClient)
-	createTicket := create_ticket.NewService(repository, publisher)
-	commandConsumer := message.NewCommandConsumer(consumerConfig, client, repository, createTicket)
+	ticket := usecase.NewTicketService(repository, publisher)
+	commandConsumer := message.NewCommandConsumer(consumerConfig, client, repository, ticket)
 	return commandConsumer, func() {
 	}, nil
 }
 
 // wire.go:
 
-var providerCommandConsumerSet = wire.NewSet(message.NewCommandConsumer, create_ticket.NewService, message.NewEventPublisher, database.NewRepository, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewPublisherConfig, provider.NewSQSClient, provider.NewSNSClient)
+var providerCommandConsumerSet = wire.NewSet(message.NewCommandConsumer, usecase.NewTicketService, message.NewEventPublisher, database.NewRepository, provider.NewENV, provider.NewAWSConfig, provider.NewConsumerConfig, provider.NewPublisherConfig, provider.NewSQSClient, provider.NewSNSClient)

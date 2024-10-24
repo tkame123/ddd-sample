@@ -9,20 +9,20 @@ import (
 	"github.com/tkame123/ddd-sample/proto/message"
 )
 
-type TicketRejectWhenTicketRejectHandler struct {
+type TicketCancelWhenTicketCancelHandler struct {
 	svc service.Ticket
 }
 
-func NewTicketRejectWhenTicketRejectHandler(svc service.Ticket) domain_event.EventHandler {
-	return &TicketRejectWhenTicketRejectHandler{svc: svc}
+func NewTicketCancelWhenTicketCancelHandler(svc service.Ticket) domain_event.EventHandler {
+	return &TicketCancelWhenTicketCancelHandler{svc: svc}
 }
 
-func (h *TicketRejectWhenTicketRejectHandler) Handler(ctx context.Context, mes *message.Message) error {
-	if mes.Subject.Type != message.Type_TYPE_COMMAND_TICKET_REJECT {
+func (h *TicketCancelWhenTicketCancelHandler) Handler(ctx context.Context, mes *message.Message) error {
+	if mes.Subject.Type != message.Type_TYPE_COMMAND_TICKET_CREATE {
 		return fmt.Errorf("invalid event type: %v", mes.Subject.Type)
 	}
 
-	var v message.CommandTicketReject
+	var v message.CommandTicketCancel
 	err := mes.Envelope.UnmarshalTo(&v)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal event: %w", err)
@@ -32,12 +32,13 @@ func (h *TicketRejectWhenTicketRejectHandler) Handler(ctx context.Context, mes *
 	if err != nil {
 		return fmt.Errorf("failed to parse order id: %w", err)
 	}
+
 	ticketId, err := model.TicketIdParse(v.TicketId)
 	if err != nil {
 		return fmt.Errorf("failed to parse order id: %w", err)
 	}
 
-	if err := h.svc.RejectTicket(ctx, *id, *ticketId); err != nil {
+	if err := h.svc.CancelTicket(ctx, *id, *ticketId); err != nil {
 		return err
 	}
 
